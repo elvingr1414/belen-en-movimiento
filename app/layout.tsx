@@ -1,8 +1,11 @@
-export default function Home() {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <main style={{ padding: "40px" }}>
-      <h1>Belén en Movimiento</h1>
-      <p>Sitio en construcción.</p>
-    </main>
+    <html lang="es">
+      <body>{children}</body>
+    </html>
   );
 }
