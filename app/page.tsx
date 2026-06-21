@@ -1,4 +1,6 @@
 export default function Home() {
+  const tags = ["Personas", "Agrupaciones", "Instituciones", "Actividades", "Proyectos"];
+
   return (
     <main
       style={{
@@ -19,98 +21,65 @@ export default function Home() {
           textAlign: "center",
         }}
       >
-        <p
-          style={{
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            fontSize: "0.85rem",
-            color: "#7c6f57",
-            marginBottom: "24px",
-          }}
-        >
+        <p style={{ letterSpacing: "0.25em", textTransform: "uppercase", fontSize: "0.85rem", color: "#7c6f57", marginBottom: "24px" }}>
           Comunidad • Participación • Futuro
         </p>
 
-        <h1
-          style={{
-            fontSize: "clamp(3rem, 8vw, 6rem)",
-            lineHeight: "1",
-            margin: "0 0 28px",
-            fontWeight: 700,
-          }}
-        >
+        <h1 style={{ fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: "1", margin: "0 0 28px", fontWeight: 700 }}>
           Belén en Movimiento
         </h1>
 
-        <p
-          style={{
-            fontSize: "1.45rem",
-            color: "#334155",
-            marginBottom: "24px",
-          }}
-        >
+        <p style={{ fontSize: "1.45rem", color: "#334155", marginBottom: "34px" }}>
           Juntos hacemos que Belén avance.
         </p>
 
-        <p
+        <div
           style={{
-            maxWidth: "760px",
-            fontSize: "1.05rem",
-            lineHeight: "1.9",
-            color: "#667085",
-            marginBottom: "42px",
-          }}
-        >
-          Una iniciativa para conectar personas, agrupaciones y proyectos que
-          fortalecen nuestra comunidad con visión, orden y participación.
-        </p>
-
-        <button
-          style={{
-            padding: "16px 38px",
+            width: "100%",
+            maxWidth: "780px",
+            background: "white",
             borderRadius: "999px",
-            border: "1px solid #1e3a8a",
-            background: "#1e3a8a",
-            color: "white",
-            fontSize: "1rem",
-            fontWeight: 600,
-            cursor: "pointer",
-            boxShadow: "0 14px 30px rgba(30, 58, 138, 0.22)",
+            padding: "18px 26px",
+            boxShadow: "0 22px 60px rgba(15, 23, 42, 0.12)",
+            border: "1px solid rgba(30, 41, 59, 0.10)",
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            marginBottom: "22px",
           }}
         >
-          Conozca más
-        </button>
-      </section>
-
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "22px",
-          maxWidth: "980px",
-          margin: "0 auto",
-        }}
-      >
-        {["Personas", "Agrupaciones", "Proyectos"].map((item) => (
-          <div
-            key={item}
+          <span style={{ fontSize: "1.35rem" }}>🔍</span>
+          <input
+            placeholder="Buscar personas, agrupaciones, instituciones, actividades o proyectos..."
             style={{
-              background: "rgba(255,255,255,0.72)",
-              border: "1px solid rgba(30, 41, 59, 0.10)",
-              borderRadius: "24px",
-              padding: "30px",
-              textAlign: "center",
-              boxShadow: "0 20px 50px rgba(15, 23, 42, 0.06)",
+              width: "100%",
+              border: "none",
+              outline: "none",
+              fontSize: "1rem",
+              fontFamily: "Arial, sans-serif",
+              color: "#1f2933",
             }}
-          >
-            <h2 style={{ margin: "0 0 12px", fontSize: "1.35rem" }}>
-              {item}
-            </h2>
-            <p style={{ margin: 0, color: "#667085", lineHeight: "1.7" }}>
-              Parte esencial del movimiento que impulsa el desarrollo de Belén.
-            </p>
-          </div>
-        ))}
+          />
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px" }}>
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "999px",
+                background: "rgba(255,255,255,0.75)",
+                border: "1px solid rgba(30,41,59,0.10)",
+                color: "#475569",
+                fontSize: "0.95rem",
+                fontFamily: "Arial, sans-serif",
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </section>
     </main>
   );
