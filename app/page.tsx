@@ -4,7 +4,6 @@ export default function Home() {
     { titulo: "Agrupaciones", numero: "0", descripcion: "Organizaciones y grupos comunitarios." },
     { titulo: "Proyectos", numero: "0", descripcion: "Iniciativas activas para el desarrollo de Belén." },
   ];
-
   const agrupaciones = [
     "CDAM Belén",
     "Asociación de Adultos Belemitas",
