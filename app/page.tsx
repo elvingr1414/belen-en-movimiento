@@ -2,27 +2,53 @@
 
 import { useState } from "react";
 
-type Modulo = "Personas" | "Entidades" | "Actividades" | "Proyectos" | "Recursos" | "Comunicaciones";
+type Modulo =
+  | "Personas"
+  | "Entidades"
+  | "Actividades"
+  | "Proyectos"
+  | "Recursos"
+  | "Comunicaciones";
+
 type Accion = "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
 
-const modulos: Modulo[] = ["Personas", "Entidades", "Actividades", "Proyectos", "Recursos", "Comunicaciones"];
+const modulos: Modulo[] = [
+  "Personas",
+  "Entidades",
+  "Actividades",
+  "Proyectos",
+  "Recursos",
+  "Comunicaciones",
+];
 
 const datos: Record<Modulo, string[]> = {
   Personas: [
-    "Elvin González Rodríguez | Belén en Movimiento | Coordinador General",
-    "Sonia Román Zeledón | CDAM Belén | Presidenta",
-    "Zeneida Chávez Fernández | Municipalidad de Belén | Alcaldesa",
+    "Elvin González Rodríguez | 8888-0000 | elvin@email.com | Belén en Movimiento | Coordinador General",
+    "Sonia Román Zeledón | 8888-1111 | sonia@email.com | CDAM Belén | Presidenta",
+    "Zeneida Chávez Fernández | 8888-2222 | zeneida@email.com | Municipalidad de Belén | Alcaldesa",
   ],
   Entidades: [
-    "CDAM Belén | Agrupación",
-    "Belén en Movimiento | Agrupación comunitaria",
-    "Municipalidad de Belén | Institución",
-    "Intel Costa Rica | Empresa",
+    "CDAM Belén | Agrupación | 2233-0000 | info@cdam.cr",
+    "Belén en Movimiento | Agrupación comunitaria | 8888-3333 | info@belenmovimiento.cr",
+    "Municipalidad de Belén | Institución | 2587-0000 | info@belen.go.cr",
+    "Intel Costa Rica | Empresa | 2200-0000 | contacto@intel.com",
   ],
-  Actividades: ["Caravana Dorada | Actividad comunitaria", "Reunión de coordinación | Actividad interna"],
-  Proyectos: ["Belén en Movimiento | Activo", "Bosque de Campanas | Propuesta"],
-  Recursos: ["Acta Junta Directiva | Documento", "Logo Belén en Movimiento | Imagen"],
-  Comunicaciones: ["Convocatoria comunitaria | Publicación", "Comunicado institucional | Noticia"],
+  Actividades: [
+    "Caravana Dorada | Actividad comunitaria | 07/06/2026",
+    "Reunión de coordinación | Actividad interna | 20/06/2026",
+  ],
+  Proyectos: [
+    "Belén en Movimiento | Activo | Proyecto comunitario",
+    "Bosque de Campanas | Propuesta | Proyecto ambiental",
+  ],
+  Recursos: [
+    "Acta Junta Directiva | Documento | PDF",
+    "Logo Belén en Movimiento | Imagen | PNG",
+  ],
+  Comunicaciones: [
+    "Convocatoria comunitaria | Publicación | Redes sociales",
+    "Comunicado institucional | Noticia | Web",
+  ],
 };
 
 export default function Home() {
@@ -31,7 +57,9 @@ export default function Home() {
   const [seleccionado, setSeleccionado] = useState<string | null>(null);
   const [accion, setAccion] = useState<Accion>("Vista");
 
-  const lista = datos[modulo].filter((x) => x.toLowerCase().includes(busqueda.toLowerCase()));
+  const lista = datos[modulo].filter((item) =>
+    item.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   function cambiarModulo(m: Modulo) {
     setModulo(m);
@@ -67,20 +95,37 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <div>
-              <h2 style={{ margin: 0 }}>{icono(modulo)} {modulo}</h2>
+              <h2 style={{ margin: 0 }}>
+                {icono(modulo)} {modulo}
+              </h2>
               {seleccionado && <strong>{seleccionado}</strong>}
             </div>
 
             <div style={actions}>
               {seleccionado && (
                 <>
-                  <button onClick={() => setAccion("Editar")} style={chip(accion === "Editar")}>Editar</button>
-                  <button onClick={() => setAccion("Excluir")} style={chip(accion === "Excluir")}>Excluir</button>
-                  <button onClick={() => setAccion("Vincular")} style={chip(accion === "Vincular")}>Vincular</button>
-                  <button onClick={() => setAccion("Recursos")} style={chip(accion === "Recursos")}>Recursos</button>
+                  <button onClick={() => setAccion("Editar")} style={chip(accion === "Editar")}>
+                    Editar
+                  </button>
+                  <button onClick={() => setAccion("Excluir")} style={chip(accion === "Excluir")}>
+                    Excluir
+                  </button>
+                  <button onClick={() => setAccion("Vincular")} style={chip(accion === "Vincular")}>
+                    Vincular
+                  </button>
+                  <button onClick={() => setAccion("Recursos")} style={chip(accion === "Recursos")}>
+                    Recursos
+                  </button>
                 </>
               )}
-              <button onClick={() => { setSeleccionado(null); setAccion("Nuevo"); }} style={primary}>
+
+              <button
+                onClick={() => {
+                  setSeleccionado(null);
+                  setAccion("Nuevo");
+                }}
+                style={primary}
+              >
                 + Nuevo
               </button>
             </div>
@@ -89,7 +134,14 @@ export default function Home() {
           {!seleccionado && accion !== "Nuevo" && (
             <div style={list}>
               {lista.map((item) => (
-                <button key={item} style={row} onClick={() => { setSeleccionado(item); setAccion("Vista"); }}>
+                <button
+                  key={item}
+                  style={row}
+                  onClick={() => {
+                    setSeleccionado(item);
+                    setAccion("Vista");
+                  }}
+                >
                   {item}
                 </button>
               ))}
@@ -98,15 +150,21 @@ export default function Home() {
 
           {accion === "Nuevo" && <Formulario modulo={modulo} modo="Nuevo" />}
 
-          {seleccionado && accion === "Vista" && <Formulario modulo={modulo} modo="Consulta" lectura />}
+          {seleccionado && accion === "Vista" && (
+            <Formulario modulo={modulo} modo="Consulta automática" lectura />
+          )}
 
-          {seleccionado && accion === "Editar" && <Formulario modulo={modulo} modo="Editar" />}
+          {seleccionado && accion === "Editar" && (
+            <Formulario modulo={modulo} modo="Editar" />
+          )}
 
-          {seleccionado && accion === "Excluir" && <Formulario modulo={modulo} modo="Excluir" lectura />}
+          {seleccionado && accion === "Excluir" && (
+            <Formulario modulo={modulo} modo="Excluir" lectura />
+          )}
 
           {seleccionado && accion === "Vincular" && (
             <div style={grid}>
-              <input placeholder="Entidad / Persona relacionada" style={field} />
+              <input placeholder="Persona / Entidad relacionada" style={field} />
               <input placeholder="Puesto" style={field} />
               <input placeholder="¿Junta Directiva? Sí / No" style={field} />
               <input placeholder="Fecha inicio" style={field} />
@@ -116,7 +174,7 @@ export default function Home() {
 
           {seleccionado && accion === "Recursos" && (
             <div style={list}>
-              <button style={row}>Foto de perfil | Imagen</button>
+              <button style={row}>Foto principal | Imagen</button>
               <button style={row}>Acta relacionada | Documento</button>
               <button style={primary}>+ Agregar recurso</button>
             </div>
@@ -127,10 +185,20 @@ export default function Home() {
   );
 }
 
-function Formulario({ modulo, modo, lectura = false }: { modulo: Modulo; modo: string; lectura?: boolean }) {
+function Formulario({
+  modulo,
+  modo,
+  lectura = false,
+}: {
+  modulo: Modulo;
+  modo: string;
+  lectura?: boolean;
+}) {
   return (
     <div style={{ marginTop: 20 }}>
-      <p>Modo: <strong>{modo}</strong></p>
+      <p>
+        Modo: <strong>{modo}</strong>
+      </p>
 
       <div style={grid}>
         {modulo === "Personas" ? (
@@ -140,6 +208,8 @@ function Formulario({ modulo, modo, lectura = false }: { modulo: Modulo; modo: s
             <input readOnly={lectura} placeholder="Primer apellido" style={field} />
             <input readOnly={lectura} placeholder="Segundo apellido" style={field} />
             <input readOnly={lectura} placeholder="Distrito" style={field} />
+            <input readOnly={lectura} placeholder="Teléfono principal" style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" style={field} />
           </>
         ) : modulo === "Entidades" ? (
           <>
@@ -147,6 +217,8 @@ function Formulario({ modulo, modo, lectura = false }: { modulo: Modulo; modo: s
             <input readOnly={lectura} placeholder="Tipo de entidad" style={field} />
             <input readOnly={lectura} placeholder="Categoría" style={field} />
             <input readOnly={lectura} placeholder="Distrito" style={field} />
+            <input readOnly={lectura} placeholder="Teléfono principal" style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" style={field} />
           </>
         ) : (
           <>
@@ -158,36 +230,133 @@ function Formulario({ modulo, modo, lectura = false }: { modulo: Modulo; modo: s
         )}
       </div>
 
-      <textarea readOnly={lectura} placeholder="Descripción / observaciones" style={{ ...field, width: "100%", minHeight: 90, marginTop: 14 }} />
+      <textarea
+        readOnly={lectura}
+        placeholder="Descripción / observaciones"
+        style={{ ...field, width: "100%", minHeight: 90, marginTop: 14 }}
+      />
 
       <div style={{ textAlign: "right", marginTop: 18 }}>
         {modo === "Nuevo" && <button style={primary}>Guardar</button>}
         {modo === "Editar" && <button style={primary}>Guardar cambios</button>}
-        {modo === "Excluir" && <button style={{ ...primary, background: "#991b1b" }}>Confirmar exclusión</button>}
+        {modo === "Excluir" && (
+          <button style={{ ...primary, background: "#991b1b" }}>
+            Confirmar exclusión
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 function icono(m: Modulo) {
-  return { Personas: "👤", Entidades: "🏢", Actividades: "📅", Proyectos: "🚀", Recursos: "📚", Comunicaciones: "📢" }[m];
+  return {
+    Personas: "👤",
+    Entidades: "🏢",
+    Actividades: "📅",
+    Proyectos: "🚀",
+    Recursos: "📚",
+    Comunicaciones: "📢",
+  }[m];
 }
 
-const page = { minHeight: "100vh", padding: 28, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
+const page = {
+  minHeight: "100vh",
+  padding: 28,
+  background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)",
+  fontFamily: "Georgia, serif",
+  color: "#1f2937",
+};
+
 const wrap = { maxWidth: 1100, margin: "0 auto" };
+
 const eyebrow = { letterSpacing: 4, color: "#64748b", fontSize: 12 };
-const title = { fontSize: "clamp(2.6rem,7vw,5rem)", margin: "12px 0" };
+
+const title = {
+  fontSize: "clamp(2.6rem,7vw,5rem)",
+  margin: "12px 0",
+};
+
 const subtitle = { fontSize: 20, color: "#334155" };
-const search = { width: "100%", padding: "18px 24px", borderRadius: 999, border: "1px solid #d1d5db", fontSize: 16, margin: "22px 0" };
-const chips = { display: "flex", gap: 10, flexWrap: "wrap" as const, justifyContent: "center" };
-const actions = { display: "flex", gap: 10, flexWrap: "wrap" as const };
-const panel = { marginTop: 24, background: "rgba(255,255,255,.82)", border: "1px solid rgba(0,0,0,.08)", borderRadius: 28, padding: 26 };
-const topLine = { display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" as const, alignItems: "center" };
-const list = { display: "grid", gap: 10, marginTop: 18 };
-const row = { textAlign: "left" as const, padding: "14px 18px", borderRadius: 14, border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: 15 };
-const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14, marginTop: 18 };
-const field = { padding: "14px 16px", borderRadius: 14, border: "1px solid #d1d5db", fontSize: 15, background: "white" };
-const primary = { padding: "12px 22px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "white", fontWeight: 700, cursor: "pointer" };
+
+const search = {
+  width: "100%",
+  padding: "18px 24px",
+  borderRadius: 999,
+  border: "1px solid #d1d5db",
+  fontSize: 16,
+  margin: "22px 0",
+};
+
+const chips = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap" as const,
+  justifyContent: "center",
+};
+
+const actions = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap" as const,
+};
+
+const panel = {
+  marginTop: 24,
+  background: "rgba(255,255,255,.82)",
+  border: "1px solid rgba(0,0,0,.08)",
+  borderRadius: 28,
+  padding: 26,
+};
+
+const topLine = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 16,
+  flexWrap: "wrap" as const,
+  alignItems: "center",
+};
+
+const list = {
+  display: "grid",
+  gap: 10,
+  marginTop: 18,
+};
+
+const row = {
+  textAlign: "left" as const,
+  padding: "14px 18px",
+  borderRadius: 14,
+  border: "1px solid #e5e7eb",
+  background: "white",
+  cursor: "pointer",
+  fontSize: 15,
+};
+
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+  gap: 14,
+  marginTop: 18,
+};
+
+const field = {
+  padding: "14px 16px",
+  borderRadius: 14,
+  border: "1px solid #d1d5db",
+  fontSize: 15,
+  background: "white",
+};
+
+const primary = {
+  padding: "12px 22px",
+  borderRadius: 999,
+  border: "none",
+  background: "#1e3a8a",
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+};
 
 function chip(active: boolean) {
   return {
