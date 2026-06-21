@@ -1,142 +1,159 @@
 export default function Home() {
-  const tags = ["Personas", "Agrupaciones", "Instituciones", "Actividades", "Proyectos"];
+  const categorias = [
+    {
+      titulo: "Personas",
+      numero: "0",
+      descripcion: "Ciudadanos registrados en la plataforma.",
+    },
+    {
+      titulo: "Agrupaciones",
+      numero: "0",
+      descripcion: "Organizaciones y grupos comunitarios.",
+    },
+    {
+      titulo: "Proyectos",
+      numero: "0",
+      descripcion: "Iniciativas activas para el desarrollo de Belén.",
+    },
+  ];
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f8f5ef 0%, #ffffff 55%, #eef2f7 100%)",
-        color: "#1f2933",
+        background:
+          "linear-gradient(135deg,#f8f5ef 0%,#ffffff 55%,#eef2f7 100%)",
         fontFamily: "Georgia, serif",
-        padding: "48px",
+        padding: "40px",
+        color: "#1f2937",
       }}
     >
       <section
         style={{
-          minHeight: "75vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
           textAlign: "center",
+          marginTop: "60px",
+          marginBottom: "80px",
         }}
       >
-        <p style={{ letterSpacing: "0.25em", textTransform: "uppercase", fontSize: "0.85rem", color: "#7c6f57", marginBottom: "24px" }}>
-          Comunidad • Participación • Futuro
+        <p
+          style={{
+            letterSpacing: "4px",
+            fontSize: "0.8rem",
+            color: "#6b7280",
+          }}
+        >
+          COMUNIDAD • PARTICIPACIÓN • FUTURO
         </p>
 
-        <h1 style={{ fontSize: "clamp(3rem, 8vw, 6rem)", lineHeight: "1", margin: "0 0 28px", fontWeight: 700 }}>
+        <h1
+          style={{
+            fontSize: "clamp(3rem,8vw,6rem)",
+            margin: "20px 0",
+            lineHeight: 1,
+          }}
+        >
           Belén en Movimiento
         </h1>
 
-        <p style={{ fontSize: "1.45rem", color: "#334155", marginBottom: "34px" }}>
+        <p
+          style={{
+            fontSize: "1.5rem",
+            marginBottom: "30px",
+          }}
+        >
           Juntos hacemos que Belén avance.
         </p>
 
         <div
           style={{
-            width: "100%",
-            maxWidth: "780px",
-            background: "white",
+            maxWidth: "900px",
+            margin: "0 auto",
+            background: "#fff",
             borderRadius: "999px",
-            padding: "18px 26px",
-            boxShadow: "0 22px 60px rgba(15, 23, 42, 0.12)",
-            border: "1px solid rgba(30, 41, 59, 0.10)",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-            marginBottom: "22px",
+            padding: "18px 25px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+            border: "1px solid rgba(0,0,0,0.08)",
           }}
         >
-          <span style={{ fontSize: "1.35rem" }}>🔍</span>
-          <input
-            placeholder="Buscar personas, agrupaciones, instituciones, actividades o proyectos..."
-            style={{
-              width: "100%",
-              border: "none",
-              outline: "none",
-              fontSize: "1rem",
-              fontFamily: "Arial, sans-serif",
-              color: "#1f2933",
-            }}
-          />
+          🔍 Buscar personas, agrupaciones, instituciones,
+          actividades o proyectos...
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px" }}>
-          {tags.map((tag) => (
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          {[
+            "Personas",
+            "Agrupaciones",
+            "Instituciones",
+            "Actividades",
+            "Proyectos",
+          ].map((item) => (
             <span
-              key={tag}
+              key={item}
               style={{
                 padding: "10px 18px",
                 borderRadius: "999px",
-                background: "rgba(255,255,255,0.75)",
-                border: "1px solid rgba(30,41,59,0.10)",
-                color: "#475569",
-                fontSize: "0.95rem",
-                fontFamily: "Arial, sans-serif",
+                background: "#ffffff",
+                border: "1px solid #d1d5db",
               }}
             >
-              {tag}
+              {item}
             </span>
           ))}
         </div>
       </section>
-   <section
-  style={{
-    maxWidth: "1200px",
-    margin: "60px auto 0",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
-    gap: "24px",
-  }}
->
-  {[
-    { titulo: "Personas", numero: "0", texto: "Ciudadanos registrados en la plataforma." },
-    { titulo: "Agrupaciones", numero: "0", texto: "Organizaciones y grupos comunitarios." },
-    { titulo: "Proyectos", numero: "0", texto: "Iniciativas activas para el desarrollo de Belén." },
-  ].map((item) => (
-    <div
-      key={item.titulo}
-      style={{
-        background: "rgba(255,255,255,0.8)",
-        borderRadius: "24px",
-        padding: "32px",
-        textAlign: "center",
-        border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 15px 40px rgba(0,0,0,0.06)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "3rem",
-          fontWeight: "bold",
-          color: "#1e3a8a",
-          marginBottom: "12px",
-        }}
-      >
-        {item.numero}
-      </div>
 
-      <h2
+      <section
         style={{
-          margin: "0 0 12px",
-          fontSize: "1.6rem",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
+          gap: "24px",
         }}
       >
-        {item.titulo}
-      </h2>
+        {categorias.map((item) => (
+          <div
+            key={item.titulo}
+            style={{
+              background: "rgba(255,255,255,0.85)",
+              borderRadius: "24px",
+              padding: "35px",
+              textAlign: "center",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
+              border: "1px solid rgba(0,0,0,0.06)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "3rem",
+                fontWeight: "bold",
+                color: "#1e3a8a",
+              }}
+            >
+              {item.numero}
+            </div>
 
-      <p
-        style={{
-          margin: 0,
-          color: "#64748b",
-          lineHeight: "1.7",
-        }}
-      >
-        {item.texto}
-      </p>
-    </div>
-  ))}
-</section>
+            <h2>{item.titulo}</h2>
+
+            <p
+              style={{
+                color: "#64748b",
+                lineHeight: 1.8,
+              }}
+            >
+              {item.descripcion}
+            </p>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }
