@@ -2,199 +2,130 @@
 
 import { useState } from "react";
 
-const secciones = [
-  "Inicio",
-  "Personas",
-  "Entidades",
-  "Actividades",
-  "Proyectos",
-  "Recursos",
-  "Comunicaciones",
-  "Administración",
-];
+const modulos = ["Personas", "Entidades", "Actividades", "Proyectos", "Recursos", "Comunicaciones", "Vinculaciones"];
 
 export default function Home() {
-  const [seccion, setSeccion] = useState("Inicio");
+  const [modulo, setModulo] = useState("Personas");
+  const [accion, setAccion] = useState("Consultar");
 
-  const cardStyle = {
-    background: "rgba(255,255,255,0.72)",
-    border: "1px solid rgba(30,41,59,0.10)",
-    borderRadius: "24px",
-    padding: "24px",
-    boxShadow: "0 20px 50px rgba(15,23,42,0.06)",
-  };
+  const acciones =
+    modulo === "Vinculaciones"
+      ? ["Asignar", "Consultar", "Editar", "Finalizar"]
+      : ["Nueva", "Consultar", "Editar", "Excluir"];
+
+  const soloLectura = accion === "Consultar" || accion === "Excluir" || accion === "Finalizar";
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)",
-        color: "#1f2933",
-        fontFamily: "Georgia, serif",
-        padding: "28px",
-      }}
-    >
-      <section style={{ maxWidth: "1100px", margin: "0 auto", textAlign: "center" }}>
-        <p style={{ letterSpacing: "0.35em", fontSize: "0.75rem" }}>
-          COMUNIDAD · PARTICIPACIÓN · FUTURO
-        </p>
-
-        <h1 style={{ fontSize: "clamp(3rem, 8vw, 6rem)", margin: "18px 0" }}>
-          Belén en Movimiento
-        </h1>
-
-        <p style={{ fontSize: "1.35rem" }}>Juntos hacemos que Belén avance.</p>
+    <main style={{ minHeight: "100vh", padding: 28, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" }}>
+      <section style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <p style={{ letterSpacing: 4, color: "#64748b", fontSize: 12 }}>COMUNIDAD • PARTICIPACIÓN • FUTURO</p>
+          <h1 style={{ fontSize: "clamp(2.6rem,7vw,5rem)", margin: "12px 0" }}>Belén en Movimiento</h1>
+          <p style={{ fontSize: 20, color: "#334155" }}>Juntos hacemos que Belén avance.</p>
+        </div>
 
         <input
-          placeholder="Buscar personas, entidades, proyectos, recursos o comunicaciones..."
-          style={{
-            marginTop: "30px",
-            width: "100%",
-            maxWidth: "760px",
-            padding: "18px 24px",
-            borderRadius: "999px",
-            border: "1px solid #d8dee9",
-            fontSize: "1rem",
-          }}
+          placeholder="Buscar en la plataforma..."
+          style={{ width: "100%", padding: "18px 24px", borderRadius: 999, border: "1px solid #d1d5db", fontSize: 16, marginBottom: 22 }}
         />
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "10px",
-            marginTop: "22px",
-          }}
-        >
-          {secciones.map((item) => (
-            <button
-              key={item}
-              onClick={() => setSeccion(item)}
-              style={{
-                padding: "11px 18px",
-                borderRadius: "999px",
-                border: "1px solid #d8dee9",
-                background: seccion === item ? "#1e3a8a" : "white",
-                color: seccion === item ? "white" : "#334155",
-                cursor: "pointer",
-              }}
-            >
-              {item}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: 20 }}>
+          {modulos.map((m) => (
+            <button key={m} onClick={() => { setModulo(m); setAccion(m === "Vinculaciones" ? "Asignar" : "Consultar"); }}
+              style={{ padding: "11px 18px", borderRadius: 999, border: "1px solid #d1d5db", background: modulo === m ? "#1e3a8a" : "white", color: modulo === m ? "white" : "#475569", cursor: "pointer" }}>
+              {m}
             </button>
           ))}
         </div>
 
-        <section style={{ marginTop: "42px", textAlign: "left" }}>
-          {seccion === "Inicio" && (
-            <div style={{ display: "grid", gap: "18px", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-              {[
-                ["👤 Personas", "Ciudadanos, líderes, voluntarios y funcionarios."],
-                ["🏢 Entidades", "Empresas, instituciones y agrupaciones."],
-                ["📅 Actividades", "Agenda comunitaria del cantón."],
-                ["🚀 Proyectos", "Iniciativas activas de Belén."],
-                ["📚 Recursos", "Actas, fotos, videos y documentos históricos."],
-                ["📢 Comunicaciones", "Noticias, convocatorias y comunicados."],
-              ].map(([titulo, texto]) => (
-                <div key={titulo} style={cardStyle}>
-                  <h2>{titulo}</h2>
-                  <p>{texto}</p>
-                </div>
-              ))}
-            </div>
+        <div style={{ background: "rgba(255,255,255,.82)", border: "1px solid rgba(0,0,0,.08)", borderRadius: 28, padding: 26, boxShadow: "0 20px 60px rgba(15,23,42,.08)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginBottom: 24 }}>
+            <h2 style={{ margin: 0, flex: 1 }}>{icono(modulo)} {modulo}</h2>
+            {acciones.map((a) => (
+              <button key={a} onClick={() => setAccion(a)}
+                style={{ padding: "10px 16px", borderRadius: 999, border: "1px solid #d1d5db", background: accion === a ? "#1e3a8a" : "white", color: accion === a ? "white" : "#475569", cursor: "pointer" }}>
+                {a}
+              </button>
+            ))}
+          </div>
+
+          <h3>{accion} {modulo}</h3>
+
+          {accion !== "Nueva" && accion !== "Asignar" && (
+            <input placeholder={`Buscar ${modulo.toLowerCase()}...`} style={campo()} />
           )}
 
-          {seccion === "Personas" && (
-            <div style={cardStyle}>
-              <h2>👤 Personas</h2>
-              <p>Administre ciudadanos, miembros, voluntarios y líderes comunales.</p>
-              <button>+ Nueva Persona</button>
-              <ul>
-                <li>Elvin González Rodríguez — Coordinador General</li>
-                <li>Sonia Román Zeledón — Junta Directiva CDAM</li>
-                <li>Zeneida Chávez Fernández — Municipalidad de Belén</li>
-              </ul>
-            </div>
-          )}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 14, marginTop: 16 }}>
+            {modulo === "Personas" && (
+              <>
+                <input readOnly={soloLectura} placeholder="Cédula" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Nombre" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Primer apellido" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Segundo apellido" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Distrito" style={campo()} />
+              </>
+            )}
 
-          {seccion === "Entidades" && (
-            <div style={cardStyle}>
-              <h2>🏢 Entidades</h2>
-              <p>Empresas, instituciones, agrupaciones, fundaciones, comités e iglesias.</p>
-              <button>+ Nueva Entidad</button>
-              <ul>
-                <li>Belén en Movimiento — Agrupación</li>
-                <li>CDAM Belén — Agrupación</li>
-                <li>Municipalidad de Belén — Institución</li>
-                <li>Intel Costa Rica — Empresa</li>
-              </ul>
-            </div>
-          )}
+            {modulo === "Entidades" && (
+              <>
+                <input readOnly={soloLectura} placeholder="Nombre de entidad" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Tipo: Empresa / Institución / Agrupación" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Categoría" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Distrito" style={campo()} />
+              </>
+            )}
 
-          {seccion === "Actividades" && (
-            <div style={cardStyle}>
-              <h2>📅 Actividades</h2>
-              <p>Agenda comunal, reuniones, ferias, capacitaciones y eventos.</p>
-              <ul>
-                <li>Caravana Dorada</li>
-                <li>Reunión de coordinación comunitaria</li>
-                <li>Capacitación para voluntarios</li>
-              </ul>
-            </div>
-          )}
+            {modulo === "Vinculaciones" && (
+              <>
+                <input readOnly={soloLectura} placeholder="Persona" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Entidad" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Puesto" style={campo()} />
+                <input readOnly={soloLectura} placeholder="¿Junta Directiva? Sí / No" style={campo()} />
+              </>
+            )}
 
-          {seccion === "Proyectos" && (
-            <div style={cardStyle}>
-              <h2>🚀 Proyectos</h2>
-              <p>Iniciativas que conectan personas, entidades y recursos.</p>
-              <ul>
-                <li>Belén en Movimiento — Activo</li>
-                <li>Caravana Dorada — En organización</li>
-                <li>Bosque de Campanas — Propuesta</li>
-              </ul>
-            </div>
-          )}
+            {!["Personas", "Entidades", "Vinculaciones"].includes(modulo) && (
+              <>
+                <input readOnly={soloLectura} placeholder="Título / Nombre" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Tipo / Categoría" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Fecha" style={campo()} />
+                <input readOnly={soloLectura} placeholder="Relacionado con" style={campo()} />
+              </>
+            )}
+          </div>
 
-          {seccion === "Recursos" && (
-            <div style={cardStyle}>
-              <h2>📚 Recursos</h2>
-              <p>Memoria histórica y documental de la comunidad.</p>
-              <ul>
-                <li>Actas de Junta Directiva</li>
-                <li>Reglamentos y estatutos</li>
-                <li>Fotografías históricas</li>
-                <li>Videos institucionales</li>
-              </ul>
-            </div>
-          )}
+          <textarea readOnly={soloLectura} placeholder="Observaciones / descripción" style={{ ...campo(), width: "100%", marginTop: 14, minHeight: 90 }} />
 
-          {seccion === "Comunicaciones" && (
-            <div style={cardStyle}>
-              <h2>📢 Comunicaciones</h2>
-              <p>Centro de comunicación comunitaria para informar, compartir y movilizar.</p>
-              <ul>
-                <li>Noticias comunales</li>
-                <li>Convocatorias</li>
-                <li>Comunicados institucionales</li>
-                <li>Publicaciones para redes sociales</li>
-              </ul>
-            </div>
-          )}
-
-          {seccion === "Administración" && (
-            <div style={cardStyle}>
-              <h2>⚙️ Administración</h2>
-              <p>Gestión de datos, roles, permisos y validación comunitaria.</p>
-              <ul>
-                <li>Personas ↔ Entidades</li>
-                <li>Puestos y juntas directivas</li>
-                <li>Recursos documentales</li>
-                <li>Redes sociales y contactos</li>
-              </ul>
-            </div>
-          )}
-        </section>
+          <div style={{ marginTop: 20, textAlign: "right" }}>
+            {accion === "Consultar" && <button style={boton()}>Cerrar</button>}
+            {accion === "Editar" && <button style={boton()}>Guardar cambios</button>}
+            {accion === "Nueva" && <button style={boton()}>Guardar</button>}
+            {accion === "Excluir" && <button style={boton("#991b1b")}>Confirmar exclusión</button>}
+            {accion === "Asignar" && <button style={boton()}>Guardar vinculación</button>}
+            {accion === "Finalizar" && <button style={boton("#991b1b")}>Finalizar vínculo</button>}
+          </div>
+        </div>
       </section>
     </main>
   );
+}
+
+function campo() {
+  return { padding: "14px 16px", borderRadius: 14, border: "1px solid #d1d5db", fontSize: 15, background: "white" };
+}
+
+function boton(color = "#1e3a8a") {
+  return { padding: "13px 24px", borderRadius: 999, border: "none", background: color, color: "white", fontWeight: 700, cursor: "pointer" };
+}
+
+function icono(m: string) {
+  return {
+    Personas: "👤",
+    Entidades: "🏢",
+    Actividades: "📅",
+    Proyectos: "🚀",
+    Recursos: "📚",
+    Comunicaciones: "📢",
+    Vinculaciones: "🔗",
+  }[m];
 }
