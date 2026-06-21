@@ -4,12 +4,11 @@ import { useState } from "react";
 
 export default function Home() {
   const categorias = [
-    "Todo",
-    "Personas",
-    "Agrupaciones",
-    "Instituciones",
-    "Actividades",
-    "Proyectos",
+    "👤 Personas",
+    "👥 Agrupaciones",
+    "🏛 Instituciones",
+    "📅 Actividades",
+    "🚀 Proyectos",
   ];
 
   const datos = [
@@ -25,70 +24,39 @@ export default function Home() {
     { tipo: "Proyectos", nombre: "Registro de Agrupaciones", detalle: "Proyecto para organizar la información comunitaria." },
   ];
 
-  const [categoriaActiva, setCategoriaActiva] = useState("Todo");
+  const [categoriaActiva, setCategoriaActiva] = useState("👤 Personas");
   const [busqueda, setBusqueda] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
 
+  const tipoActivo = categoriaActiva.replace(/[^\p{L}\s]/gu, "").trim();
+
   const resultados = datos
-    .filter((item) => categoriaActiva === "Todo" || item.tipo === categoriaActiva)
+    .filter((item) => item.tipo === tipoActivo)
     .filter((item) =>
-      busqueda.trim() === ""
-        ? true
-        : item.nombre.toLowerCase().includes(busqueda.toLowerCase())
+      item.nombre.toLowerCase().includes(busqueda.toLowerCase())
     )
     .sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-  function buscar() {
-    setMostrarResultados(true);
-  }
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg,#f8f5ef 0%,#ffffff 55%,#eef2f7 100%)",
+        background: "linear-gradient(135deg,#f8f5ef 0%,#ffffff 55%,#eef2f7 100%)",
         fontFamily: "Georgia, serif",
         padding: "40px",
         color: "#1f2937",
       }}
     >
-      <section
-        style={{
-          maxWidth: "1050px",
-          margin: "0 auto",
-          textAlign: "center",
-          paddingTop: "70px",
-        }}
-      >
-        <p
-          style={{
-            letterSpacing: "4px",
-            fontSize: "0.8rem",
-            color: "#6b7280",
-            marginBottom: "20px",
-          }}
-        >
+      <section style={{ maxWidth: "1050px", margin: "0 auto", textAlign: "center", paddingTop: "70px" }}>
+        <p style={{ letterSpacing: "4px", fontSize: "0.8rem", color: "#6b7280", marginBottom: "20px" }}>
           COMUNIDAD • PARTICIPACIÓN • FUTURO
         </p>
 
-        <h1
-          style={{
-            fontSize: "clamp(3rem,8vw,5.5rem)",
-            margin: "0 0 22px",
-            lineHeight: 1,
-          }}
-        >
+        <h1 style={{ fontSize: "clamp(3rem,8vw,5.5rem)", margin: "0 0 22px", lineHeight: 1 }}>
           Belén en Movimiento
         </h1>
 
-        <p
-          style={{
-            fontSize: "1.45rem",
-            marginBottom: "36px",
-            color: "#334155",
-          }}
-        >
+        <p style={{ fontSize: "1.45rem", marginBottom: "36px", color: "#334155" }}>
           Juntos hacemos que Belén avance.
         </p>
 
@@ -110,11 +78,11 @@ export default function Home() {
 
           <input
             value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") buscar();
+            onChange={(e) => {
+              setBusqueda(e.target.value);
+              setMostrarResultados(true);
             }}
-            placeholder={`Buscar en ${categoriaActiva.toLowerCase()}...`}
+            placeholder={`Buscar en ${tipoActivo.toLowerCase()}...`}
             style={{
               width: "100%",
               border: "none",
@@ -127,15 +95,7 @@ export default function Home() {
           />
         </div>
 
-        <div
-          style={{
-            marginTop: "24px",
-            display: "flex",
-            justifyContent: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
+        <div style={{ marginTop: "24px", display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
           {categorias.map((categoria) => {
             const activa = categoriaActiva === categoria;
 
@@ -144,8 +104,8 @@ export default function Home() {
                 key={categoria}
                 onClick={() => {
                   setCategoriaActiva(categoria);
-                  setMostrarResultados(false);
                   setBusqueda("");
+                  setMostrarResultados(true);
                 }}
                 style={{
                   padding: "11px 20px",
@@ -165,16 +125,8 @@ export default function Home() {
           })}
         </div>
 
-        <p
-          style={{
-            marginTop: "34px",
-            color: "#64748b",
-            fontSize: "0.95rem",
-            fontFamily: "Arial, sans-serif",
-          }}
-        >
-          Escriba una palabra y presione Enter. Si deja el campo vacío, se muestra
-          el listado alfabético de la categoría seleccionada.
+        <p style={{ marginTop: "34px", color: "#64748b", fontSize: "0.95rem", fontFamily: "Arial, sans-serif" }}>
+          Seleccione una categoría para ver su listado o escriba para filtrar los resultados.
         </p>
       </section>
 
@@ -191,7 +143,7 @@ export default function Home() {
           }}
         >
           <h2 style={{ marginTop: 0, textAlign: "center" }}>
-            Resultados en {categoriaActiva}
+            {tipoActivo}
           </h2>
 
           {resultados.length === 0 ? (
@@ -212,7 +164,7 @@ export default function Home() {
                 >
                   <strong>{item.nombre}</strong>
                   <p style={{ margin: "6px 0 0", color: "#64748b" }}>
-                    {item.tipo} · {item.detalle}
+                    {item.detalle}
                   </p>
                 </div>
               ))}
