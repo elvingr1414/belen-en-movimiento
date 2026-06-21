@@ -81,6 +81,63 @@ export default function Home() {
           ))}
         </div>
       </section>
+   <section
+  style={{
+    maxWidth: "1200px",
+    margin: "60px auto 0",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+    gap: "24px",
+  }}
+>
+  {[
+    { titulo: "Personas", numero: "0", texto: "Ciudadanos registrados en la plataforma." },
+    { titulo: "Agrupaciones", numero: "0", texto: "Organizaciones y grupos comunitarios." },
+    { titulo: "Proyectos", numero: "0", texto: "Iniciativas activas para el desarrollo de Belén." },
+  ].map((item) => (
+    <div
+      key={item.titulo}
+      style={{
+        background: "rgba(255,255,255,0.8)",
+        borderRadius: "24px",
+        padding: "32px",
+        textAlign: "center",
+        border: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 15px 40px rgba(0,0,0,0.06)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "3rem",
+          fontWeight: "bold",
+          color: "#1e3a8a",
+          marginBottom: "12px",
+        }}
+      >
+        {item.numero}
+      </div>
+
+      <h2
+        style={{
+          margin: "0 0 12px",
+          fontSize: "1.6rem",
+        }}
+      >
+        {item.titulo}
+      </h2>
+
+      <p
+        style={{
+          margin: 0,
+          color: "#64748b",
+          lineHeight: "1.7",
+        }}
+      >
+        {item.texto}
+      </p>
+    </div>
+  ))}
+</section>
     </main>
   );
 }
