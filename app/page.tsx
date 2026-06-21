@@ -1,6 +1,5 @@
 export default function Home() {
   const tags = ["Personas", "Agrupaciones", "Instituciones", "Actividades", "Proyectos"];
-
   return (
     <main
       style={{
