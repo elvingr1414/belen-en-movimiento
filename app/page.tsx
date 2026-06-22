@@ -2,10 +2,24 @@
 
 import { useState } from "react";
 
-type Modulo = "Personas" | "Entidades" | "Actividades" | "Proyectos" | "Recursos" | "Comunicaciones";
+type Modulo =
+  | "Personas"
+  | "Entidades"
+  | "Actividades"
+  | "Proyectos"
+  | "Recursos"
+  | "Comunicaciones";
+
 type Accion = "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
 
-const modulos: Modulo[] = ["Personas", "Entidades", "Actividades", "Proyectos", "Recursos", "Comunicaciones"];
+const modulos: Modulo[] = [
+  "Personas",
+  "Entidades",
+  "Actividades",
+  "Proyectos",
+  "Recursos",
+  "Comunicaciones",
+];
 
 const personasBase = [
   { id: "p1", nombre: "Elvin", apellido1: "González", apellido2: "Rodríguez", cedula: "000000000", distrito: "San Antonio", telefono: "8888-0000", correo: "elvin@email.com" },
@@ -42,7 +56,20 @@ const datos: Record<Modulo, any[]> = {
 };
 
 const puestos = ["Presidente", "Vicepresidente", "Secretario", "Tesorero", "Vocal", "Coordinador General", "Miembro", "Voluntario", "Empleado", "Funcionario"];
-const tiposRecurso = ["Fotografía", "Acta Junta Directiva", "Acta Asamblea", "Documento", "Logo", "Video", "Certificado", "Formulario", "Otro"];
+
+const tiposRecurso = [
+  "Fotografía",
+  "Acta Junta Directiva",
+  "Acta Asamblea",
+  "Documento varios",
+  "Logo",
+  "Video",
+  "Certificado",
+  "Formulario",
+  "Contrato",
+  "Convenio",
+  "Otro",
+];
 
 export default function Home() {
   const [modulo, setModulo] = useState<Modulo>("Personas");
@@ -54,14 +81,11 @@ export default function Home() {
     { personaId: "p2", entidadId: "e1", puesto: "Presidenta", directiva: "Sí", fecha: "2026-01-15" },
     { personaId: "p2", entidadId: "e2", puesto: "Coordinadora", directiva: "No", fecha: "2026-06-01" },
     { personaId: "p1", entidadId: "e2", puesto: "Coordinador General", directiva: "Sí", fecha: "2026-06-01" },
-    { personaId: "p3", entidadId: "e3", puesto: "Alcaldesa", directiva: "No", fecha: "2026-05-01" },
   ]);
 
   const [recursos, setRecursos] = useState<any[]>([
-    { ownerTipo: "Personas", ownerId: "p2", nombre: "Foto Sonia Román", tipo: "Fotografía" },
-    { ownerTipo: "Personas", ownerId: "p2", nombre: "Nombramiento Presidencia CDAM", tipo: "Documento" },
-    { ownerTipo: "Entidades", ownerId: "e1", nombre: "Acta Junta Directiva Enero 2026", tipo: "Acta Junta Directiva" },
-    { ownerTipo: "Entidades", ownerId: "e2", nombre: "Logo Belén en Movimiento", tipo: "Logo" },
+    { ownerTipo: "Personas", ownerId: "p2", nombre: "Foto Sonia Román", tipo: "Fotografía", ubicacion: "Drive / Personas / Sonia" },
+    { ownerTipo: "Entidades", ownerId: "e1", nombre: "Acta Junta Directiva Enero 2026", tipo: "Acta Junta Directiva", ubicacion: "Drive / CDAM / Actas" },
   ]);
 
   const [busquedaVinculo, setBusquedaVinculo] = useState("");
@@ -72,13 +96,20 @@ export default function Home() {
 
   const [nuevoRecursoNombre, setNuevoRecursoNombre] = useState("");
   const [nuevoRecursoTipo, setNuevoRecursoTipo] = useState("Fotografía");
+  const [nuevoRecursoUbicacion, setNuevoRecursoUbicacion] = useState("");
 
-  const lista = datos[modulo].filter((item) => JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase()));
+  const lista = datos[modulo].filter((item) =>
+    JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const listaVinculo =
     modulo === "Personas"
-      ? entidadesBase.filter((item) => JSON.stringify(item).toLowerCase().includes(busquedaVinculo.toLowerCase()))
-      : personasBase.filter((item) => JSON.stringify(item).toLowerCase().includes(busquedaVinculo.toLowerCase()));
+      ? entidadesBase.filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busquedaVinculo.toLowerCase())
+        )
+      : personasBase.filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busquedaVinculo.toLowerCase())
+        );
 
   function cambiarModulo(m: Modulo) {
     setModulo(m);
@@ -120,24 +151,24 @@ export default function Home() {
 
     setRecursos([
       ...recursos,
-      { ownerTipo: modulo, ownerId: seleccionado.id, nombre: nuevoRecursoNombre, tipo: nuevoRecursoTipo },
+      {
+        ownerTipo: modulo,
+        ownerId: seleccionado.id,
+        nombre: nuevoRecursoNombre,
+        tipo: nuevoRecursoTipo,
+        ubicacion: nuevoRecursoUbicacion || "Sin ubicación",
+      },
     ]);
 
     setNuevoRecursoNombre("");
     setNuevoRecursoTipo("Fotografía");
+    setNuevoRecursoUbicacion("");
   }
 
   function vinculosActuales() {
     if (!seleccionado) return [];
-
-    if (modulo === "Personas") {
-      return vinculos.filter((v) => v.personaId === seleccionado.id);
-    }
-
-    if (modulo === "Entidades") {
-      return vinculos.filter((v) => v.entidadId === seleccionado.id);
-    }
-
+    if (modulo === "Personas") return vinculos.filter((v) => v.personaId === seleccionado.id);
+    if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
     return [];
   }
 
@@ -149,12 +180,22 @@ export default function Home() {
   return (
     <main style={page}>
       <section style={wrap}>
-        <header style={{ textAlign: "center" }}>
+        <header>
           <p style={eyebrow}>COMUNIDAD • PARTICIPACIÓN • FUTURO</p>
-          <h1 style={title}>Belén en Movimiento</h1>
+
+          <div style={titleLine}>
+            <h1 style={title}>Belén en Movimiento</h1>
+            <AnimatedGears />
+          </div>
         </header>
 
-        <input value={busqueda} onFocus={() => volverALista()} onChange={(e) => volverALista(e.target.value)} placeholder="Buscar..." style={search} />
+        <input
+          value={busqueda}
+          onFocus={() => volverALista()}
+          onChange={(e) => volverALista(e.target.value)}
+          placeholder="Buscar..."
+          style={search}
+        />
 
         <nav style={chips}>
           {modulos.map((m) => (
@@ -166,7 +207,9 @@ export default function Home() {
 
         <section style={panel}>
           <div style={topLine}>
-            <h2 style={sectionTitle}>{seleccionado ? tituloRegistro(seleccionado) : `${icono(modulo)} ${modulo}`}</h2>
+            <h2 style={sectionTitle}>
+              {seleccionado ? tituloRegistro(seleccionado) : `${icono(modulo)} ${modulo}`}
+            </h2>
 
             <div style={actions}>
               {seleccionado && (
@@ -195,7 +238,6 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && <Formulario modulo={modulo} datos={null} />}
-
           {seleccionado && accion === "Vista" && <Formulario modulo={modulo} datos={seleccionado} lectura />}
           {seleccionado && accion === "Editar" && <Formulario modulo={modulo} datos={seleccionado} />}
 
@@ -216,7 +258,10 @@ export default function Home() {
                 {vinculosActuales().map((v, i) => {
                   const persona = personasBase.find((p) => p.id === v.personaId);
                   const entidad = entidadesBase.find((e) => e.id === v.entidadId);
-                  const nombre = modulo === "Personas" ? entidad?.nombre : `${persona?.nombre} ${persona?.apellido1} ${persona?.apellido2}`;
+                  const nombre =
+                    modulo === "Personas"
+                      ? entidad?.nombre
+                      : `${persona?.nombre} ${persona?.apellido1} ${persona?.apellido2}`;
 
                   return (
                     <div key={i} style={relationRow}>
@@ -239,7 +284,7 @@ export default function Home() {
                 style={searchSmall}
               />
 
-              {!vinculoSeleccionado && (
+              {busquedaVinculo && !vinculoSeleccionado && (
                 <div style={scrollArea}>
                   <div style={listWide}>
                     {listaVinculo.map((item, index) => (
@@ -282,6 +327,7 @@ export default function Home() {
                   <div key={i} style={relationRow}>
                     <strong>📁 {r.nombre}</strong>
                     <span>{r.tipo}</span>
+                    <span>{r.ubicacion}</span>
                   </div>
                 ))}
               </div>
@@ -293,6 +339,8 @@ export default function Home() {
                   {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
                 </select>
 
+                <input placeholder="Ubicación / enlace del archivo" value={nuevoRecursoUbicacion} onChange={(e) => setNuevoRecursoUbicacion(e.target.value)} style={field} />
+
                 <button style={primary} onClick={guardarRecurso}>Agregar recurso</button>
               </div>
             </div>
@@ -300,6 +348,16 @@ export default function Home() {
         </section>
       </section>
     </main>
+  );
+}
+
+function AnimatedGears() {
+  return (
+    <div style={gears}>
+      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
+      <span style={{ ...gear, animationDirection: "reverse" }}>⚙️</span>
+      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
+    </div>
   );
 }
 
@@ -358,13 +416,23 @@ function lineaConsulta(modulo: Modulo, item: any) {
 }
 
 function icono(m: Modulo) {
-  return { Personas: "👤", Entidades: "🏢", Actividades: "📅", Proyectos: "🚀", Recursos: "📚", Comunicaciones: "📢" }[m];
+  return {
+    Personas: "👤",
+    Entidades: "🏢",
+    Actividades: "📅",
+    Proyectos: "🚀",
+    Recursos: "📚",
+    Comunicaciones: "📢",
+  }[m];
 }
 
-const page = { minHeight: "100vh", padding: 18, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
+const page = { minHeight: "100vh", padding: 18, paddingBottom: 120, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
 const wrap = { maxWidth: 1100, margin: "0 auto" };
-const eyebrow = { letterSpacing: 3, color: "#64748b", fontSize: 11, margin: 0 };
+const eyebrow = { letterSpacing: 3, color: "#64748b", fontSize: 11, margin: 0, textAlign: "center" as const };
+const titleLine = { display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" as const };
 const title = { fontSize: "clamp(2.1rem,6vw,4.2rem)", margin: "6px 0 12px" };
+const gears = { display: "flex", gap: 2, marginTop: -6 };
+const gear = { display: "inline-block", fontSize: 22, animationName: "spin", animationDuration: "2.8s", animationTimingFunction: "linear", animationIterationCount: "infinite" };
 const search = { width: "100%", padding: "14px 20px", borderRadius: 999, border: "1px solid #d1d5db", fontSize: 15, margin: "10px 0 14px", boxSizing: "border-box" as const };
 const searchSmall = { ...search, margin: "12px 0 10px" };
 const chips = { display: "flex", gap: 8, flexWrap: "wrap" as const, justifyContent: "center" };
