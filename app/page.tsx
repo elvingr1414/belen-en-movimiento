@@ -2,612 +2,369 @@
 
 import { useState } from "react";
 
-type Modulo = "Personas" | "Entidades" | "Actividades" | "Proyectos" | "Recursos" | "Comunicaciones";
+type Modulo =
+  | "Personas"
+  | "Entidades"
+  | "Actividades"
+  | "Proyectos"
+  | "Recursos"
+  | "Comunicaciones";
 
 type Accion = "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
 
-const modulos: Modulo[] = ["Personas", "Entidades", "Actividades", "Proyectos", "Recursos", "Comunicaciones"];
+const modulos: Modulo[] = [
+  "Personas",
+  "Entidades",
+  "Actividades",
+  "Proyectos",
+  "Recursos",
+  "Comunicaciones",
+];
 
-const datos: Record<Modulo, any[]> = {
-
+const datos: Record<Modulo, string[]> = {
   Personas: [
-
-    { nombre: "Elvin", apellido1: "González", apellido2: "Rodríguez", cedula: "000000000", distrito: "San Antonio", telefono: "8888-0000", correo: "elvin@email.com", resumen: "Belén en Movimiento | Coordinador General" },
-
-    { nombre: "Sonia", apellido1: "Román", apellido2: "Zeledón", cedula: "000000001", distrito: "Belén", telefono: "8888-1111", correo: "sonia@email.com", resumen: "CDAM Belén | Presidenta" },
-
-    { nombre: "Zeneida", apellido1: "Chávez", apellido2: "Fernández", cedula: "000000002", distrito: "Belén", telefono: "8888-2222", correo: "zeneida@email.com", resumen: "Municipalidad de Belén | Alcaldesa" },
-
+    "Elvin González Rodríguez | 8888-0000 | elvin@email.com | Belén en Movimiento | Coordinador General",
+    "Sonia Román Zeledón | 8888-1111 | sonia@email.com | CDAM Belén | Presidenta",
+    "Zeneida Chávez Fernández | 8888-2222 | zeneida@email.com | Municipalidad de Belén | Alcaldesa",
   ],
-
   Entidades: [
-
-    { nombre: "CDAM Belén", tipo: "Agrupación", categoria: "Adulto Mayor", distrito: "Belén", telefono: "2233-0000", correo: "info@cdam.cr" },
-
-    { nombre: "Belén en Movimiento", tipo: "Agrupación comunitaria", categoria: "Participación ciudadana", distrito: "Belén", telefono: "8888-3333", correo: "info@belenmovimiento.cr" },
-
-    { nombre: "Municipalidad de Belén", tipo: "Institución", categoria: "Gobierno local", distrito: "San Antonio", telefono: "2587-0000", correo: "info@belen.go.cr" },
-
-    { nombre: "Intel Costa Rica", tipo: "Empresa", categoria: "Tecnología", distrito: "La Ribera", telefono: "2200-0000", correo: "contacto@intel.com" },
-
+    "CDAM Belén | Agrupación | 2233-0000 | info@cdam.cr",
+    "Belén en Movimiento | Agrupación comunitaria | 8888-3333 | info@belenmovimiento.cr",
+    "Municipalidad de Belén | Institución | 2587-0000 | info@belen.go.cr",
+    "Intel Costa Rica | Empresa | 2200-0000 | contacto@intel.com",
   ],
-
   Actividades: [
-
-    { nombre: "Caravana Dorada", tipo: "Actividad comunitaria", fecha: "07/06/2026", relacionado: "CDAM Belén" },
-
-    { nombre: "Reunión de coordinación", tipo: "Actividad interna", fecha: "20/06/2026", relacionado: "Belén en Movimiento" },
-
+    "Caravana Dorada | Actividad comunitaria | 07/06/2026",
+    "Reunión de coordinación | Actividad interna | 20/06/2026",
   ],
-
   Proyectos: [
-
-    { nombre: "Belén en Movimiento", tipo: "Proyecto comunitario", fecha: "2026", relacionado: "Cantón de Belén" },
-
-    { nombre: "Bosque de Campanas", tipo: "Proyecto ambiental", fecha: "2026", relacionado: "Belén" },
-
+    "Belén en Movimiento | Activo | Proyecto comunitario",
+    "Bosque de Campanas | Propuesta | Proyecto ambiental",
   ],
-
   Recursos: [
-
-    { nombre: "Acta Junta Directiva", tipo: "Documento", fecha: "2026", relacionado: "CDAM Belén" },
-
-    { nombre: "Logo Belén en Movimiento", tipo: "Imagen", fecha: "2026", relacionado: "Belén en Movimiento" },
-
+    "Acta Junta Directiva | Documento | PDF",
+    "Logo Belén en Movimiento | Imagen | PNG",
   ],
-
   Comunicaciones: [
-
-    { nombre: "Convocatoria comunitaria", tipo: "Publicación", fecha: "2026", relacionado: "Redes sociales" },
-
-    { nombre: "Comunicado institucional", tipo: "Noticia", fecha: "2026", relacionado: "Web" },
-
+    "Convocatoria comunitaria | Publicación | Redes sociales",
+    "Comunicado institucional | Noticia | Web",
   ],
-
 };
 
 export default function Home() {
-
   const [modulo, setModulo] = useState<Modulo>("Personas");
-
   const [busqueda, setBusqueda] = useState("");
-
-  const [seleccionado, setSeleccionado] = useState<any | null>(null);
-
+  const [seleccionado, setSeleccionado] = useState<string | null>(null);
   const [accion, setAccion] = useState<Accion>("Vista");
 
   const lista = datos[modulo].filter((item) =>
-
-    JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
-
+    item.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   function cambiarModulo(m: Modulo) {
-
     setModulo(m);
-
     setBusqueda("");
-
     setSeleccionado(null);
-
     setAccion("Vista");
-
   }
 
   return (
-
     <main style={page}>
-
       <section style={wrap}>
-
         <header style={{ textAlign: "center" }}>
-
           <p style={eyebrow}>COMUNIDAD • PARTICIPACIÓN • FUTURO</p>
-
           <h1 style={title}>Belén en Movimiento</h1>
-
+          <p style={subtitle}>Juntos hacemos que Belén avance.</p>
         </header>
 
         <input
-
           value={busqueda}
-
           onChange={(e) => setBusqueda(e.target.value)}
-
-          placeholder="Buscar..."
-
+          placeholder="Buscar en la plataforma..."
           style={search}
-
         />
 
         <nav style={chips}>
-
           {modulos.map((m) => (
-
             <button key={m} onClick={() => cambiarModulo(m)} style={chip(modulo === m)}>
-
               {icono(m)} {m}
-
             </button>
-
           ))}
-
         </nav>
 
         <section style={panel}>
-
           <div style={topLine}>
-
             <div>
-
-              <h2 style={sectionTitle}>
-
-                {seleccionado ? tituloRegistro(seleccionado) : `${icono(modulo)} ${modulo}`}
-
+              <h2 style={{ margin: 0 }}>
+                {icono(modulo)} {modulo}
               </h2>
-
+              {seleccionado && <strong>{seleccionado}</strong>}
             </div>
 
             <div style={actions}>
-
               {seleccionado && (
-
                 <>
-
-                  <button onClick={() => setAccion("Editar")} style={chip(accion === "Editar")}>Editar</button>
-
-                  <button onClick={() => setAccion("Excluir")} style={chip(accion === "Excluir")}>Excluir</button>
-
-                  <button onClick={() => setAccion("Vincular")} style={chip(accion === "Vincular")}>Vincular</button>
-
-                  <button onClick={() => setAccion("Recursos")} style={chip(accion === "Recursos")}>Recursos</button>
-
+                  <button onClick={() => setAccion("Editar")} style={chip(accion === "Editar")}>
+                    Editar
+                  </button>
+                  <button onClick={() => setAccion("Excluir")} style={chip(accion === "Excluir")}>
+                    Excluir
+                  </button>
+                  <button onClick={() => setAccion("Vincular")} style={chip(accion === "Vincular")}>
+                    Vincular
+                  </button>
+                  <button onClick={() => setAccion("Recursos")} style={chip(accion === "Recursos")}>
+                    Recursos
+                  </button>
                 </>
-
               )}
 
               <button
-
                 onClick={() => {
-
                   setSeleccionado(null);
-
                   setAccion("Nuevo");
-
                 }}
-
                 style={primary}
-
               >
-
                 + Nuevo
-
               </button>
-
             </div>
-
           </div>
 
           {!seleccionado && accion !== "Nuevo" && (
-
             <div style={list}>
-
-              {lista.map((item, index) => (
-
+              {lista.map((item) => (
                 <button
-
-                  key={index}
-
+                  key={item}
                   style={row}
-
                   onClick={() => {
-
                     setSeleccionado(item);
-
                     setAccion("Vista");
-
                   }}
-
                 >
-
-                  {lineaConsulta(modulo, item)}
-
+                  {item}
                 </button>
-
               ))}
-
             </div>
-
           )}
 
-          {accion === "Nuevo" && <Formulario modulo={modulo} datos={null} />}
+          {accion === "Nuevo" && <Formulario modulo={modulo} modo="Nuevo" />}
 
           {seleccionado && accion === "Vista" && (
-
-            <Formulario modulo={modulo} datos={seleccionado} lectura />
-
+            <Formulario modulo={modulo} modo="Consulta automática" lectura />
           )}
 
           {seleccionado && accion === "Editar" && (
-
-            <Formulario modulo={modulo} datos={seleccionado} />
-
+            <Formulario modulo={modulo} modo="Editar" />
           )}
 
           {seleccionado && accion === "Excluir" && (
-
-            <>
-
-              <Formulario modulo={modulo} datos={seleccionado} lectura />
-
-              <div style={{ textAlign: "right", marginTop: 12 }}>
-
-                <button style={{ ...primary, background: "#991b1b" }}>Confirmar exclusión</button>
-
-              </div>
-
-            </>
-
+            <Formulario modulo={modulo} modo="Excluir" lectura />
           )}
 
           {seleccionado && accion === "Vincular" && (
-
             <div style={grid}>
-
               <input placeholder="Persona / Entidad relacionada" style={field} />
-
               <input placeholder="Puesto" style={field} />
-
-              <input placeholder="Junta Directiva: Sí / No" style={field} />
-
+              <input placeholder="¿Junta Directiva? Sí / No" style={field} />
               <input placeholder="Fecha inicio" style={field} />
-
               <button style={primary}>Guardar vínculo</button>
-
             </div>
-
           )}
 
           {seleccionado && accion === "Recursos" && (
-
             <div style={list}>
-
               <button style={row}>Foto principal | Imagen</button>
-
               <button style={row}>Acta relacionada | Documento</button>
-
               <button style={primary}>+ Agregar recurso</button>
-
             </div>
-
           )}
-
         </section>
-
       </section>
-
     </main>
-
   );
-
 }
 
-function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos: any | null; lectura?: boolean }) {
-
+function Formulario({
+  modulo,
+  modo,
+  lectura = false,
+}: {
+  modulo: Modulo;
+  modo: string;
+  lectura?: boolean;
+}) {
   return (
-
-    <div style={{ marginTop: 14 }}>
+    <div style={{ marginTop: 20 }}>
+      <p>
+        Modo: <strong>{modo}</strong>
+      </p>
 
       <div style={grid}>
-
         {modulo === "Personas" ? (
-
           <>
-
-            <input readOnly={lectura} placeholder="Cédula" defaultValue={datos?.cedula || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Nombre" defaultValue={datos?.nombre || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Primer apellido" defaultValue={datos?.apellido1 || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Segundo apellido" defaultValue={datos?.apellido2 || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Distrito" defaultValue={datos?.distrito || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Teléfono principal" defaultValue={datos?.telefono || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Correo principal" defaultValue={datos?.correo || ""} style={field} />
-
+            <input readOnly={lectura} placeholder="Cédula" style={field} />
+            <input readOnly={lectura} placeholder="Nombre" style={field} />
+            <input readOnly={lectura} placeholder="Primer apellido" style={field} />
+            <input readOnly={lectura} placeholder="Segundo apellido" style={field} />
+            <input readOnly={lectura} placeholder="Distrito" style={field} />
+            <input readOnly={lectura} placeholder="Teléfono principal" style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" style={field} />
           </>
-
         ) : modulo === "Entidades" ? (
-
           <>
-
-            <input readOnly={lectura} placeholder="Nombre de entidad" defaultValue={datos?.nombre || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Tipo de entidad" defaultValue={datos?.tipo || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Categoría" defaultValue={datos?.categoria || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Distrito" defaultValue={datos?.distrito || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Teléfono principal" defaultValue={datos?.telefono || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Correo principal" defaultValue={datos?.correo || ""} style={field} />
-
+            <input readOnly={lectura} placeholder="Nombre de entidad" style={field} />
+            <input readOnly={lectura} placeholder="Tipo de entidad" style={field} />
+            <input readOnly={lectura} placeholder="Categoría" style={field} />
+            <input readOnly={lectura} placeholder="Distrito" style={field} />
+            <input readOnly={lectura} placeholder="Teléfono principal" style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" style={field} />
           </>
-
         ) : (
-
           <>
-
-            <input readOnly={lectura} placeholder="Título / Nombre" defaultValue={datos?.nombre || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Tipo / Categoría" defaultValue={datos?.tipo || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Fecha" defaultValue={datos?.fecha || ""} style={field} />
-
-            <input readOnly={lectura} placeholder="Relacionado con" defaultValue={datos?.relacionado || ""} style={field} />
-
+            <input readOnly={lectura} placeholder="Título / Nombre" style={field} />
+            <input readOnly={lectura} placeholder="Tipo / Categoría" style={field} />
+            <input readOnly={lectura} placeholder="Fecha" style={field} />
+            <input readOnly={lectura} placeholder="Relacionado con" style={field} />
           </>
-
         )}
-
       </div>
 
       <textarea
-
         readOnly={lectura}
-
         placeholder="Descripción / observaciones"
-
-        style={{ ...field, width: "100%", minHeight: 80, marginTop: 10 }}
-
+        style={{ ...field, width: "100%", minHeight: 90, marginTop: 14 }}
       />
 
-      {!lectura && (
-
-        <div style={{ textAlign: "right", marginTop: 12 }}>
-
-          <button style={primary}>Guardar</button>
-
-        </div>
-
-      )}
-
+      <div style={{ textAlign: "right", marginTop: 18 }}>
+        {modo === "Nuevo" && <button style={primary}>Guardar</button>}
+        {modo === "Editar" && <button style={primary}>Guardar cambios</button>}
+        {modo === "Excluir" && (
+          <button style={{ ...primary, background: "#991b1b" }}>
+            Confirmar exclusión
+          </button>
+        )}
+      </div>
     </div>
-
   );
-
-}
-
-function tituloRegistro(item: any) {
-
-  return item.nombre
-
-    ? `${item.nombre} ${item.apellido1 || ""} ${item.apellido2 || ""}`.trim()
-
-    : "";
-
-}
-
-function lineaConsulta(modulo: Modulo, item: any) {
-
-  if (modulo === "Personas") {
-
-    return `${item.nombre} ${item.apellido1} ${item.apellido2} | ${item.telefono} | ${item.correo} | ${item.resumen}`;
-
-  }
-
-  if (modulo === "Entidades") {
-
-    return `${item.nombre} | ${item.tipo} | ${item.telefono} | ${item.correo}`;
-
-  }
-
-  return `${item.nombre} | ${item.tipo} | ${item.fecha || ""} | ${item.relacionado || ""}`;
-
 }
 
 function icono(m: Modulo) {
-
   return {
-
     Personas: "👤",
-
     Entidades: "🏢",
-
     Actividades: "📅",
-
     Proyectos: "🚀",
-
     Recursos: "📚",
-
     Comunicaciones: "📢",
-
   }[m];
-
 }
 
 const page = {
-
   minHeight: "100vh",
-
-  padding: 18,
-
+  padding: 28,
   background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)",
-
   fontFamily: "Georgia, serif",
-
   color: "#1f2937",
-
 };
 
 const wrap = { maxWidth: 1100, margin: "0 auto" };
 
-const eyebrow = { letterSpacing: 3, color: "#64748b", fontSize: 11, margin: 0 };
+const eyebrow = { letterSpacing: 4, color: "#64748b", fontSize: 12 };
 
 const title = {
-
-  fontSize: "clamp(2.1rem,6vw,4.2rem)",
-
-  margin: "6px 0 12px",
-
+  fontSize: "clamp(2.6rem,7vw,5rem)",
+  margin: "12px 0",
 };
 
+const subtitle = { fontSize: 20, color: "#334155" };
+
 const search = {
-
   width: "100%",
-
-  padding: "14px 20px",
-
+  padding: "18px 24px",
   borderRadius: 999,
-
   border: "1px solid #d1d5db",
-
-  fontSize: 15,
-
-  margin: "10px 0 14px",
-
+  fontSize: 16,
+  margin: "22px 0",
 };
 
 const chips = {
-
   display: "flex",
-
-  gap: 8,
-
+  gap: 10,
   flexWrap: "wrap" as const,
-
   justifyContent: "center",
-
 };
 
 const actions = {
-
   display: "flex",
-
-  gap: 8,
-
-  flexWrap: "nowrap" as const,
-
-  overflowX: "auto" as const,
-
+  gap: 10,
+  flexWrap: "wrap" as const,
 };
 
 const panel = {
-
-  marginTop: 16,
-
-  background: "rgba(255,255,255,.86)",
-
+  marginTop: 24,
+  background: "rgba(255,255,255,.82)",
   border: "1px solid rgba(0,0,0,.08)",
-
-  borderRadius: 22,
-
-  padding: 16,
-
+  borderRadius: 28,
+  padding: 26,
 };
 
 const topLine = {
-
   display: "flex",
-
   justifyContent: "space-between",
-
-  gap: 10,
-
+  gap: 16,
   flexWrap: "wrap" as const,
-
   alignItems: "center",
-
 };
 
-const sectionTitle = { margin: 0, fontSize: 22 };
-
-const list = { display: "grid", gap: 8, marginTop: 14 };
+const list = {
+  display: "grid",
+  gap: 10,
+  marginTop: 18,
+};
 
 const row = {
-
   textAlign: "left" as const,
-
-  padding: "12px 14px",
-
-  borderRadius: 12,
-
+  padding: "14px 18px",
+  borderRadius: 14,
   border: "1px solid #e5e7eb",
-
   background: "white",
-
   cursor: "pointer",
-
-  fontSize: 14,
-
+  fontSize: 15,
 };
 
 const grid = {
-
   display: "grid",
-
-  gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))",
-
-  gap: 10,
-
-  marginTop: 12,
-
+  gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+  gap: 14,
+  marginTop: 18,
 };
 
 const field = {
-
-  padding: "12px 14px",
-
-  borderRadius: 12,
-
+  padding: "14px 16px",
+  borderRadius: 14,
   border: "1px solid #d1d5db",
-
-  fontSize: 14,
-
+  fontSize: 15,
   background: "white",
-
 };
 
 const primary = {
-
-  padding: "10px 18px",
-
+  padding: "12px 22px",
   borderRadius: 999,
-
   border: "none",
-
   background: "#1e3a8a",
-
   color: "white",
-
   fontWeight: 700,
-
   cursor: "pointer",
-
 };
 
 function chip(active: boolean) {
-
   return {
-
-    padding: "9px 14px",
-
+    padding: "10px 16px",
     borderRadius: 999,
-
     border: "1px solid #d1d5db",
-
     background: active ? "#1e3a8a" : "white",
-
     color: active ? "white" : "#475569",
-
     cursor: "pointer",
-
-    whiteSpace: "nowrap" as const,
-
   };
-
 }
