@@ -57,7 +57,6 @@ const datos: Record<Modulo, any[]> = {
       puesto: "Alcaldesa",
     },
   ],
-
   Entidades: [
     {
       nombre: "CDAM Belén",
@@ -92,7 +91,6 @@ const datos: Record<Modulo, any[]> = {
       correo: "contacto@intel.com",
     },
   ],
-
   Actividades: [
     {
       nombre: "Caravana Dorada",
@@ -107,7 +105,6 @@ const datos: Record<Modulo, any[]> = {
       relacionado: "Belén en Movimiento",
     },
   ],
-
   Proyectos: [
     {
       nombre: "Belén en Movimiento",
@@ -122,7 +119,6 @@ const datos: Record<Modulo, any[]> = {
       relacionado: "Belén",
     },
   ],
-
   Recursos: [
     {
       nombre: "Acta Junta Directiva",
@@ -137,7 +133,6 @@ const datos: Record<Modulo, any[]> = {
       relacionado: "Belén en Movimiento",
     },
   ],
-
   Comunicaciones: [
     {
       nombre: "Convocatoria comunitaria",
@@ -234,25 +229,27 @@ export default function Home() {
                 }}
                 style={iconPrimary}
               >
-                ➕
+                +
               </button>
             </div>
           </div>
 
           {!seleccionado && accion !== "Nuevo" && (
-            <div style={list}>
-              {lista.map((item, index) => (
-                <button
-                  key={index}
-                  style={row}
-                  onClick={() => {
-                    setSeleccionado(item);
-                    setAccion("Vista");
-                  }}
-                >
-                  {lineaConsulta(modulo, item)}
-                </button>
-              ))}
+            <div style={scrollArea}>
+              <div style={listWide}>
+                {lista.map((item, index) => (
+                  <button
+                    key={index}
+                    style={rowWide}
+                    onClick={() => {
+                      setSeleccionado(item);
+                      setAccion("Vista");
+                    }}
+                  >
+                    {lineaConsulta(modulo, item)}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -289,8 +286,8 @@ export default function Home() {
 
           {seleccionado && accion === "Recursos" && (
             <div style={list}>
-              <button style={row}>📷 Foto principal | Imagen</button>
-              <button style={row}>📄 Acta relacionada | Documento</button>
+              <button style={rowSimple}>📷 Foto principal | Imagen</button>
+              <button style={rowSimple}>📄 Acta relacionada | Documento</button>
               <button style={primary}>+ Agregar recurso</button>
             </div>
           )}
@@ -372,14 +369,14 @@ function tituloRegistro(item: any) {
 
 function lineaConsulta(modulo: Modulo, item: any) {
   if (modulo === "Personas") {
-    return `${item.nombre} ${item.apellido1} ${item.apellido2} | 🏢 ${item.entidad} | 🎖 ${item.puesto} | 📞 ${item.telefono} | ✉ ${item.correo}`;
+    return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   🏢 ${item.entidad}   |   🎖 ${item.puesto}`;
   }
 
   if (modulo === "Entidades") {
-    return `${item.nombre} | ${item.tipo} | 📍 ${item.distrito} | 📞 ${item.telefono} | ✉ ${item.correo}`;
+    return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
   }
 
-  return `${item.nombre} | ${item.tipo} | 📅 ${item.fecha || ""} | ${item.relacionado || ""}`;
+  return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
 }
 
 function icono(m: Modulo) {
@@ -464,7 +461,21 @@ const list = {
   marginTop: 14,
 };
 
-const row = {
+const scrollArea = {
+  marginTop: 14,
+  overflowX: "auto" as const,
+  overflowY: "hidden" as const,
+  WebkitOverflowScrolling: "touch" as const,
+  paddingBottom: 4,
+};
+
+const listWide = {
+  display: "grid",
+  gap: 8,
+  minWidth: 760,
+};
+
+const rowWide = {
   textAlign: "left" as const,
   padding: "10px 12px",
   borderRadius: 12,
@@ -473,8 +484,17 @@ const row = {
   cursor: "pointer",
   fontSize: 14,
   whiteSpace: "nowrap" as const,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
+  overflow: "visible",
+};
+
+const rowSimple = {
+  textAlign: "left" as const,
+  padding: "10px 12px",
+  borderRadius: 12,
+  border: "1px solid #e5e7eb",
+  background: "white",
+  cursor: "pointer",
+  fontSize: 14,
 };
 
 const grid = {
@@ -498,7 +518,7 @@ const primary = {
   borderRadius: 999,
   border: "none",
   background: "#1e3a8a",
-  color: "white",
+  color: "#ffffff",
   fontWeight: 700,
   cursor: "pointer",
 };
@@ -508,7 +528,10 @@ const iconPrimary = {
   width: 42,
   height: 42,
   padding: 0,
-  fontSize: 18,
+  fontSize: 28,
+  color: "#ffffff",
+  fontWeight: 900,
+  lineHeight: "42px",
 };
 
 function chip(active: boolean) {
