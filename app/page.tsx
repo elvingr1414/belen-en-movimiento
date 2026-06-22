@@ -34,7 +34,7 @@ const entidadesBase = [
   { id: "e4", nombre: "Intel Costa Rica", tipo: "Empresa", categoria: "Tecnología", distrito: "La Ribera", telefono: "2200-0000", correo: "contacto@intel.com" },
 ];
 
-const datos: Record<Modulo, any[]> = {
+const datosBase: Record<Modulo, any[]> = {
   Personas: personasBase,
   Entidades: entidadesBase,
   Actividades: [
@@ -45,10 +45,7 @@ const datos: Record<Modulo, any[]> = {
     { id: "pr1", nombre: "Belén en Movimiento", tipo: "Comunitario", fecha: "2026", relacionado: "Cantón de Belén" },
     { id: "pr2", nombre: "Bosque de Campanas", tipo: "Ambiental", fecha: "2026", relacionado: "Belén" },
   ],
-  Recursos: [
-    { id: "r1", nombre: "Acta Junta Directiva", tipo: "Documento", fecha: "2026", relacionado: "CDAM Belén" },
-    { id: "r2", nombre: "Logo Belén en Movimiento", tipo: "Imagen", fecha: "2026", relacionado: "Belén en Movimiento" },
-  ],
+  Recursos: [],
   Comunicaciones: [
     { id: "c1", nombre: "Convocatoria comunitaria", tipo: "Publicación", fecha: "2026", relacionado: "Redes sociales" },
     { id: "c2", nombre: "Comunicado institucional", tipo: "Noticia", fecha: "2026", relacionado: "Web" },
@@ -66,10 +63,14 @@ const tiposRecurso = [
   "Video",
   "Certificado",
   "Formulario",
+  "Cotización",
+  "Factura",
   "Contrato",
   "Convenio",
   "Otro",
 ];
+
+const visibilidades = ["Público", "Privado", "Compartido"];
 
 export default function Home() {
   const [modulo, setModulo] = useState<Modulo>("Personas");
@@ -84,8 +85,31 @@ export default function Home() {
   ]);
 
   const [recursos, setRecursos] = useState<any[]>([
-    { ownerTipo: "Personas", ownerId: "p2", nombre: "Foto Sonia Román", tipo: "Fotografía", ubicacion: "Drive / Personas / Sonia" },
-    { ownerTipo: "Entidades", ownerId: "e1", nombre: "Acta Junta Directiva Enero 2026", tipo: "Acta Junta Directiva", ubicacion: "Drive / CDAM / Actas" },
+    {
+      id: "r1",
+      tipo: "Acta Junta Directiva",
+      descripcion: "Acta Junta Directiva Enero 2026",
+      ubicacion: "Drive / CDAM / Actas",
+      visibilidad: "Compartido",
+      observaciones: "Documento de ejemplo",
+      propietarioTipo: "Entidades",
+      propietarioId: "e1",
+    },
+    {
+      id: "r2",
+      tipo: "Fotografía",
+      descripcion: "Foto Sonia Román",
+      ubicacion: "Drive / Personas / Sonia",
+      visibilidad: "Privado",
+      observaciones: "Fotografía de perfil",
+      propietarioTipo: "Personas",
+      propietarioId: "p2",
+    },
+  ]);
+
+  const [recursoVinculos, setRecursoVinculos] = useState<any[]>([
+    { recursoId: "r1", destinoTipo: "Entidades", destinoId: "e1" },
+    { recursoId: "r2", destinoTipo: "Personas", destinoId: "p2" },
   ]);
 
   const [busquedaVinculo, setBusquedaVinculo] = useState("");
@@ -94,13 +118,28 @@ export default function Home() {
   const [directiva, setDirectiva] = useState("No");
   const [fecha, setFecha] = useState("");
 
-  const [nuevoRecursoNombre, setNuevoRecursoNombre] = useState("");
-  const [nuevoRecursoTipo, setNuevoRecursoTipo] = useState("Fotografía");
-  const [nuevoRecursoUbicacion, setNuevoRecursoUbicacion] = useState("");
+  const [recursoForm, setRecursoForm] = useState({
+    tipo: "Fotografía",
+    descripcion: "",
+    ubicacion: "",
+    visibilidad: "Público",
+    observaciones: "",
+    propietarioTipo: "Entidades",
+    propietarioId: "e1",
+  });
 
-  const lista = datos[modulo].filter((item) =>
-    JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const [tipoDestinoRecurso, setTipoDestinoRecurso] = useState<"Personas" | "Entidades">("Entidades");
+  const [busquedaDestinoRecurso, setBusquedaDestinoRecurso] = useState("");
+  const [destinoRecursoSeleccionado, setDestinoRecursoSeleccionado] = useState<any | null>(null);
+
+  const lista =
+    modulo === "Recursos"
+      ? recursos.filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
+        )
+      : datosBase[modulo].filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
+        );
 
   const listaVinculo =
     modulo === "Personas"
@@ -111,12 +150,22 @@ export default function Home() {
           JSON.stringify(item).toLowerCase().includes(busquedaVinculo.toLowerCase())
         );
 
+  const listaDestinoRecurso =
+    tipoDestinoRecurso === "Entidades"
+      ? entidadesBase.filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busquedaDestinoRecurso.toLowerCase())
+        )
+      : personasBase.filter((item) =>
+          JSON.stringify(item).toLowerCase().includes(busquedaDestinoRecurso.toLowerCase())
+        );
+
   function cambiarModulo(m: Modulo) {
     setModulo(m);
     setBusqueda("");
     setSeleccionado(null);
     setAccion("Vista");
     limpiarVinculo();
+    limpiarRecursoDestino();
   }
 
   function volverALista(valorActual?: string) {
@@ -124,6 +173,7 @@ export default function Home() {
     setSeleccionado(null);
     setAccion("Vista");
     limpiarVinculo();
+    limpiarRecursoDestino();
   }
 
   function limpiarVinculo() {
@@ -132,6 +182,23 @@ export default function Home() {
     setPuesto("");
     setDirectiva("No");
     setFecha("");
+  }
+
+  function limpiarRecursoDestino() {
+    setBusquedaDestinoRecurso("");
+    setDestinoRecursoSeleccionado(null);
+  }
+
+  function limpiarRecursoForm() {
+    setRecursoForm({
+      tipo: "Fotografía",
+      descripcion: "",
+      ubicacion: "",
+      visibilidad: "Público",
+      observaciones: "",
+      propietarioTipo: "Entidades",
+      propietarioId: "e1",
+    });
   }
 
   function guardarVinculo() {
@@ -147,22 +214,50 @@ export default function Home() {
   }
 
   function guardarRecurso() {
-    if (!seleccionado || !nuevoRecursoNombre) return;
+    if (!recursoForm.descripcion.trim()) return;
 
-    setRecursos([
-      ...recursos,
+    if (accion === "Editar" && seleccionado && modulo === "Recursos") {
+      const actualizados = recursos.map((r) =>
+        r.id === seleccionado.id ? { ...r, ...recursoForm } : r
+      );
+      setRecursos(actualizados);
+      setSeleccionado({ ...seleccionado, ...recursoForm });
+      setAccion("Vista");
+      return;
+    }
+
+    const nuevo = {
+      id: `r${Date.now()}`,
+      ...recursoForm,
+    };
+
+    setRecursos([...recursos, nuevo]);
+    setSeleccionado(nuevo);
+    setAccion("Vista");
+    limpiarRecursoForm();
+  }
+
+  function excluirRecurso() {
+    if (!seleccionado || modulo !== "Recursos") return;
+    setRecursos(recursos.filter((r) => r.id !== seleccionado.id));
+    setRecursoVinculos(recursoVinculos.filter((v) => v.recursoId !== seleccionado.id));
+    setSeleccionado(null);
+    setAccion("Vista");
+  }
+
+  function guardarVinculoRecurso() {
+    if (!seleccionado || modulo !== "Recursos" || !destinoRecursoSeleccionado) return;
+
+    setRecursoVinculos([
+      ...recursoVinculos,
       {
-        ownerTipo: modulo,
-        ownerId: seleccionado.id,
-        nombre: nuevoRecursoNombre,
-        tipo: nuevoRecursoTipo,
-        ubicacion: nuevoRecursoUbicacion || "Sin ubicación",
+        recursoId: seleccionado.id,
+        destinoTipo: tipoDestinoRecurso,
+        destinoId: destinoRecursoSeleccionado.id,
       },
     ]);
 
-    setNuevoRecursoNombre("");
-    setNuevoRecursoTipo("Fotografía");
-    setNuevoRecursoUbicacion("");
+    limpiarRecursoDestino();
   }
 
   function vinculosActuales() {
@@ -172,13 +267,28 @@ export default function Home() {
     return [];
   }
 
-  function recursosActuales() {
+  function recursosVinculadosAlRegistro() {
     if (!seleccionado) return [];
-    return recursos.filter((r) => r.ownerTipo === modulo && r.ownerId === seleccionado.id);
+    return recursoVinculos
+      .filter((v) => v.destinoTipo === modulo && v.destinoId === seleccionado.id)
+      .map((v) => recursos.find((r) => r.id === v.recursoId))
+      .filter(Boolean);
+  }
+
+  function vinculosDelRecurso() {
+    if (!seleccionado || modulo !== "Recursos") return [];
+    return recursoVinculos.filter((v) => v.recursoId === seleccionado.id);
   }
 
   return (
     <main style={page}>
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <section style={wrap}>
         <header>
           <p style={eyebrow}>COMUNIDAD • PARTICIPACIÓN • FUTURO</p>
@@ -208,20 +318,36 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado) : `${icono(modulo)} ${modulo}`}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : `${icono(modulo)} ${modulo}`}
             </h2>
 
             <div style={actions}>
               {seleccionado && (
                 <>
-                  <button title="Editar" onClick={() => setAccion("Editar")} style={iconButton(accion === "Editar")}>✏️</button>
+                  <button title="Editar" onClick={() => {
+                    if (modulo === "Recursos") setRecursoForm({ ...seleccionado });
+                    setAccion("Editar");
+                  }} style={iconButton(accion === "Editar")}>✏️</button>
+
                   <button title="Excluir" onClick={() => setAccion("Excluir")} style={iconButton(accion === "Excluir")}>🗑️</button>
-                  <button title="Vincular" onClick={() => { setAccion("Vincular"); limpiarVinculo(); }} style={iconButton(accion === "Vincular")}>🔗</button>
-                  <button title="Recursos" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>📁</button>
+
+                  <button title="Vincular" onClick={() => {
+                    setAccion("Vincular");
+                    limpiarVinculo();
+                    limpiarRecursoDestino();
+                  }} style={iconButton(accion === "Vincular")}>🔗</button>
+
+                  {modulo !== "Recursos" && (
+                    <button title="Recursos" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>📁</button>
+                  )}
                 </>
               )}
 
-              <button title="Nuevo" onClick={() => { setSeleccionado(null); setAccion("Nuevo"); }} style={iconPrimary}>+</button>
+              <button title="Nuevo" onClick={() => {
+                setSeleccionado(null);
+                limpiarRecursoForm();
+                setAccion("Nuevo");
+              }} style={iconPrimary}>+</button>
             </div>
           </div>
 
@@ -229,7 +355,10 @@ export default function Home() {
             <div style={scrollArea}>
               <div style={listWide}>
                 {lista.map((item, index) => (
-                  <button key={index} style={rowWide} onClick={() => { setSeleccionado(item); setAccion("Vista"); }}>
+                  <button key={index} style={rowWide} onClick={() => {
+                    setSeleccionado(item);
+                    setAccion("Vista");
+                  }}>
                     {lineaConsulta(modulo, item)}
                   </button>
                 ))}
@@ -237,111 +366,108 @@ export default function Home() {
             </div>
           )}
 
-          {accion === "Nuevo" && <Formulario modulo={modulo} datos={null} />}
-          {seleccionado && accion === "Vista" && <Formulario modulo={modulo} datos={seleccionado} lectura />}
-          {seleccionado && accion === "Editar" && <Formulario modulo={modulo} datos={seleccionado} />}
+          {accion === "Nuevo" && modulo === "Recursos" && (
+            <RecursoForm
+              recursoForm={recursoForm}
+              setRecursoForm={setRecursoForm}
+              guardarRecurso={guardarRecurso}
+            />
+          )}
+
+          {accion === "Nuevo" && modulo !== "Recursos" && (
+            <Formulario modulo={modulo} datos={null} />
+          )}
+
+          {seleccionado && accion === "Vista" && modulo === "Recursos" && (
+            <RecursoDetalle recurso={seleccionado} vinculos={vinculosDelRecurso()} />
+          )}
+
+          {seleccionado && accion === "Vista" && modulo !== "Recursos" && (
+            <Formulario modulo={modulo} datos={seleccionado} lectura />
+          )}
+
+          {seleccionado && accion === "Editar" && modulo === "Recursos" && (
+            <RecursoForm
+              recursoForm={recursoForm}
+              setRecursoForm={setRecursoForm}
+              guardarRecurso={guardarRecurso}
+            />
+          )}
+
+          {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
+            <Formulario modulo={modulo} datos={seleccionado} />
+          )}
 
           {seleccionado && accion === "Excluir" && (
             <>
-              <Formulario modulo={modulo} datos={seleccionado} lectura />
+              {modulo === "Recursos" ? (
+                <RecursoDetalle recurso={seleccionado} vinculos={vinculosDelRecurso()} />
+              ) : (
+                <Formulario modulo={modulo} datos={seleccionado} lectura />
+              )}
+
               <div style={{ textAlign: "right", marginTop: 10 }}>
-                <button style={{ ...primary, background: "#991b1b" }}>Confirmar exclusión</button>
+                <button
+                  style={{ ...primary, background: "#991b1b" }}
+                  onClick={() => {
+                    if (modulo === "Recursos") excluirRecurso();
+                  }}
+                >
+                  Confirmar exclusión
+                </button>
               </div>
             </>
           )}
 
-          {seleccionado && accion === "Vincular" && (
-            <div style={{ marginTop: 12 }}>
-              <h3 style={miniTitle}>{modulo === "Personas" ? "Entidades vinculadas" : "Personas vinculadas"}</h3>
-
-              <div style={list}>
-                {vinculosActuales().map((v, i) => {
-                  const persona = personasBase.find((p) => p.id === v.personaId);
-                  const entidad = entidadesBase.find((e) => e.id === v.entidadId);
-                  const nombre =
-                    modulo === "Personas"
-                      ? entidad?.nombre
-                      : `${persona?.nombre} ${persona?.apellido1} ${persona?.apellido2}`;
-
-                  return (
-                    <div key={i} style={relationRow}>
-                      <strong>{modulo === "Personas" ? "🏢" : "👤"} {nombre}</strong>
-                      <span>🎖 {v.puesto}</span>
-                      <span>Directiva: {v.directiva}</span>
-                      <span>{v.fecha || "Sin fecha"}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <input
-                value={busquedaVinculo}
-                onChange={(e) => {
-                  setBusquedaVinculo(e.target.value);
-                  setVinculoSeleccionado(null);
-                }}
-                placeholder={modulo === "Personas" ? "Buscar entidad para agregar..." : "Buscar persona para agregar..."}
-                style={searchSmall}
-              />
-
-              {busquedaVinculo && !vinculoSeleccionado && (
-                <div style={scrollArea}>
-                  <div style={listWide}>
-                    {listaVinculo.map((item, index) => (
-                      <button key={index} style={rowWide} onClick={() => setVinculoSeleccionado(item)}>
-                        {modulo === "Personas" ? lineaConsulta("Entidades", item) : lineaConsulta("Personas", item)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {vinculoSeleccionado && (
-                <div style={grid}>
-                  <input readOnly value={tituloRegistro(vinculoSeleccionado)} style={field} />
-
-                  <select style={field} value={puesto} onChange={(e) => setPuesto(e.target.value)}>
-                    <option value="">Seleccione puesto</option>
-                    {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
-                  </select>
-
-                  <select style={field} value={directiva} onChange={(e) => setDirectiva(e.target.value)}>
-                    <option>Sí</option>
-                    <option>No</option>
-                  </select>
-
-                  <input type="date" style={field} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-
-                  <button style={primary} onClick={guardarVinculo}>Guardar vínculo</button>
-                </div>
-              )}
-            </div>
+          {seleccionado && accion === "Vincular" && modulo !== "Recursos" && (
+            <VincularPersonaEntidad
+              modulo={modulo}
+              vinculosActuales={vinculosActuales()}
+              busquedaVinculo={busquedaVinculo}
+              setBusquedaVinculo={setBusquedaVinculo}
+              vinculoSeleccionado={vinculoSeleccionado}
+              setVinculoSeleccionado={setVinculoSeleccionado}
+              listaVinculo={listaVinculo}
+              puesto={puesto}
+              setPuesto={setPuesto}
+              directiva={directiva}
+              setDirectiva={setDirectiva}
+              fecha={fecha}
+              setFecha={setFecha}
+              guardarVinculo={guardarVinculo}
+            />
           )}
 
-          {seleccionado && accion === "Recursos" && (
+          {seleccionado && accion === "Vincular" && modulo === "Recursos" && (
+            <VincularRecurso
+              tipoDestinoRecurso={tipoDestinoRecurso}
+              setTipoDestinoRecurso={setTipoDestinoRecurso}
+              busquedaDestinoRecurso={busquedaDestinoRecurso}
+              setBusquedaDestinoRecurso={setBusquedaDestinoRecurso}
+              destinoRecursoSeleccionado={destinoRecursoSeleccionado}
+              setDestinoRecursoSeleccionado={setDestinoRecursoSeleccionado}
+              listaDestinoRecurso={listaDestinoRecurso}
+              guardarVinculoRecurso={guardarVinculoRecurso}
+              vinculos={vinculosDelRecurso()}
+            />
+          )}
+
+          {seleccionado && accion === "Recursos" && modulo !== "Recursos" && (
             <div style={{ marginTop: 12 }}>
               <h3 style={miniTitle}>Recursos asociados</h3>
 
-              <div style={list}>
-                {recursosActuales().map((r, i) => (
-                  <div key={i} style={relationRow}>
-                    <strong>📁 {r.nombre}</strong>
-                    <span>{r.tipo}</span>
-                    <span>{r.ubicacion}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={grid}>
-                <input placeholder="Nombre del recurso" value={nuevoRecursoNombre} onChange={(e) => setNuevoRecursoNombre(e.target.value)} style={field} />
-
-                <select value={nuevoRecursoTipo} onChange={(e) => setNuevoRecursoTipo(e.target.value)} style={field}>
-                  {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
-                </select>
-
-                <input placeholder="Ubicación / enlace del archivo" value={nuevoRecursoUbicacion} onChange={(e) => setNuevoRecursoUbicacion(e.target.value)} style={field} />
-
-                <button style={primary} onClick={guardarRecurso}>Agregar recurso</button>
+              <div style={scrollArea}>
+                <div style={listWide}>
+                  {recursosVinculadosAlRegistro().map((r: any, i: number) => (
+                    <button key={i} style={rowWide} onClick={() => {
+                      setModulo("Recursos");
+                      setSeleccionado(r);
+                      setAccion("Vista");
+                    }}>
+                      {lineaConsulta("Recursos", r)}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -351,12 +477,245 @@ export default function Home() {
   );
 }
 
-function AnimatedGears() {
+function VincularPersonaEntidad(props: any) {
   return (
-    <div style={gears}>
-      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
-      <span style={{ ...gear, animationDirection: "reverse" }}>⚙️</span>
-      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
+    <div style={{ marginTop: 12 }}>
+      <h3 style={miniTitle}>{props.modulo === "Personas" ? "Entidades vinculadas" : "Personas vinculadas"}</h3>
+
+      <div style={list}>
+        {props.vinculosActuales.map((v: any, i: number) => {
+          const persona = personasBase.find((p) => p.id === v.personaId);
+          const entidad = entidadesBase.find((e) => e.id === v.entidadId);
+          const nombre =
+            props.modulo === "Personas"
+              ? entidad?.nombre
+              : `${persona?.nombre} ${persona?.apellido1} ${persona?.apellido2}`;
+
+          return (
+            <div key={i} style={relationRow}>
+              <strong>{props.modulo === "Personas" ? "🏢" : "👤"} {nombre}</strong>
+              <span>🎖 {v.puesto}</span>
+              <span>Directiva: {v.directiva}</span>
+              <span>{v.fecha || "Sin fecha"}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <input
+        value={props.busquedaVinculo}
+        onChange={(e) => {
+          props.setBusquedaVinculo(e.target.value);
+          props.setVinculoSeleccionado(null);
+        }}
+        placeholder={props.modulo === "Personas" ? "Buscar entidad para agregar..." : "Buscar persona para agregar..."}
+        style={searchSmall}
+      />
+
+      {props.busquedaVinculo.trim() !== "" && !props.vinculoSeleccionado && (
+        <div style={scrollArea}>
+          <div style={listWide}>
+            {props.listaVinculo.map((item: any, index: number) => (
+              <button key={index} style={rowWide} onClick={() => props.setVinculoSeleccionado(item)}>
+                {props.modulo === "Personas" ? lineaConsulta("Entidades", item) : lineaConsulta("Personas", item)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {props.vinculoSeleccionado && (
+        <div style={grid}>
+          <input readOnly value={tituloRegistro(props.vinculoSeleccionado, props.modulo)} style={field} />
+
+          <select style={field} value={props.puesto} onChange={(e) => props.setPuesto(e.target.value)}>
+            <option value="">Seleccione puesto</option>
+            {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <select style={field} value={props.directiva} onChange={(e) => props.setDirectiva(e.target.value)}>
+            <option>Sí</option>
+            <option>No</option>
+          </select>
+
+          <input type="date" style={field} value={props.fecha} onChange={(e) => props.setFecha(e.target.value)} />
+
+          <button style={primary} onClick={props.guardarVinculo}>Guardar vínculo</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VincularRecurso(props: any) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <h3 style={miniTitle}>Vinculaciones del recurso</h3>
+
+      <div style={list}>
+        {props.vinculos.map((v: any, i: number) => {
+          const item =
+            v.destinoTipo === "Entidades"
+              ? entidadesBase.find((e) => e.id === v.destinoId)
+              : personasBase.find((p) => p.id === v.destinoId);
+
+          return (
+            <div key={i} style={relationRow}>
+              <strong>{v.destinoTipo === "Entidades" ? "🏢" : "👤"} {tituloRegistro(item, v.destinoTipo)}</strong>
+              <span>{v.destinoTipo}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={grid}>
+        <select
+          style={field}
+          value={props.tipoDestinoRecurso}
+          onChange={(e) => {
+            props.setTipoDestinoRecurso(e.target.value);
+            props.setDestinoRecursoSeleccionado(null);
+            props.setBusquedaDestinoRecurso("");
+          }}
+        >
+          <option value="Entidades">Entidades</option>
+          <option value="Personas">Personas</option>
+        </select>
+
+        <input
+          value={props.busquedaDestinoRecurso}
+          onChange={(e) => {
+            props.setBusquedaDestinoRecurso(e.target.value);
+            props.setDestinoRecursoSeleccionado(null);
+          }}
+          placeholder="Buscar destino para vincular..."
+          style={field}
+        />
+      </div>
+
+      {props.busquedaDestinoRecurso.trim() !== "" && !props.destinoRecursoSeleccionado && (
+        <div style={scrollArea}>
+          <div style={listWide}>
+            {props.listaDestinoRecurso.map((item: any, index: number) => (
+              <button key={index} style={rowWide} onClick={() => props.setDestinoRecursoSeleccionado(item)}>
+                {lineaConsulta(props.tipoDestinoRecurso, item)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {props.destinoRecursoSeleccionado && (
+        <div style={{ textAlign: "right", marginTop: 10 }}>
+          <button style={primary} onClick={props.guardarVinculoRecurso}>
+            Guardar vínculo
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
+  return (
+    <div style={grid}>
+      <select
+        style={field}
+        value={recursoForm.tipo}
+        onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
+      >
+        {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
+      </select>
+
+      <input
+        placeholder="Descripción"
+        value={recursoForm.descripcion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
+        style={field}
+      />
+
+      <input
+        placeholder="Ubicación / enlace"
+        value={recursoForm.ubicacion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
+        style={field}
+      />
+
+      <select
+        style={field}
+        value={recursoForm.visibilidad}
+        onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
+      >
+        {visibilidades.map((v) => <option key={v}>{v}</option>)}
+      </select>
+
+      <select
+        style={field}
+        value={recursoForm.propietarioTipo}
+        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
+      >
+        <option value="Entidades">Propietario: Entidad</option>
+        <option value="Personas">Propietario: Persona</option>
+      </select>
+
+      <select
+        style={field}
+        value={recursoForm.propietarioId}
+        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
+      >
+        {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
+          <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
+        ))}
+      </select>
+
+      <textarea
+        placeholder="Observaciones"
+        value={recursoForm.observaciones}
+        onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
+        style={{ ...field, minHeight: 70 }}
+      />
+
+      <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
+    </div>
+  );
+}
+
+function RecursoDetalle({ recurso, vinculos }: any) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={scrollArea}>
+        <div style={listWide}>
+          <div style={rowWide}>
+            {lineaConsulta("Recursos", recurso)}
+          </div>
+        </div>
+      </div>
+
+      <div style={grid}>
+        <input readOnly value={`Tipo: ${recurso.tipo}`} style={field} />
+        <input readOnly value={`Visibilidad: ${recurso.visibilidad}`} style={field} />
+        <input readOnly value={`Ubicación: ${recurso.ubicacion || "Sin ubicación"}`} style={field} />
+        <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
+      </div>
+
+      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
+
+      <h3 style={miniTitle}>Vinculado a</h3>
+      <div style={list}>
+        {vinculos.map((v: any, i: number) => {
+          const item =
+            v.destinoTipo === "Entidades"
+              ? entidadesBase.find((e) => e.id === v.destinoId)
+              : personasBase.find((p) => p.id === v.destinoId);
+
+          return (
+            <div key={i} style={relationRow}>
+              <strong>{v.destinoTipo === "Entidades" ? "🏢" : "👤"} {tituloRegistro(item, v.destinoTipo)}</strong>
+              <span>{v.destinoTipo}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -405,13 +764,36 @@ function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos:
   );
 }
 
-function tituloRegistro(item: any) {
-  return item.nombre ? `${item.nombre} ${item.apellido1 || ""} ${item.apellido2 || ""}`.trim() : "";
+function AnimatedGears() {
+  return (
+    <div style={gears}>
+      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
+      <span style={{ ...gear, animationDirection: "reverse" }}>⚙️</span>
+      <span style={{ ...gear, animationDirection: "normal" }}>⚙️</span>
+    </div>
+  );
 }
 
-function lineaConsulta(modulo: Modulo, item: any) {
+function tituloRegistro(item: any, modulo?: any) {
+  if (!item) return "";
+  if (modulo === "Recursos") return item.descripcion || "";
+  if (item.apellido1) return `${item.nombre} ${item.apellido1 || ""} ${item.apellido2 || ""}`.trim();
+  return item.nombre || item.descripcion || "";
+}
+
+function nombrePropietario(recurso: any) {
+  const item =
+    recurso.propietarioTipo === "Entidades"
+      ? entidadesBase.find((e) => e.id === recurso.propietarioId)
+      : personasBase.find((p) => p.id === recurso.propietarioId);
+
+  return tituloRegistro(item, recurso.propietarioTipo);
+}
+
+function lineaConsulta(modulo: Modulo | "Personas" | "Entidades", item: any) {
   if (modulo === "Personas") return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}`;
   if (modulo === "Entidades") return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
+  if (modulo === "Recursos") return `📁 ${item.descripcion}   |   ${item.tipo}   |   🔒 ${item.visibilidad}   |   👤 ${nombrePropietario(item)}   |   🔗 ${item.ubicacion || "Sin ubicación"}`;
   return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
 }
 
@@ -421,7 +803,7 @@ function icono(m: Modulo) {
     Entidades: "🏢",
     Actividades: "📅",
     Proyectos: "🚀",
-    Recursos: "📚",
+    Recursos: "📁",
     Comunicaciones: "📢",
   }[m];
 }
@@ -443,7 +825,7 @@ const sectionTitle = { margin: 0, fontSize: 22 };
 const miniTitle = { margin: "8px 0", fontSize: 17 };
 const list = { display: "grid", gap: 8, marginTop: 10 };
 const scrollArea = { marginTop: 14, overflowX: "auto" as const, overflowY: "hidden" as const, WebkitOverflowScrolling: "touch" as const, paddingBottom: 4 };
-const listWide = { display: "grid", gap: 8, minWidth: 760 };
+const listWide = { display: "grid", gap: 8, minWidth: 880 };
 const rowWide = { textAlign: "left" as const, padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: 14, whiteSpace: "nowrap" as const, overflow: "visible" };
 const relationRow = { display: "flex", gap: 12, flexWrap: "wrap" as const, alignItems: "center", padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontSize: 14 };
 const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 10, marginTop: 12 };
