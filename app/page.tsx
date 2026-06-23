@@ -678,15 +678,51 @@ function VincularRecurso(props: any) {
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
   return (
     <div style={grid}>
-      <select style={field} value={recursoForm.tipo} onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}>
+      <select
+        style={field}
+        value={recursoForm.tipo}
+        onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
+      >
         {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
       </select>
 
-      <input placeholder="Descripción" value={recursoForm.descripcion} onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })} style={field} />
+      <input
+        placeholder="Descripción"
+        value={recursoForm.descripcion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
+        style={field}
+      />
 
-      <input placeholder="Ubicación / enlace" value={recursoForm.ubicacion} onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })} style={field} />
+      <label style={fileLabel}>
+        📎 Seleccionar archivo de mi computadora
+        <input
+          type="file"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const archivo = e.target.files?.[0];
+            if (archivo) {
+              setRecursoForm({
+                ...recursoForm,
+                ubicacion: archivo.name,
+                observaciones: recursoForm.observaciones || `Archivo seleccionado: ${archivo.name}`,
+              });
+            }
+          }}
+        />
+      </label>
 
-      <select style={field} value={recursoForm.visibilidad} onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}>
+      <input
+        placeholder="Ubicación / enlace externo"
+        value={recursoForm.ubicacion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
+        style={field}
+      />
+
+      <select
+        style={field}
+        value={recursoForm.visibilidad}
+        onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
+      >
         {visibilidades.map((v) => <option key={v}>{v}</option>)}
       </select>
 
@@ -699,13 +735,26 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         <option value="Personas">Propietario: Persona</option>
       </select>
 
-      <select style={field} value={recursoForm.propietarioId} onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}>
+      <select
+        style={field}
+        value={recursoForm.propietarioId}
+        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
+      >
         {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
           <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
         ))}
       </select>
 
-      <textarea placeholder="Observaciones" value={recursoForm.observaciones} onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })} style={{ ...field, minHeight: 70 }} />
+      <div style={fileName}>
+        {recursoForm.ubicacion ? `Archivo / ubicación: ${recursoForm.ubicacion}` : "Ningún archivo seleccionado"}
+      </div>
+
+      <textarea
+        placeholder="Observaciones"
+        value={recursoForm.observaciones}
+        onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
+        style={{ ...field, minHeight: 70 }}
+      />
 
       <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
     </div>
