@@ -200,6 +200,7 @@ export default function Home() {
       ubicacion: "",
       visibilidad: "Público",
       observaciones: "",
+      archivos: [],
       propietarioTipo: "Entidades",
       propietarioId: "e1",
     });
@@ -676,6 +677,8 @@ function VincularRecurso(props: any) {
 }
 
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
+  const archivos = recursoForm.archivos || [];
+
   return (
     <div style={grid}>
       <select
@@ -694,26 +697,28 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
       />
 
       <div style={filePickerBox}>
-        <label style={folderButton} title="Seleccionar archivo">
+        <label style={folderButton} title="Seleccionar archivos">
           📁
           <input
             type="file"
+            multiple
             style={{ display: "none" }}
             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
             onChange={(e) => {
-              const archivo = e.target.files?.[0];
-              if (archivo) {
-                const urlTemporal = archivo.type.startsWith("image/")
-                  ? URL.createObjectURL(archivo)
-                  : "";
+              const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
+                nombre: archivo.name,
+                tipo: archivo.type || "Archivo",
+                preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
+              }));
 
+              if (seleccionados.length > 0) {
                 setRecursoForm({
                   ...recursoForm,
-                  ubicacion: archivo.name,
-                  archivoNombre: archivo.name,
-                  archivoTipo: archivo.type || "Archivo",
-                  archivoPreview: urlTemporal,
-                  observaciones: recursoForm.observaciones || `Archivo seleccionado: ${archivo.name}`,
+                  archivos: seleccionados,
+                  ubicacion:
+                    seleccionados.length === 1
+                      ? seleccionados[0].nombre
+                      : `${seleccionados.length} archivos seleccionados`,
                 });
               }
             }}
@@ -721,7 +726,11 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         </label>
 
         <div style={fileSelectedText}>
-          {recursoForm.archivoNombre || recursoForm.ubicacion || "Seleccione archivo"}
+          {archivos.length === 0
+            ? "Seleccione archivo(s)"
+            : archivos.length === 1
+              ? archivos[0].nombre
+              : `${archivos.length} archivos seleccionados`}
         </div>
       </div>
 
@@ -759,15 +768,23 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         ))}
       </select>
 
-      {recursoForm.archivoPreview && (
+      {archivos.length > 0 && (
         <div style={previewBox}>
-          <img src={recursoForm.archivoPreview} alt="Vista previa" style={previewImage} />
-        </div>
-      )}
+          <strong>Archivos seleccionados</strong>
 
-      {!recursoForm.archivoPreview && recursoForm.archivoNombre && (
-        <div style={previewBox}>
-          📄 {recursoForm.archivoNombre}
+          <div style={previewGrid}>
+            {archivos.map((archivo: any, index: number) => (
+              <div key={index} style={previewItem}>
+                {archivo.preview ? (
+                  <img src={archivo.preview} alt={archivo.nombre} style={previewImage} />
+                ) : (
+                  <div style={fileIcon}>📄</div>
+                )}
+
+                <div style={fileCaption}>{archivo.nombre}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -775,10 +792,12 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         placeholder="Observaciones"
         value={recursoForm.observaciones}
         onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-        style={{ ...field, minHeight: 70 }}
+        style={{ ...field, minHeight: 80, gridColumn: "1 / -1" }}
       />
 
-      <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
+      <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
+        <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
+      </div>
     </div>
   );
 }
@@ -942,7 +961,11 @@ const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth:
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
-const previewImage = { maxWidth: 220, maxHeight: 160, borderRadius: 12, border: "1px solid #e5e7eb", display: "block" };
+const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
+const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
+const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
+const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
+const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
