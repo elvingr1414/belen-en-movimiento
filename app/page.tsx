@@ -219,25 +219,42 @@ export default function Home() {
   }
 
   function guardarRecurso() {
-    if (!recursoForm.descripcion.trim()) return;
+    const archivosSeleccionados = recursoForm.archivos || [];
+    const descripcionFinal =
+      recursoForm.descripcion.trim() ||
+      (archivosSeleccionados.length === 1
+        ? archivosSeleccionados[0].nombre
+        : archivosSeleccionados.length > 1
+          ? `${archivosSeleccionados.length} archivos seleccionados`
+          : "");
+
+    if (!descripcionFinal) {
+      alert("Debe escribir una descripción o seleccionar al menos un archivo.");
+      return;
+    }
+
+    const recursoParaGuardar = {
+      ...recursoForm,
+      descripcion: descripcionFinal,
+    };
 
     if (accion === "Editar" && seleccionado && modulo === "Recursos") {
       const actualizados = recursos.map((r) =>
-        r.id === seleccionado.id ? { ...r, ...recursoForm } : r
+        r.id === seleccionado.id ? { ...r, ...recursoParaGuardar } : r
       );
       setRecursos(actualizados);
-      setSeleccionado({ ...seleccionado, ...recursoForm });
+      setSeleccionado({ ...seleccionado, ...recursoParaGuardar });
       setAccion("Vista");
       return;
     }
 
     const nuevo = {
       id: `r${Date.now()}`,
-      ...recursoForm,
+      ...recursoParaGuardar,
     };
 
     setRecursos([...recursos, nuevo]);
-    setSeleccionado(nuevo);
+    setSeleccionado(null);
     setAccion("Vista");
     limpiarRecursoForm();
   }
@@ -719,6 +736,11 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
                     seleccionados.length === 1
                       ? seleccionados[0].nombre
                       : `${seleccionados.length} archivos seleccionados`,
+                  descripcion:
+                    recursoForm.descripcion ||
+                    (seleccionados.length === 1
+                      ? seleccionados[0].nombre
+                      : `${seleccionados.length} archivos seleccionados`),
                 });
               }
             }}
@@ -789,14 +811,14 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
       )}
 
       <textarea
-        placeholder="Observaciones"
+        placeholder="Observaciones opcionales"
         value={recursoForm.observaciones}
         onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
         style={{ ...field, minHeight: 80, gridColumn: "1 / -1" }}
       />
 
       <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
-        <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
+        <button style={primary} onClick={guardarRecurso}>Guardar en Biblioteca</button>
       </div>
     </div>
   );
@@ -818,7 +840,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
         <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
       </div>
 
-      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
+      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones opcionales" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
 
       <h3 style={miniTitle}>Vinculado a</h3>
       <div style={list}>
