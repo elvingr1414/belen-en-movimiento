@@ -533,23 +533,20 @@ function VincularPersonaEntidad(props: any) {
       <div style={searchLine}>
         <input
           value={props.busquedaVinculo}
+          onFocus={() => props.setMostrarListaVinculo(true)}
+          onClick={() => props.setMostrarListaVinculo(true)}
           onChange={(e) => {
             props.setBusquedaVinculo(e.target.value);
             props.setVinculoSeleccionado(null);
+            props.setMostrarListaVinculo(true);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") props.setMostrarListaVinculo(true);
           }}
-          placeholder="🔍 Buscar..."
+          placeholder={props.modulo === "Personas" ? "🔍 Buscar entidad para vincular..." : "🔍 Buscar persona para vincular..."}
           style={{ ...field, flex: 1 }}
         />
-
-        <button style={primary} onClick={() => props.setMostrarListaVinculo(true)}>
-          🔍
-        </button>
       </div>
-
-      <div style={hint}>↵ Enter para vincular más</div>
 
       {props.mostrarListaVinculo && !props.vinculoSeleccionado && (
         <div style={scrollArea}>
@@ -633,23 +630,20 @@ function VincularRecurso(props: any) {
       <div style={searchLine}>
         <input
           value={props.busquedaDestinoRecurso}
+          onFocus={() => props.setMostrarListaDestinoRecurso(true)}
+          onClick={() => props.setMostrarListaDestinoRecurso(true)}
           onChange={(e) => {
             props.setBusquedaDestinoRecurso(e.target.value);
             props.setDestinoRecursoSeleccionado(null);
+            props.setMostrarListaDestinoRecurso(true);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") props.setMostrarListaDestinoRecurso(true);
           }}
-          placeholder="🔍 Buscar..."
+          placeholder="🔍 Buscar destino para vincular..."
           style={{ ...field, flex: 1 }}
         />
-
-        <button style={primary} onClick={() => props.setMostrarListaDestinoRecurso(true)}>
-          🔍
-        </button>
       </div>
-
-      <div style={hint}>↵ Enter para vincular más</div>
 
       {props.mostrarListaDestinoRecurso && !props.destinoRecursoSeleccionado && (
         <div style={scrollArea}>
@@ -868,7 +862,6 @@ const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
-const hint = { fontSize: 12, color: "#64748b", marginTop: 4, marginBottom: 8 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
