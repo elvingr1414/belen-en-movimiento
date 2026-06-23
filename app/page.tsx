@@ -314,7 +314,7 @@ export default function Home() {
         <nav style={chips}>
           {modulos.map((m) => (
             <button key={m} onClick={() => cambiarModulo(m)} style={chip(modulo === m)}>
-              {icono(m)} {m}
+              {icono(m)} {nombreModulo(m)}
             </button>
           ))}
         </nav>
@@ -322,7 +322,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : `${icono(modulo)} ${modulo}`}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : `${icono(modulo)} ${nombreModulo(modulo)}`}
             </h2>
 
             <div style={actions}>
@@ -478,7 +478,7 @@ export default function Home() {
 
           {seleccionado && accion === "Recursos" && modulo !== "Recursos" && (
             <div style={{ marginTop: 12 }}>
-              <h3 style={miniTitle}>Recursos asociados</h3>
+              <h3 style={miniTitle}>Biblioteca asociada</h3>
 
               <div style={scrollArea}>
                 <div style={listWide}>
@@ -833,9 +833,14 @@ function icono(m: Modulo) {
     Entidades: "🏢",
     Actividades: "📅",
     Proyectos: "🚀",
-    Recursos: "📁",
+    Recursos: "📚",
     Comunicaciones: "📢",
   }[m];
+}
+
+
+function nombreModulo(m: Modulo) {
+  return m === "Recursos" ? "Biblioteca" : m;
 }
 
 const page = { minHeight: "100vh", padding: 18, paddingBottom: 120, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
@@ -862,6 +867,9 @@ const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
+const fileBox = { display: "grid", gap: 6 };
+const fileLabel = { padding: "12px 14px", borderRadius: 12, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontWeight: 700, cursor: "pointer", textAlign: "center" as const };
+const fileName = { padding: "8px 10px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e5e7eb", fontSize: 12, color: "#475569", minHeight: 18 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
