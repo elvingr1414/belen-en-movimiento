@@ -693,23 +693,37 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         style={field}
       />
 
-      <label style={fileLabel}>
-        📎 Seleccionar archivo de mi computadora
-        <input
-          type="file"
-          style={{ display: "none" }}
-          onChange={(e) => {
-            const archivo = e.target.files?.[0];
-            if (archivo) {
-              setRecursoForm({
-                ...recursoForm,
-                ubicacion: archivo.name,
-                observaciones: recursoForm.observaciones || `Archivo seleccionado: ${archivo.name}`,
-              });
-            }
-          }}
-        />
-      </label>
+      <div style={filePickerBox}>
+        <label style={folderButton} title="Seleccionar archivo">
+          📁
+          <input
+            type="file"
+            style={{ display: "none" }}
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+            onChange={(e) => {
+              const archivo = e.target.files?.[0];
+              if (archivo) {
+                const urlTemporal = archivo.type.startsWith("image/")
+                  ? URL.createObjectURL(archivo)
+                  : "";
+
+                setRecursoForm({
+                  ...recursoForm,
+                  ubicacion: archivo.name,
+                  archivoNombre: archivo.name,
+                  archivoTipo: archivo.type || "Archivo",
+                  archivoPreview: urlTemporal,
+                  observaciones: recursoForm.observaciones || `Archivo seleccionado: ${archivo.name}`,
+                });
+              }
+            }}
+          />
+        </label>
+
+        <div style={fileSelectedText}>
+          {recursoForm.archivoNombre || recursoForm.ubicacion || "Seleccione archivo"}
+        </div>
+      </div>
 
       <input
         placeholder="Ubicación / enlace externo"
@@ -745,9 +759,17 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         ))}
       </select>
 
-      <div style={fileName}>
-        {recursoForm.ubicacion ? `Archivo / ubicación: ${recursoForm.ubicacion}` : "Ningún archivo seleccionado"}
-      </div>
+      {recursoForm.archivoPreview && (
+        <div style={previewBox}>
+          <img src={recursoForm.archivoPreview} alt="Vista previa" style={previewImage} />
+        </div>
+      )}
+
+      {!recursoForm.archivoPreview && recursoForm.archivoNombre && (
+        <div style={previewBox}>
+          📄 {recursoForm.archivoNombre}
+        </div>
+      )}
 
       <textarea
         placeholder="Observaciones"
@@ -916,9 +938,11 @@ const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
-const fileBox = { display: "grid", gap: 6 };
-const fileLabel = { padding: "12px 14px", borderRadius: 12, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontWeight: 700, cursor: "pointer", textAlign: "center" as const };
-const fileName = { padding: "8px 10px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e5e7eb", fontSize: 12, color: "#475569", minHeight: 18 };
+const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
+const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
+const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
+const previewImage = { maxWidth: 220, maxHeight: 160, borderRadius: 12, border: "1px solid #e5e7eb", display: "block" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
