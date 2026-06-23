@@ -113,6 +113,7 @@ export default function Home() {
   ]);
 
   const [busquedaVinculo, setBusquedaVinculo] = useState("");
+  const [mostrarListaVinculo, setMostrarListaVinculo] = useState(false);
   const [vinculoSeleccionado, setVinculoSeleccionado] = useState<any | null>(null);
   const [puesto, setPuesto] = useState("");
   const [directiva, setDirectiva] = useState("No");
@@ -130,6 +131,7 @@ export default function Home() {
 
   const [tipoDestinoRecurso, setTipoDestinoRecurso] = useState<"Personas" | "Entidades">("Entidades");
   const [busquedaDestinoRecurso, setBusquedaDestinoRecurso] = useState("");
+  const [mostrarListaDestinoRecurso, setMostrarListaDestinoRecurso] = useState(false);
   const [destinoRecursoSeleccionado, setDestinoRecursoSeleccionado] = useState<any | null>(null);
 
   const lista =
@@ -178,6 +180,7 @@ export default function Home() {
 
   function limpiarVinculo() {
     setBusquedaVinculo("");
+    setMostrarListaVinculo(false);
     setVinculoSeleccionado(null);
     setPuesto("");
     setDirectiva("No");
@@ -186,6 +189,7 @@ export default function Home() {
 
   function limpiarRecursoDestino() {
     setBusquedaDestinoRecurso("");
+    setMostrarListaDestinoRecurso(false);
     setDestinoRecursoSeleccionado(null);
   }
 
@@ -324,30 +328,52 @@ export default function Home() {
             <div style={actions}>
               {seleccionado && (
                 <>
-                  <button title="Editar" onClick={() => {
-                    if (modulo === "Recursos") setRecursoForm({ ...seleccionado });
-                    setAccion("Editar");
-                  }} style={iconButton(accion === "Editar")}>✏️</button>
+                  <button
+                    title="Editar"
+                    onClick={() => {
+                      if (modulo === "Recursos") setRecursoForm({ ...seleccionado });
+                      setAccion("Editar");
+                    }}
+                    style={iconButton(accion === "Editar")}
+                  >
+                    ✏️
+                  </button>
 
-                  <button title="Excluir" onClick={() => setAccion("Excluir")} style={iconButton(accion === "Excluir")}>🗑️</button>
+                  <button title="Excluir" onClick={() => setAccion("Excluir")} style={iconButton(accion === "Excluir")}>
+                    🗑️
+                  </button>
 
-                  <button title="Vincular" onClick={() => {
-                    setAccion("Vincular");
-                    limpiarVinculo();
-                    limpiarRecursoDestino();
-                  }} style={iconButton(accion === "Vincular")}>🔗</button>
+                  <button
+                    title="Vincular"
+                    onClick={() => {
+                      setAccion("Vincular");
+                      limpiarVinculo();
+                      limpiarRecursoDestino();
+                    }}
+                    style={iconButton(accion === "Vincular")}
+                  >
+                    🔗
+                  </button>
 
                   {modulo !== "Recursos" && (
-                    <button title="Recursos" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>📁</button>
+                    <button title="Recursos" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
+                      📁
+                    </button>
                   )}
                 </>
               )}
 
-              <button title="Nuevo" onClick={() => {
-                setSeleccionado(null);
-                limpiarRecursoForm();
-                setAccion("Nuevo");
-              }} style={iconPrimary}>+</button>
+              <button
+                title="Nuevo"
+                onClick={() => {
+                  setSeleccionado(null);
+                  limpiarRecursoForm();
+                  setAccion("Nuevo");
+                }}
+                style={iconPrimary}
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -355,10 +381,14 @@ export default function Home() {
             <div style={scrollArea}>
               <div style={listWide}>
                 {lista.map((item, index) => (
-                  <button key={index} style={rowWide} onClick={() => {
-                    setSeleccionado(item);
-                    setAccion("Vista");
-                  }}>
+                  <button
+                    key={index}
+                    style={rowWide}
+                    onClick={() => {
+                      setSeleccionado(item);
+                      setAccion("Vista");
+                    }}
+                  >
                     {lineaConsulta(modulo, item)}
                   </button>
                 ))}
@@ -367,16 +397,10 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm
-              recursoForm={recursoForm}
-              setRecursoForm={setRecursoForm}
-              guardarRecurso={guardarRecurso}
-            />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} />
           )}
 
-          {accion === "Nuevo" && modulo !== "Recursos" && (
-            <Formulario modulo={modulo} datos={null} />
-          )}
+          {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
 
           {seleccionado && accion === "Vista" && modulo === "Recursos" && (
             <RecursoDetalle recurso={seleccionado} vinculos={vinculosDelRecurso()} />
@@ -387,11 +411,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm
-              recursoForm={recursoForm}
-              setRecursoForm={setRecursoForm}
-              guardarRecurso={guardarRecurso}
-            />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -425,6 +445,8 @@ export default function Home() {
               vinculosActuales={vinculosActuales()}
               busquedaVinculo={busquedaVinculo}
               setBusquedaVinculo={setBusquedaVinculo}
+              mostrarListaVinculo={mostrarListaVinculo}
+              setMostrarListaVinculo={setMostrarListaVinculo}
               vinculoSeleccionado={vinculoSeleccionado}
               setVinculoSeleccionado={setVinculoSeleccionado}
               listaVinculo={listaVinculo}
@@ -444,6 +466,8 @@ export default function Home() {
               setTipoDestinoRecurso={setTipoDestinoRecurso}
               busquedaDestinoRecurso={busquedaDestinoRecurso}
               setBusquedaDestinoRecurso={setBusquedaDestinoRecurso}
+              mostrarListaDestinoRecurso={mostrarListaDestinoRecurso}
+              setMostrarListaDestinoRecurso={setMostrarListaDestinoRecurso}
               destinoRecursoSeleccionado={destinoRecursoSeleccionado}
               setDestinoRecursoSeleccionado={setDestinoRecursoSeleccionado}
               listaDestinoRecurso={listaDestinoRecurso}
@@ -459,11 +483,15 @@ export default function Home() {
               <div style={scrollArea}>
                 <div style={listWide}>
                   {recursosVinculadosAlRegistro().map((r: any, i: number) => (
-                    <button key={i} style={rowWide} onClick={() => {
-                      setModulo("Recursos");
-                      setSeleccionado(r);
-                      setAccion("Vista");
-                    }}>
+                    <button
+                      key={i}
+                      style={rowWide}
+                      onClick={() => {
+                        setModulo("Recursos");
+                        setSeleccionado(r);
+                        setAccion("Vista");
+                      }}
+                    >
                       {lineaConsulta("Recursos", r)}
                     </button>
                   ))}
@@ -502,21 +530,39 @@ function VincularPersonaEntidad(props: any) {
         })}
       </div>
 
-      <input
-        value={props.busquedaVinculo}
-        onChange={(e) => {
-          props.setBusquedaVinculo(e.target.value);
-          props.setVinculoSeleccionado(null);
-        }}
-        placeholder={props.modulo === "Personas" ? "Buscar entidad para agregar..." : "Buscar persona para agregar..."}
-        style={searchSmall}
-      />
+      <div style={searchLine}>
+        <input
+          value={props.busquedaVinculo}
+          onChange={(e) => {
+            props.setBusquedaVinculo(e.target.value);
+            props.setVinculoSeleccionado(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") props.setMostrarListaVinculo(true);
+          }}
+          placeholder="🔍 Buscar..."
+          style={{ ...field, flex: 1 }}
+        />
 
-      {props.busquedaVinculo.trim() !== "" && !props.vinculoSeleccionado && (
+        <button style={primary} onClick={() => props.setMostrarListaVinculo(true)}>
+          🔍
+        </button>
+      </div>
+
+      <div style={hint}>↵ Enter para vincular más</div>
+
+      {props.mostrarListaVinculo && !props.vinculoSeleccionado && (
         <div style={scrollArea}>
           <div style={listWide}>
             {props.listaVinculo.map((item: any, index: number) => (
-              <button key={index} style={rowWide} onClick={() => props.setVinculoSeleccionado(item)}>
+              <button
+                key={index}
+                style={rowWide}
+                onClick={() => {
+                  props.setVinculoSeleccionado(item);
+                  props.setMostrarListaVinculo(false);
+                }}
+              >
                 {props.modulo === "Personas" ? lineaConsulta("Entidades", item) : lineaConsulta("Personas", item)}
               </button>
             ))}
@@ -576,28 +622,47 @@ function VincularRecurso(props: any) {
             props.setTipoDestinoRecurso(e.target.value);
             props.setDestinoRecursoSeleccionado(null);
             props.setBusquedaDestinoRecurso("");
+            props.setMostrarListaDestinoRecurso(false);
           }}
         >
           <option value="Entidades">Entidades</option>
           <option value="Personas">Personas</option>
         </select>
+      </div>
 
+      <div style={searchLine}>
         <input
           value={props.busquedaDestinoRecurso}
           onChange={(e) => {
             props.setBusquedaDestinoRecurso(e.target.value);
             props.setDestinoRecursoSeleccionado(null);
           }}
-          placeholder="Buscar destino para vincular..."
-          style={field}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") props.setMostrarListaDestinoRecurso(true);
+          }}
+          placeholder="🔍 Buscar..."
+          style={{ ...field, flex: 1 }}
         />
+
+        <button style={primary} onClick={() => props.setMostrarListaDestinoRecurso(true)}>
+          🔍
+        </button>
       </div>
 
-      {props.busquedaDestinoRecurso.trim() !== "" && !props.destinoRecursoSeleccionado && (
+      <div style={hint}>↵ Enter para vincular más</div>
+
+      {props.mostrarListaDestinoRecurso && !props.destinoRecursoSeleccionado && (
         <div style={scrollArea}>
           <div style={listWide}>
             {props.listaDestinoRecurso.map((item: any, index: number) => (
-              <button key={index} style={rowWide} onClick={() => props.setDestinoRecursoSeleccionado(item)}>
+              <button
+                key={index}
+                style={rowWide}
+                onClick={() => {
+                  props.setDestinoRecursoSeleccionado(item);
+                  props.setMostrarListaDestinoRecurso(false);
+                }}
+              >
                 {lineaConsulta(props.tipoDestinoRecurso, item)}
               </button>
             ))}
@@ -619,33 +684,15 @@ function VincularRecurso(props: any) {
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
   return (
     <div style={grid}>
-      <select
-        style={field}
-        value={recursoForm.tipo}
-        onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
-      >
+      <select style={field} value={recursoForm.tipo} onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}>
         {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
       </select>
 
-      <input
-        placeholder="Descripción"
-        value={recursoForm.descripcion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
-        style={field}
-      />
+      <input placeholder="Descripción" value={recursoForm.descripcion} onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })} style={field} />
 
-      <input
-        placeholder="Ubicación / enlace"
-        value={recursoForm.ubicacion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
-        style={field}
-      />
+      <input placeholder="Ubicación / enlace" value={recursoForm.ubicacion} onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })} style={field} />
 
-      <select
-        style={field}
-        value={recursoForm.visibilidad}
-        onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
-      >
+      <select style={field} value={recursoForm.visibilidad} onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}>
         {visibilidades.map((v) => <option key={v}>{v}</option>)}
       </select>
 
@@ -658,22 +705,13 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         <option value="Personas">Propietario: Persona</option>
       </select>
 
-      <select
-        style={field}
-        value={recursoForm.propietarioId}
-        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
-      >
+      <select style={field} value={recursoForm.propietarioId} onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}>
         {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
           <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
         ))}
       </select>
 
-      <textarea
-        placeholder="Observaciones"
-        value={recursoForm.observaciones}
-        onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-        style={{ ...field, minHeight: 70 }}
-      />
+      <textarea placeholder="Observaciones" value={recursoForm.observaciones} onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })} style={{ ...field, minHeight: 70 }} />
 
       <button style={primary} onClick={guardarRecurso}>Guardar recurso</button>
     </div>
@@ -685,9 +723,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
     <div style={{ marginTop: 12 }}>
       <div style={scrollArea}>
         <div style={listWide}>
-          <div style={rowWide}>
-            {lineaConsulta("Recursos", recurso)}
-          </div>
+          <div style={rowWide}>{lineaConsulta("Recursos", recurso)}</div>
         </div>
       </div>
 
@@ -816,7 +852,6 @@ const title = { fontSize: "clamp(2.1rem,6vw,4.2rem)", margin: "6px 0 12px" };
 const gears = { display: "flex", gap: 2, marginTop: -6 };
 const gear = { display: "inline-block", fontSize: 22, animationName: "spin", animationDuration: "2.8s", animationTimingFunction: "linear", animationIterationCount: "infinite" };
 const search = { width: "100%", padding: "14px 20px", borderRadius: 999, border: "1px solid #d1d5db", fontSize: 15, margin: "10px 0 14px", boxSizing: "border-box" as const };
-const searchSmall = { ...search, margin: "12px 0 10px" };
 const chips = { display: "flex", gap: 8, flexWrap: "wrap" as const, justifyContent: "center" };
 const actions = { display: "flex", gap: 8, flexWrap: "nowrap" as const, overflowX: "auto" as const };
 const panel = { marginTop: 16, background: "rgba(255,255,255,.86)", border: "1px solid rgba(0,0,0,.08)", borderRadius: 22, padding: 16, overflow: "hidden" };
@@ -832,6 +867,8 @@ const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190
 const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", fontSize: 14, background: "white", boxSizing: "border-box" as const };
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
+const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
+const hint = { fontSize: 12, color: "#64748b", marginTop: 4, marginBottom: 8 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
