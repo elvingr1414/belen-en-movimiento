@@ -229,13 +229,20 @@ export default function Home() {
           : "");
 
     if (!descripcionFinal) {
-      alert("Debe escribir una descripción o seleccionar al menos un archivo.");
+      alert("Debe seleccionar al menos un archivo o escribir una descripción.");
       return;
     }
 
     const recursoParaGuardar = {
       ...recursoForm,
       descripcion: descripcionFinal,
+      ubicacion:
+        recursoForm.ubicacion ||
+        (archivosSeleccionados.length === 1
+          ? archivosSeleccionados[0].nombre
+          : archivosSeleccionados.length > 1
+            ? `${archivosSeleccionados.length} archivos seleccionados`
+            : ""),
     };
 
     if (accion === "Editar" && seleccionado && modulo === "Recursos") {
@@ -706,21 +713,14 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
       </select>
 
-      <input
-        placeholder="Descripción"
-        value={recursoForm.descripcion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
-        style={field}
-      />
-
       <div style={filePickerBox}>
-        <label style={folderButton} title="Seleccionar archivos">
+        <label style={folderButton} title="Seleccionar archivo(s)">
           📁
           <input
             type="file"
             multiple
             style={{ display: "none" }}
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.mov,.avi"
             onChange={(e) => {
               const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
                 nombre: archivo.name,
@@ -756,13 +756,6 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         </div>
       </div>
 
-      <input
-        placeholder="Ubicación / enlace externo"
-        value={recursoForm.ubicacion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
-        style={field}
-      />
-
       <select
         style={field}
         value={recursoForm.visibilidad}
@@ -790,9 +783,23 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         ))}
       </select>
 
+      <textarea
+        placeholder="Descripción / detalle del recurso"
+        value={recursoForm.descripcion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
+        style={{ ...field, minHeight: 76, gridColumn: "1 / -1" }}
+      />
+
+      <input
+        placeholder="Enlace externo opcional / ruta de respaldo"
+        value={recursoForm.ubicacion}
+        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
+        style={{ ...field, gridColumn: "1 / -1" }}
+      />
+
       {archivos.length > 0 && (
         <div style={previewBox}>
-          <strong>Archivos seleccionados</strong>
+          <strong>Vista previa / archivos seleccionados</strong>
 
           <div style={previewGrid}>
             {archivos.map((archivo: any, index: number) => (
@@ -814,11 +821,13 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         placeholder="Observaciones opcionales"
         value={recursoForm.observaciones}
         onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-        style={{ ...field, minHeight: 80, gridColumn: "1 / -1" }}
+        style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
       />
 
       <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
-        <button style={primary} onClick={guardarRecurso}>Guardar en Biblioteca</button>
+        <button style={primary} onClick={guardarRecurso}>
+          {textoGuardarBiblioteca(recursoForm.tipo)}
+        </button>
       </div>
     </div>
   );
@@ -906,6 +915,22 @@ function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos:
   );
 }
 
+
+function textoGuardarBiblioteca(tipo: string) {
+  const t = (tipo || "").toLowerCase();
+
+  if (t.includes("fotografía") || t.includes("foto")) return "Guardar fotografía";
+  if (t.includes("acta")) return "Guardar acta";
+  if (t.includes("video")) return "Guardar video";
+  if (t.includes("logo")) return "Guardar logo";
+  if (t.includes("cotización")) return "Guardar cotización";
+  if (t.includes("factura")) return "Guardar factura";
+  if (t.includes("contrato")) return "Guardar contrato";
+  if (t.includes("certificado")) return "Guardar certificado";
+
+  return "Guardar en Biblioteca";
+}
+
 function AnimatedGears() {
   return (
     <div style={gears}>
@@ -983,6 +1008,14 @@ const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth:
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
+const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
+const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
+const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
+const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
+const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
+const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
+const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
 const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
 const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
