@@ -349,7 +349,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V10</span></>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V11</span></>}
             </h2>
 
             <div style={actions}>
@@ -1011,23 +1011,7 @@ const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
-const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
-const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
-const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
-const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
-const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
-const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
-const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
-const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
-const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
-const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
-const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
-const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
-const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
-const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
@@ -1044,4 +1028,3 @@ function chip(active: boolean) {
 function iconButton(active: boolean) {
   return { width: 42, height: 42, borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", fontSize: 18 };
 }
-// redeploy 23-06-2026 11:10
