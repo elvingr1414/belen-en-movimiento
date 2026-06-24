@@ -281,7 +281,6 @@ export default function Home() {
             creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
             vinculosCount: 0,
             creadoEnMs,
-            creadoEnMs,
           }))
         : [{
             id: `r${Date.now()}`,
