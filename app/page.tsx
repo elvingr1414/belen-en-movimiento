@@ -401,7 +401,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V19</span></>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V20</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -777,10 +777,6 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
   return (
     <div style={{ marginTop: 12 }}>
-      <div style={libraryHeader}>
-        <div style={libraryUser}>👤 Elvin González Rodríguez</div>
-      </div>
-
 <div style={grid}>
         <select
           style={field}
@@ -870,11 +866,11 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
       </div>
 
       <div style={recentBox}>
-        <strong>Recursos recientes / pendientes de guardar</strong>
+        <strong>Mis recursos recientes</strong>
 
         <div style={recentScroll}>
           {cintaRecursos.length === 0 && (
-            <div style={emptyRecent}>Aún no hay recursos cargados por usted.</div>
+            <div style={emptyRecent}>Cuando seleccione o guarde archivos, aparecerán aquí.</div>
           )}
 
           {cintaRecursos.map((r: any) => {
@@ -882,7 +878,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
             return (
               <div key={r.id} style={r.pendiente ? pendingCard : recentCard}>
-                {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
+                {r.pendiente && <div style={pendingBadge}>Pendiente de guardar</div>}
 
                 <div style={recentThumb}>
                   {r.archivos?.[0]?.preview ? (
@@ -1094,21 +1090,28 @@ const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center
 const libraryHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" as const, marginBottom: 10 };
 const libraryHeaderTitle = { fontSize: 18, fontWeight: 800 };
 const libraryUser = { fontSize: 13, color: "#475569", background: "#f8fafc", border: "1px solid #e5e7eb", padding: "6px 10px", borderRadius: 999 };
+const libraryUserInline = { fontSize: 13, color: "#475569", fontWeight: 500 };
 const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
+const previewGrid = { display: "flex", gap: 10, flexWrap: "nowrap" as const, marginTop: 10, overflowX: "auto" as const, paddingBottom: 8 };
+const previewItem = { width: 150, minWidth: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
+const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
+const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
+const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const saveBar = { position: "sticky" as const, bottom: 10, zIndex: 50, display: "flex", justifyContent: "flex-end", padding: "10px 0", background: "linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.95))" };
 const recentBox = { marginTop: 12, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#ffffff" };
 const recentScroll = { display: "flex", gap: 10, overflowX: "auto" as const, paddingTop: 10, paddingBottom: 6 };
-const recentCard = { width: 145, minWidth: 145, border: "1px solid #e5e7eb", borderRadius: 14, background: "#f8fafc", padding: 8, position: "relative" as const };
-const recentThumb = { height: 78, borderRadius: 10, background: "#eef2f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, overflow: "hidden" };
+const recentCard = { width: 150, minWidth: 150, border: "1px solid #e5e7eb", borderRadius: 14, background: "#f8fafc", padding: 8, position: "relative" as const };
+const recentThumb = { height: 86, borderRadius: 10, background: "#eef2f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, overflow: "hidden" };
 const recentImage = { width: "100%", height: "100%", objectFit: "cover" as const };
 const recentName = { marginTop: 6, fontSize: 12, fontWeight: 700, color: "#1f2937", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const recentMeta = { marginTop: 2, fontSize: 11, color: "#64748b", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const emptyRecent = { minWidth: 260, color: "#64748b", fontSize: 13, padding: 10 };
 const deleteMini = { position: "absolute" as const, top: 6, right: 6, border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 28, height: 28, cursor: "pointer" };
-const pendingCard = { width: 145, minWidth: 145, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const };
-const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800 };
+const pendingCard = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const };
+const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800, maxWidth: 130, whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
