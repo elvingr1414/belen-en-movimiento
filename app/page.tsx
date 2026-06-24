@@ -264,6 +264,7 @@ export default function Home() {
     const fechaActual = ahora.toISOString().slice(0, 10);
     const horaActual = ahora.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
     const fechaHoraCreacion = ahora.toISOString();
+    const creadoEnMs = ahora.getTime();
 
     const nuevos =
       archivosSeleccionados.length > 0
@@ -279,6 +280,8 @@ export default function Home() {
             creadoPorId: recursoForm.creadoPorId || "p1",
             creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
             vinculosCount: 0,
+            creadoEnMs,
+            creadoEnMs,
           }))
         : [{
             id: `r${Date.now()}`,
@@ -401,7 +404,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V20</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V21</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -762,6 +765,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
     tipo: recursoForm.tipo,
     ubicacion: archivo.nombre,
     descripcion: recursoForm.observaciones || archivo.nombre,
+    observaciones: recursoForm.observaciones || "",
     fecha: "Pendiente",
     hora: "",
     archivos: [archivo],
@@ -770,14 +774,25 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
   const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
-    .sort((a: any, b: any) => (b.fechaHoraCreacion || b.id || "").localeCompare(a.fechaHoraCreacion || a.id || ""))
+    .sort((a: any, b: any) => {
+      const ax = a.creadoEnMs || Date.parse(a.fechaHoraCreacion || "") || 0;
+      const bx = b.creadoEnMs || Date.parse(b.fechaHoraCreacion || "") || 0;
+      return bx - ax;
+    })
     .slice(0, 20);
 
   const cintaRecursos = [...pendientes, ...misRecursos];
 
+  const textoArchivo =
+    archivos.length === 0
+      ? "Seleccionar archivo"
+      : archivos.length === 1
+        ? "Archivo listo"
+        : `${archivos.length} archivos listos`;
+
   return (
     <div style={{ marginTop: 12 }}>
-<div style={grid}>
+      <div style={grid}>
         <select
           style={field}
           value={recursoForm.tipo}
@@ -786,43 +801,33 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
         </select>
 
-        <div style={filePickerBox}>
-          <label style={folderButton} title="Seleccionar archivo(s)">
-            📁
-            <input
-              type="file"
-              multiple
-              style={{ display: "none" }}
-              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.mov,.avi"
-              onChange={(e) => {
-                const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
-                  nombre: archivo.name,
-                  tipo: archivo.type || "Archivo",
-                  preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
-                }));
+        <label style={fileOneButton} title="Seleccionar archivo(s)">
+          📁 {textoArchivo}
+          <input
+            type="file"
+            multiple
+            style={{ display: "none" }}
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.mov,.avi"
+            onChange={(e) => {
+              const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
+                nombre: archivo.name,
+                tipo: archivo.type || "Archivo",
+                preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
+              }));
 
-                if (seleccionados.length > 0) {
-                  setRecursoForm({
-                    ...recursoForm,
-                    archivos: seleccionados,
-                    ubicacion:
-                      seleccionados.length === 1
-                        ? seleccionados[0].nombre
-                        : `${seleccionados.length} archivos seleccionados`,
-                  });
-                }
-              }}
-            />
-          </label>
-
-          <div style={fileSelectedText}>
-            {archivos.length === 0
-              ? "Seleccionar archivo"
-              : archivos.length === 1
-                ? "1 archivo seleccionado"
-                : `${archivos.length} archivos seleccionados`}
-          </div>
-        </div>
+              if (seleccionados.length > 0) {
+                setRecursoForm({
+                  ...recursoForm,
+                  archivos: seleccionados,
+                  ubicacion:
+                    seleccionados.length === 1
+                      ? seleccionados[0].nombre
+                      : `${seleccionados.length} archivos seleccionados`,
+                });
+              }
+            }}
+          />
+        </label>
 
         <select
           style={field}
@@ -875,21 +880,25 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
           {cintaRecursos.map((r: any) => {
             const tieneVinculos = recursoVinculos.some((v: any) => v.recursoId === r.id);
+            const archivoPrincipal = r.archivos?.[0];
 
             return (
               <div key={r.id} style={r.pendiente ? pendingCard : recentCard}>
-                {r.pendiente && <div style={pendingBadge}>Pendiente de guardar</div>}
+                {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
 
                 <div style={recentThumb}>
-                  {r.archivos?.[0]?.preview ? (
-                    <img src={r.archivos[0].preview} alt={r.ubicacion} style={recentImage} />
+                  {archivoPrincipal?.preview ? (
+                    <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} />
                   ) : (
-                    <span>{iconoArchivo(r.tipo)}</span>
+                    <span>{iconoArchivoReal(r)}</span>
                   )}
                 </div>
 
                 <div style={recentName}>{r.ubicacion || r.descripcion}</div>
                 <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
+                {(r.observaciones || r.descripcion) && (
+                  <div style={recentObs}>{r.observaciones || r.descripcion}</div>
+                )}
 
                 {!r.pendiente && !tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
                   <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
@@ -1029,6 +1038,23 @@ function nombrePropietario(recurso: any) {
 }
 
 
+
+function iconoArchivoReal(recurso: any) {
+  const archivo = recurso?.archivos?.[0];
+  const nombre = (archivo?.nombre || recurso?.ubicacion || recurso?.descripcion || "").toLowerCase();
+  const mime = (archivo?.tipo || "").toLowerCase();
+
+  if (mime.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic)$/.test(nombre)) return "🖼️";
+  if (mime.startsWith("video/") || /\.(mp4|mov|avi|mkv|webm)$/.test(nombre)) return "🎥";
+  if (mime.includes("pdf") || nombre.endsWith(".pdf")) return "📄";
+  if (/\.(doc|docx)$/.test(nombre)) return "📝";
+  if (/\.(xls|xlsx)$/.test(nombre)) return "📊";
+  if (/\.(ppt|pptx)$/.test(nombre)) return "📽️";
+  if (/\.(mp3|wav|m4a)$/.test(nombre)) return "🎧";
+
+  return iconoArchivo(recurso?.tipo || "");
+}
+
 function iconoArchivo(tipo: string) {
   const t = (tipo || "").toLowerCase();
   if (t.includes("foto") || t.includes("imagen")) return "📷";
@@ -1091,9 +1117,8 @@ const libraryHeader = { display: "flex", alignItems: "center", justifyContent: "
 const libraryHeaderTitle = { fontSize: 18, fontWeight: 800 };
 const libraryUser = { fontSize: 13, color: "#475569", background: "#f8fafc", border: "1px solid #e5e7eb", padding: "6px 10px", borderRadius: 999 };
 const libraryUserInline = { fontSize: 13, color: "#475569", fontWeight: 500 };
-const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
-const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
-const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const fileOneButton = { padding: "12px 14px", borderRadius: 12, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", whiteSpace: "nowrap" as const };
+const recentObs = { marginTop: 3, fontSize: 11, color: "#334155", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
 const previewGrid = { display: "flex", gap: 10, flexWrap: "nowrap" as const, marginTop: 10, overflowX: "auto" as const, paddingBottom: 8 };
 const previewItem = { width: 150, minWidth: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
