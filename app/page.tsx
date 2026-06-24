@@ -13,11 +13,11 @@ type Modulo =
 type Accion = "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
 
 const modulos: Modulo[] = [
+  "Recursos",
   "Personas",
   "Entidades",
   "Actividades",
   "Proyectos",
-  "Recursos",
   "Comunicaciones",
 ];
 
@@ -73,7 +73,7 @@ const tiposRecurso = [
 const visibilidades = ["Público", "Privado", "Compartido"];
 
 export default function Home() {
-  const [modulo, setModulo] = useState<Modulo>("Personas");
+  const [modulo, setModulo] = useState<Modulo>("Recursos");
   const [busqueda, setBusqueda] = useState("");
   const [seleccionado, setSeleccionado] = useState<any | null>(null);
   const [accion, setAccion] = useState<Accion>("Vista");
@@ -234,14 +234,14 @@ export default function Home() {
   function guardarRecurso() {
     const archivosSeleccionados = recursoForm.archivos || [];
 
-    if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.observaciones.trim()) {
+    if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.observaciones?.trim()) {
       alert("Debe seleccionar al menos un archivo o escribir una observación.");
       return;
     }
 
     if (accion === "Editar" && seleccionado && modulo === "Recursos") {
       const descripcionFinal =
-        recursoForm.observaciones.trim() ||
+        recursoForm.observaciones?.trim() ||
         seleccionado.descripcion ||
         recursoForm.ubicacion ||
         "Recurso sin observaciones";
@@ -258,38 +258,41 @@ export default function Home() {
       return;
     }
 
-    const fechaActual = new Date().toISOString().slice(0, 10);
+    const ahora = new Date();
+    const fechaActual = ahora.toISOString().slice(0, 10);
+    const horaActual = ahora.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
+    const fechaHoraCreacion = ahora.toISOString();
 
     const nuevos =
       archivosSeleccionados.length > 0
         ? archivosSeleccionados.map((archivo: any, index: number) => ({
             id: `r${Date.now()}-${index}`,
             ...recursoForm,
-            descripcion: recursoForm.observaciones.trim() || archivo.nombre,
+            descripcion: recursoForm.observaciones?.trim() || archivo.nombre,
             ubicacion: archivo.nombre,
             archivos: [archivo],
             fecha: fechaActual,
+            hora: horaActual,
+            fechaHoraCreacion,
             creadoPorId: recursoForm.creadoPorId || "p1",
             creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
+            vinculosCount: 0,
           }))
         : [{
             id: `r${Date.now()}`,
             ...recursoForm,
-            descripcion: recursoForm.observaciones.trim() || recursoForm.ubicacion || "Recurso sin observaciones",
+            descripcion: recursoForm.observaciones?.trim() || recursoForm.ubicacion || "Recurso sin observaciones",
             fecha: fechaActual,
+            hora: horaActual,
+            fechaHoraCreacion,
             creadoPorId: recursoForm.creadoPorId || "p1",
             creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
+            vinculosCount: 0,
           }];
 
-    setRecursos([...recursos, ...nuevos]);
+    setRecursos([...nuevos, ...recursos]);
     setSeleccionado(null);
-
-    if (modulo === "Recursos") {
-      setAccion("Nuevo");
-    } else {
-      setAccion("Vista");
-    }
-
+    setAccion("Nuevo");
     limpiarRecursoForm();
   }
 
@@ -299,6 +302,25 @@ export default function Home() {
     setRecursoVinculos(recursoVinculos.filter((v) => v.recursoId !== seleccionado.id));
     setSeleccionado(null);
     setAccion("Vista");
+  }
+
+  function eliminarRecursoLibre(recursoId: string) {
+    const recurso = recursos.find((r) => r.id === recursoId);
+    const tieneVinculos = recursoVinculos.some((v) => v.recursoId === recursoId);
+
+    if (!recurso) return;
+
+    if ((recurso.creadoPorId || "p1") !== "p1") {
+      alert("Solo puede eliminar recursos creados por usted.");
+      return;
+    }
+
+    if (tieneVinculos) {
+      alert("Este recurso ya está vinculado. Primero debe desvincularse antes de eliminarlo.");
+      return;
+    }
+
+    setRecursos(recursos.filter((r) => r.id !== recursoId));
   }
 
   function guardarVinculoRecurso() {
@@ -452,7 +474,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -466,7 +488,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -730,131 +752,159 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [] }: any) {
   const archivos = recursoForm.archivos || [];
+  const misRecursos = [...recursos]
+    .filter((r: any) => (r.creadoPorId || "p1") === "p1")
+    .sort((a: any, b: any) => (b.fechaHoraCreacion || b.id || "").localeCompare(a.fechaHoraCreacion || a.id || ""))
+    .slice(0, 20);
 
   return (
-    <div style={grid}>
-      <select
-        style={field}
-        value={recursoForm.tipo}
-        onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
-      >
-        {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
-      </select>
-
-      <div style={filePickerBox}>
-        <label style={folderButton} title="Seleccionar archivo(s)">
-          📁
-          <input
-            type="file"
-            multiple
-            style={{ display: "none" }}
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.mov,.avi"
-            onChange={(e) => {
-              const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
-                nombre: archivo.name,
-                tipo: archivo.type || "Archivo",
-                preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
-              }));
-
-              if (seleccionados.length > 0) {
-                setRecursoForm({
-                  ...recursoForm,
-                  archivos: seleccionados,
-                  ubicacion:
-                    seleccionados.length === 1
-                      ? seleccionados[0].nombre
-                      : `${seleccionados.length} archivos seleccionados`,
-                  descripcion:
-                    recursoForm.descripcion ||
-                    (seleccionados.length === 1
-                      ? seleccionados[0].nombre
-                      : ""),
-                });
-              }
-            }}
-          />
-        </label>
-
-        <div style={fileSelectedText}>
-          {archivos.length === 0
-            ? "Seleccione archivo(s)"
-            : archivos.length === 1
-              ? archivos[0].nombre
-              : `${archivos.length} archivos seleccionados`}
-        </div>
+    <div style={{ marginTop: 12 }}>
+      <div style={libraryHeader}>
+        <div style={libraryHeaderTitle}>📚 Biblioteca <span style={versionTag}>V16</span></div>
+        <div style={libraryUser}>👤 Elvin González Rodríguez</div>
       </div>
 
-      <select
-        style={field}
-        value={recursoForm.visibilidad}
-        onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
-      >
-        {visibilidades.map((v) => <option key={v}>{v}</option>)}
-      </select>
+      <div style={grid}>
+        <select
+          style={field}
+          value={recursoForm.tipo}
+          onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
+        >
+          {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
+        </select>
 
-      <select
-        style={field}
-        value={recursoForm.propietarioTipo}
-        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
-      >
-        <option value="Entidades">Propietario: Entidad</option>
-        <option value="Personas">Propietario: Persona</option>
-      </select>
+        <div style={filePickerBox}>
+          <label style={folderButton} title="Seleccionar archivo(s)">
+            📁
+            <input
+              type="file"
+              multiple
+              style={{ display: "none" }}
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.mp4,.mov,.avi"
+              onChange={(e) => {
+                const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
+                  nombre: archivo.name,
+                  tipo: archivo.type || "Archivo",
+                  preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
+                }));
 
-      <select
-        style={field}
-        value={recursoForm.propietarioId}
-        onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
-      >
-        {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
-          <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
-        ))}
-      </select>
+                if (seleccionados.length > 0) {
+                  setRecursoForm({
+                    ...recursoForm,
+                    archivos: seleccionados,
+                    ubicacion:
+                      seleccionados.length === 1
+                        ? seleccionados[0].nombre
+                        : `${seleccionados.length} archivos seleccionados`,
+                  });
+                }
+              }}
+            />
+          </label>
 
-      <div style={createdByBox}>
-        Creado por: {recursoForm.creadoPorNombre || "Elvin González Rodríguez"}
-      </div>
-
-      {archivos.length > 0 && (
-        <div style={previewBox}>
-          <strong>Archivos seleccionados</strong>
-
-          <div style={previewGrid}>
-            {archivos.map((archivo: any, index: number) => (
-              <div key={index} style={previewItem}>
-                {archivo.preview ? (
-                  <img src={archivo.preview} alt={archivo.nombre} style={previewImage} />
-                ) : (
-                  <div style={fileIcon}>📄</div>
-                )}
-
-                <div style={fileCaption}>{archivo.nombre}</div>
-              </div>
-            ))}
+          <div style={fileSelectedText}>
+            {archivos.length === 0
+              ? "Seleccione archivo(s)"
+              : archivos.length === 1
+                ? archivos[0].nombre
+                : `${archivos.length} archivos seleccionados`}
           </div>
         </div>
-      )}
 
-      <input
-        placeholder="Enlace externo opcional / ruta de respaldo"
-        value={recursoForm.ubicacion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, ubicacion: e.target.value })}
-        style={{ ...field, gridColumn: "1 / -1" }}
-      />
+        <select
+          style={field}
+          value={recursoForm.visibilidad}
+          onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
+        >
+          {visibilidades.map((v) => <option key={v}>{v}</option>)}
+        </select>
 
-      <textarea
-        placeholder="Observaciones / descripción del archivo"
-        value={recursoForm.observaciones}
-        onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-        style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
-      />
+        <select
+          style={field}
+          value={recursoForm.propietarioTipo}
+          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
+        >
+          <option value="Personas">Relacionado: Persona</option>
+          <option value="Entidades">Relacionado: Entidad</option>
+        </select>
 
-      <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
+        <select
+          style={field}
+          value={recursoForm.propietarioId}
+          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
+        >
+          {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
+            <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
+          ))}
+        </select>
+
+        {archivos.length > 0 && (
+          <div style={previewBox}>
+            <strong>Vista previa / archivos seleccionados</strong>
+
+            <div style={previewGrid}>
+              {archivos.map((archivo: any, index: number) => (
+                <div key={index} style={previewItem}>
+                  {archivo.preview ? (
+                    <img src={archivo.preview} alt={archivo.nombre} style={previewImage} />
+                  ) : (
+                    <div style={fileIcon}>{iconoArchivo(recursoForm.tipo)}</div>
+                  )}
+
+                  <div style={fileCaption}>{archivo.nombre}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <textarea
+          placeholder="Observaciones / descripción del archivo"
+          value={recursoForm.observaciones}
+          onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
+          style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
+        />
+      </div>
+
+      <div style={saveBar}>
         <button style={primary} onClick={guardarRecurso}>
           {textoGuardarBiblioteca(recursoForm.tipo)}
         </button>
+      </div>
+
+      <div style={recentBox}>
+        <strong>Últimos recursos cargados por mí</strong>
+
+        <div style={recentScroll}>
+          {misRecursos.length === 0 && (
+            <div style={emptyRecent}>Aún no hay recursos cargados por usted.</div>
+          )}
+
+          {misRecursos.map((r: any) => {
+            const tieneVinculos = recursoVinculos.some((v: any) => v.recursoId === r.id);
+
+            return (
+              <div key={r.id} style={recentCard}>
+                <div style={recentThumb}>
+                  {r.archivos?.[0]?.preview ? (
+                    <img src={r.archivos[0].preview} alt={r.ubicacion} style={recentImage} />
+                  ) : (
+                    <span>{iconoArchivo(r.tipo)}</span>
+                  )}
+                </div>
+
+                <div style={recentName}>{r.ubicacion || r.descripcion}</div>
+                <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
+
+                {!tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
+                  <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -998,7 +1048,7 @@ function iconoArchivo(tipo: string) {
 function lineaConsulta(modulo: Modulo | "Personas" | "Entidades", item: any) {
   if (modulo === "Personas") return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}`;
   if (modulo === "Entidades") return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
-  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ✍️ ${item.creadoPorNombre || "Elvin González Rodríguez"}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"}`;
+  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"} ${item.hora || ""}`;
   return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
 }
 
@@ -1043,16 +1093,28 @@ const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
-const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
+const libraryHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" as const, marginBottom: 10 };
+const libraryHeaderTitle = { fontSize: 18, fontWeight: 800 };
+const libraryUser = { fontSize: 13, color: "#475569", background: "#f8fafc", border: "1px solid #e5e7eb", padding: "6px 10px", borderRadius: 999 };
 const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
 const previewGrid = { display: "flex", gap: 10, flexWrap: "nowrap" as const, marginTop: 10, overflowX: "auto" as const, paddingBottom: 8 };
-const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
+const previewItem = { width: 150, minWidth: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
 const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
 const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
 const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-const createdByBox = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 13 };
+const saveBar = { position: "sticky" as const, bottom: 10, zIndex: 50, display: "flex", justifyContent: "flex-end", padding: "10px 0", background: "linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.95))" };
+const recentBox = { marginTop: 12, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#ffffff" };
+const recentScroll = { display: "flex", gap: 10, overflowX: "auto" as const, paddingTop: 10, paddingBottom: 6 };
+const recentCard = { width: 150, minWidth: 150, border: "1px solid #e5e7eb", borderRadius: 14, background: "#f8fafc", padding: 8, position: "relative" as const };
+const recentThumb = { height: 86, borderRadius: 10, background: "#eef2f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, overflow: "hidden" };
+const recentImage = { width: "100%", height: "100%", objectFit: "cover" as const };
+const recentName = { marginTop: 6, fontSize: 12, fontWeight: 700, color: "#1f2937", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const recentMeta = { marginTop: 2, fontSize: 11, color: "#64748b", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const emptyRecent = { minWidth: 260, color: "#64748b", fontSize: 13, padding: 10 };
+const deleteMini = { position: "absolute" as const, top: 6, right: 6, border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 28, height: 28, cursor: "pointer" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
