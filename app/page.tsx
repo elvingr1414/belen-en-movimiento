@@ -313,6 +313,10 @@ export default function Home() {
 
   return (
     <main style={page}>
+      <div style={versionBadge}>
+        FUENTE ACTUAL: V13 · BIBLIOTECA SIN DESCRIPCIÓN · ARCHIVOS MÚLTIPLES
+      </div>
+
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
@@ -988,6 +992,7 @@ function nombreModulo(m: Modulo) {
 
 const page = { minHeight: "100vh", padding: 18, paddingBottom: 120, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
 const wrap = { maxWidth: 1100, margin: "0 auto" };
+const versionBadge = { position: "fixed" as const, top: 8, left: 8, zIndex: 9999, background: "#991b1b", color: "white", padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 800, boxShadow: "0 2px 8px rgba(0,0,0,.2)" };
 const eyebrow = { letterSpacing: 3, color: "#64748b", fontSize: 11, margin: 0, textAlign: "center" as const };
 const titleLine = { display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" as const };
 const title = { fontSize: "clamp(2.1rem,6vw,4.2rem)", margin: "6px 0 12px" };
