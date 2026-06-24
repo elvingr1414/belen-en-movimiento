@@ -373,7 +373,7 @@ export default function Home() {
 
       <section style={wrap}>
         <header>
-          <p style={eyebrow}>COMUNIDAD • PARTICIPACIÓN • FUTURO</p>
+          <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -403,7 +403,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V21</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V22</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -821,7 +821,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
                   ubicacion:
                     seleccionados.length === 1
                       ? seleccionados[0].nombre
-                      : `${seleccionados.length} archivos seleccionados`,
+                      : `${seleccionados.length} archivos listos`,
                 });
               }
             }}
@@ -870,7 +870,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
       </div>
 
       <div style={recentBox}>
-        <strong>Mis recursos recientes</strong>
+        <strong>Mis archivos recientes</strong>
 
         <div style={recentScroll}>
           {cintaRecursos.length === 0 && (
