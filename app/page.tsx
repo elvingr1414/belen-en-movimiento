@@ -404,7 +404,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V24</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V25</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -888,7 +888,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
                 style={r.pendiente ? pendingCard : (archivoConsultado?.id === r.id ? recentCardSelected : recentCard)}
                 onClick={() => {
                   if (r.pendiente) return;
-                  setArchivoConsultado?.(r);
+                  setArchivoConsultado?.({ ...r, previewAbierto: false });
                   setSeleccionado?.(r);
                   setAccion?.("Vista");
                 }}
@@ -921,6 +921,8 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
             );
           })}
         </div>
+      </div>
+
       {archivoConsultado && (
         <div style={consultaBox}>
           <div style={consultaHeader}>
