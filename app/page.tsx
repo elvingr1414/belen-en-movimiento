@@ -119,7 +119,7 @@ export default function Home() {
   const [directiva, setDirectiva] = useState("No");
   const [fecha, setFecha] = useState("");
 
-  const [recursoForm, setRecursoForm] = useState({
+  const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
     ubicacion: "",
