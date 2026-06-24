@@ -1,5 +1,5 @@
 "use client";
-//VERSION V14 FORZADA
+//VERSION V14 FORZADA.
 import { useState } from "react";
 
 type Modulo =
