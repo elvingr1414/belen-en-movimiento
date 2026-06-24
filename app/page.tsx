@@ -399,7 +399,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V17</span></>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V18</span></>}
             </h2>
 
             <div style={actions}>
@@ -754,15 +754,29 @@ function VincularRecurso(props: any) {
 
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [] }: any) {
   const archivos = recursoForm.archivos || [];
+
+  const pendientes = archivos.map((archivo: any, index: number) => ({
+    id: `pendiente-${index}`,
+    tipo: recursoForm.tipo,
+    ubicacion: archivo.nombre,
+    descripcion: recursoForm.observaciones || archivo.nombre,
+    fecha: "Pendiente",
+    hora: "",
+    archivos: [archivo],
+    pendiente: true,
+  }));
+
   const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
     .sort((a: any, b: any) => (b.fechaHoraCreacion || b.id || "").localeCompare(a.fechaHoraCreacion || a.id || ""))
     .slice(0, 20);
 
+  const cintaRecursos = [...pendientes, ...misRecursos];
+
   return (
     <div style={{ marginTop: 12 }}>
       <div style={libraryHeader}>
-        <div style={libraryHeaderTitle}>📚 Biblioteca <span style={versionTag}>V17</span></div>
+        <div style={libraryHeaderTitle}>📚 Biblioteca <span style={versionTag}>V18</span></div>
         <div style={libraryUser}>👤 Elvin González Rodríguez</div>
       </div>
 
@@ -840,26 +854,6 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
           ))}
         </select>
 
-        {archivos.length > 0 && (
-          <div style={previewBox}>
-            <strong>Vista previa / archivos seleccionados</strong>
-
-            <div style={previewGrid}>
-              {archivos.map((archivo: any, index: number) => (
-                <div key={index} style={previewItem}>
-                  {archivo.preview ? (
-                    <img src={archivo.preview} alt={archivo.nombre} style={previewImage} />
-                  ) : (
-                    <div style={fileIcon}>{iconoArchivo(recursoForm.tipo)}</div>
-                  )}
-
-                  <div style={fileCaption}>{archivo.nombre}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
@@ -878,15 +872,17 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
         <strong>Últimos recursos cargados por mí</strong>
 
         <div style={recentScroll}>
-          {misRecursos.length === 0 && (
+          {cintaRecursos.length === 0 && (
             <div style={emptyRecent}>Aún no hay recursos cargados por usted.</div>
           )}
 
-          {misRecursos.map((r: any) => {
+          {cintaRecursos.map((r: any) => {
             const tieneVinculos = recursoVinculos.some((v: any) => v.recursoId === r.id);
 
             return (
-              <div key={r.id} style={recentCard}>
+              <div key={r.id} style={r.pendiente ? pendingCard : recentCard}>
+                {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
+
                 <div style={recentThumb}>
                   {r.archivos?.[0]?.preview ? (
                     <img src={r.archivos[0].preview} alt={r.ubicacion} style={recentImage} />
@@ -898,7 +894,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
                 <div style={recentName}>{r.ubicacion || r.descripcion}</div>
                 <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
 
-                {!tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
+                {!r.pendiente && !tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
                   <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
                 )}
               </div>
@@ -994,7 +990,19 @@ function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos:
 
 
 function textoGuardarBiblioteca(tipo: string) {
-  return "Guardar recurso";
+  const t = (tipo || "").toLowerCase();
+
+  if (t.includes("fotografía") || t.includes("foto")) return "Guardar fotografía";
+  if (t.includes("acta")) return "Guardar acta";
+  if (t.includes("video")) return "Guardar video";
+  if (t.includes("logo")) return "Guardar logo";
+  if (t.includes("cotización")) return "Guardar cotización";
+  if (t.includes("factura")) return "Guardar factura";
+  if (t.includes("contrato")) return "Guardar contrato";
+  if (t.includes("certificado")) return "Guardar certificado";
+  if (t.includes("documento")) return "Guardar documento";
+
+  return "{textoGuardarBiblioteca(recursoForm.tipo)}";
 }
 
 function AnimatedGears() {
@@ -1104,6 +1112,8 @@ const recentName = { marginTop: 6, fontSize: 12, fontWeight: 700, color: "#1f293
 const recentMeta = { marginTop: 2, fontSize: 11, color: "#64748b", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const emptyRecent = { minWidth: 260, color: "#64748b", fontSize: 13, padding: 10 };
 const deleteMini = { position: "absolute" as const, top: 6, right: 6, border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 28, height: 28, cursor: "pointer" };
+const pendingCard = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const };
+const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
