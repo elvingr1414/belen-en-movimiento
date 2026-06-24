@@ -399,7 +399,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V15</span></>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V17</span></>}
             </h2>
 
             <div style={actions}>
@@ -762,7 +762,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
   return (
     <div style={{ marginTop: 12 }}>
       <div style={libraryHeader}>
-        <div style={libraryHeaderTitle}>📚 Biblioteca <span style={versionTag}>V16</span></div>
+        <div style={libraryHeaderTitle}>📚 Biblioteca <span style={versionTag}>V17</span></div>
         <div style={libraryUser}>👤 Elvin González Rodríguez</div>
       </div>
 
@@ -806,9 +806,9 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
           <div style={fileSelectedText}>
             {archivos.length === 0
-              ? "Seleccione archivo(s)"
+              ? "Seleccionar archivo"
               : archivos.length === 1
-                ? archivos[0].nombre
+                ? "1 archivo seleccionado"
                 : `${archivos.length} archivos seleccionados`}
           </div>
         </div>
@@ -994,18 +994,7 @@ function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos:
 
 
 function textoGuardarBiblioteca(tipo: string) {
-  const t = (tipo || "").toLowerCase();
-
-  if (t.includes("fotografía") || t.includes("foto")) return "Guardar fotografía";
-  if (t.includes("acta")) return "Guardar acta";
-  if (t.includes("video")) return "Guardar video";
-  if (t.includes("logo")) return "Guardar logo";
-  if (t.includes("cotización")) return "Guardar cotización";
-  if (t.includes("factura")) return "Guardar factura";
-  if (t.includes("contrato")) return "Guardar contrato";
-  if (t.includes("certificado")) return "Guardar certificado";
-
-  return "Guardar en Biblioteca";
+  return "Guardar recurso";
 }
 
 function AnimatedGears() {
