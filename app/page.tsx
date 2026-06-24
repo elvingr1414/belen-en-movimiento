@@ -228,7 +228,7 @@ export default function Home() {
 
     if (accion === "Editar" && seleccionado && modulo === "Recursos") {
       const descripcionFinal =
-        recursoForm.descripcion.trim() ||
+        recursoForm.observaciones.trim() || recursoForm.descripcion.trim() ||
         seleccionado.descripcion ||
         recursoForm.ubicacion ||
         "Recurso sin descripción";
@@ -250,7 +250,7 @@ export default function Home() {
         ? archivosSeleccionados.map((archivo: any, index: number) => ({
             id: `r${Date.now()}-${index}`,
             ...recursoForm,
-            descripcion: recursoForm.descripcion.trim() || archivo.nombre,
+            descripcion: recursoForm.observaciones.trim() || recursoForm.descripcion.trim() || archivo.nombre,
             ubicacion: archivo.nombre,
             archivos: [archivo],
             fecha: new Date().toISOString().slice(0, 10),
@@ -258,7 +258,7 @@ export default function Home() {
         : [{
             id: `r${Date.now()}`,
             ...recursoForm,
-            descripcion: recursoForm.descripcion.trim() || recursoForm.ubicacion || "Recurso sin descripción",
+            descripcion: recursoForm.observaciones.trim() || recursoForm.descripcion.trim() || recursoForm.ubicacion || "Recurso sin descripción",
             fecha: new Date().toISOString().slice(0, 10),
           }];
 
@@ -349,7 +349,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : `${icono(modulo)} ${nombreModulo(modulo)}`}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V10</span></>}
             </h2>
 
             <div style={actions}>
@@ -805,13 +805,6 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         </div>
       )}
 
-      <textarea
-        placeholder="Descripción / detalle del recurso"
-        value={recursoForm.descripcion}
-        onChange={(e) => setRecursoForm({ ...recursoForm, descripcion: e.target.value })}
-        style={{ ...field, minHeight: 76, gridColumn: "1 / -1" }}
-      />
-
       <input
         placeholder="Enlace externo opcional / ruta de respaldo"
         value={recursoForm.ubicacion}
@@ -820,7 +813,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
       />
 
       <textarea
-        placeholder="Observaciones opcionales"
+        placeholder="Observaciones / descripción del archivo"
         value={recursoForm.observaciones}
         onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
         style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
@@ -851,7 +844,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
         <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
       </div>
 
-      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones opcionales" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
+      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones / descripción del archivo" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
 
       <h3 style={miniTitle}>Vinculado a</h3>
       <div style={list}>
@@ -973,7 +966,7 @@ function iconoArchivo(tipo: string) {
 function lineaConsulta(modulo: Modulo | "Personas" | "Entidades", item: any) {
   if (modulo === "Personas") return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}`;
   if (modulo === "Entidades") return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
-  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ${item.descripcion || "Sin descripción"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"}`;
+  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"}`;
   return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
 }
 
@@ -1007,6 +1000,7 @@ const panel = { marginTop: 16, background: "rgba(255,255,255,.86)", border: "1px
 const topLine = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" as const, alignItems: "center" };
 const sectionTitle = { margin: 0, fontSize: 22 };
 const miniTitle = { margin: "8px 0", fontSize: 17 };
+const versionTag = { fontSize: 12, color: "#1e3a8a", background: "#dbeafe", padding: "3px 8px", borderRadius: 999, marginLeft: 8 };
 const list = { display: "grid", gap: 8, marginTop: 10 };
 const scrollArea = { marginTop: 14, overflowX: "auto" as const, overflowY: "hidden" as const, WebkitOverflowScrolling: "touch" as const, paddingBottom: 4 };
 const listWide = { display: "grid", gap: 8, minWidth: 880 };
