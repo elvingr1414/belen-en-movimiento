@@ -121,6 +121,7 @@ export default function Home() {
   const [directiva, setDirectiva] = useState("No");
   const [fecha, setFecha] = useState("");
 
+  const [recursoPreview, setRecursoPreview] = useState<any>(null);
   const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
@@ -403,7 +404,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V22</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V23</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -478,7 +479,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} recursoPreview={recursoPreview} setRecursoPreview={setRecursoPreview} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -492,7 +493,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} recursoPreview={recursoPreview} setRecursoPreview={setRecursoPreview} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -756,7 +757,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [] }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, recursoPreview, setRecursoPreview }: any) {
   const archivos = recursoForm.archivos || [];
 
   const pendientes = archivos.map((archivo: any, index: number) => ({
@@ -882,7 +883,19 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
             const archivoPrincipal = r.archivos?.[0];
 
             return (
-              <div key={r.id} style={r.pendiente ? pendingCard : recentCard}>
+              <div
+                key={r.id}
+                style={r.pendiente ? pendingCard : (recursoPreview?.id === r.id ? recentCardSelected : recentCard)}
+                onClick={() => {
+                  if (r.pendiente) return;
+                  setSeleccionado?.(r);
+                  setAccion?.("Vista");
+                }}
+                onDoubleClick={() => {
+                  setRecursoPreview?.(r);
+                }}
+                title="Un clic: consultar. Doble clic: vista previa."
+              >
                 {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
 
                 <div style={recentThumb}>
@@ -906,7 +919,33 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
             );
           })}
         </div>
-      </div>
+      {recursoPreview && (
+        <div style={modalOverlay} onClick={() => setRecursoPreview(null)}>
+          <div style={modalBox} onClick={(e) => e.stopPropagation()}>
+            <div style={modalHeader}>
+              <strong>Vista previa</strong>
+              <button style={modalClose} onClick={() => setRecursoPreview(null)}>×</button>
+            </div>
+
+            <div style={modalTitle}>{recursoPreview.ubicacion || recursoPreview.descripcion}</div>
+            <div style={modalMeta}>{recursoPreview.tipo} · {recursoPreview.fecha || "Sin fecha"} {recursoPreview.hora || ""}</div>
+
+            <div style={modalPreview}>
+              {recursoPreview.archivos?.[0]?.preview ? (
+                <img src={recursoPreview.archivos[0].preview} alt={recursoPreview.ubicacion} style={modalImage} />
+              ) : (
+                <div style={modalIcon}>{iconoArchivoReal(recursoPreview)}</div>
+              )}
+            </div>
+
+            {(recursoPreview.observaciones || recursoPreview.descripcion) && (
+              <div style={modalObservaciones}>
+                {recursoPreview.observaciones || recursoPreview.descripcion}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1136,6 +1175,19 @@ const emptyRecent = { minWidth: 260, color: "#64748b", fontSize: 13, padding: 10
 const deleteMini = { position: "absolute" as const, top: 6, right: 6, border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 28, height: 28, cursor: "pointer" };
 const pendingCard = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const };
 const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800, maxWidth: 130, whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+
+
+const recentCardSelected = { width: 145, minWidth: 145, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
+const modalOverlay = { position: "fixed" as const, inset: 0, background: "rgba(15, 23, 42, .45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20 };
+const modalBox = { width: "min(760px, 92vw)", maxHeight: "86vh", overflow: "auto" as const, background: "white", borderRadius: 18, padding: 18, boxShadow: "0 24px 80px rgba(15,23,42,.35)" };
+const modalHeader = { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 };
+const modalClose = { border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 32, height: 32, fontSize: 22, cursor: "pointer" };
+const modalTitle = { fontWeight: 800, color: "#1f2937", marginBottom: 4 };
+const modalMeta = { fontSize: 13, color: "#64748b", marginBottom: 12 };
+const modalPreview = { minHeight: 220, borderRadius: 14, background: "#f8fafc", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" };
+const modalImage = { maxWidth: "100%", maxHeight: 520, objectFit: "contain" as const };
+const modalIcon = { fontSize: 72, padding: 40 };
+const modalObservaciones = { marginTop: 12, padding: 12, borderRadius: 12, background: "#f8fafc", color: "#334155", whiteSpace: "pre-wrap" as const };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
