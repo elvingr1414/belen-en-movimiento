@@ -1,5 +1,5 @@
 "use client";
-//VERSION V14 FORZADA.
+
 import { useState } from "react";
 
 type Modulo =
@@ -92,8 +92,10 @@ export default function Home() {
       ubicacion: "Drive / CDAM / Actas",
       visibilidad: "Compartido",
       observaciones: "Documento de ejemplo",
-      propietarioTipo: "Entidades",
-      propietarioId: "e1",
+      propietarioTipo: "Personas",
+      propietarioId: "p1",
+      creadoPorId: "p1",
+      creadoPorNombre: "Elvin González Rodríguez",
     },
     {
       id: "r2",
@@ -125,8 +127,10 @@ export default function Home() {
     ubicacion: "",
     visibilidad: "Público",
     observaciones: "",
-    propietarioTipo: "Entidades",
-    propietarioId: "e1",
+    propietarioTipo: "Personas",
+    propietarioId: "p1",
+    creadoPorId: "p1",
+    creadoPorNombre: "Elvin González Rodríguez",
   });
 
   const [tipoDestinoRecurso, setTipoDestinoRecurso] = useState<"Personas" | "Entidades">("Entidades");
@@ -134,14 +138,23 @@ export default function Home() {
   const [mostrarListaDestinoRecurso, setMostrarListaDestinoRecurso] = useState(false);
   const [destinoRecursoSeleccionado, setDestinoRecursoSeleccionado] = useState<any | null>(null);
 
+  function coincideBusqueda(item: any, texto: string) {
+    const palabras = texto
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (palabras.length === 0) return true;
+
+    const base = JSON.stringify(item).toLowerCase();
+    return palabras.every((palabra) => base.includes(palabra));
+  }
+
   const lista =
     modulo === "Recursos"
-      ? recursos.filter((item) =>
-          JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
-        )
-      : datosBase[modulo].filter((item) =>
-          JSON.stringify(item).toLowerCase().includes(busqueda.toLowerCase())
-        );
+      ? recursos.filter((item) => coincideBusqueda(item, busqueda))
+      : datosBase[modulo].filter((item) => coincideBusqueda(item, busqueda));
 
   const listaVinculo =
     modulo === "Personas"
@@ -221,17 +234,17 @@ export default function Home() {
   function guardarRecurso() {
     const archivosSeleccionados = recursoForm.archivos || [];
 
-    if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.descripcion.trim()) {
-      alert("Debe seleccionar al menos un archivo o escribir una descripción.");
+    if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.observaciones.trim()) {
+      alert("Debe seleccionar al menos un archivo o escribir una observación.");
       return;
     }
 
     if (accion === "Editar" && seleccionado && modulo === "Recursos") {
       const descripcionFinal =
-        recursoForm.observaciones.trim() || recursoForm.descripcion.trim() ||
+        recursoForm.observaciones.trim() ||
         seleccionado.descripcion ||
         recursoForm.ubicacion ||
-        "Recurso sin descripción";
+        "Recurso sin observaciones";
 
       const actualizados = recursos.map((r) =>
         r.id === seleccionado.id
@@ -245,26 +258,38 @@ export default function Home() {
       return;
     }
 
+    const fechaActual = new Date().toISOString().slice(0, 10);
+
     const nuevos =
       archivosSeleccionados.length > 0
         ? archivosSeleccionados.map((archivo: any, index: number) => ({
             id: `r${Date.now()}-${index}`,
             ...recursoForm,
-            descripcion: recursoForm.observaciones.trim() || recursoForm.descripcion.trim() || archivo.nombre,
+            descripcion: recursoForm.observaciones.trim() || archivo.nombre,
             ubicacion: archivo.nombre,
             archivos: [archivo],
-            fecha: new Date().toISOString().slice(0, 10),
+            fecha: fechaActual,
+            creadoPorId: recursoForm.creadoPorId || "p1",
+            creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
           }))
         : [{
             id: `r${Date.now()}`,
             ...recursoForm,
-            descripcion: recursoForm.observaciones.trim() || recursoForm.descripcion.trim() || recursoForm.ubicacion || "Recurso sin descripción",
-            fecha: new Date().toISOString().slice(0, 10),
+            descripcion: recursoForm.observaciones.trim() || recursoForm.ubicacion || "Recurso sin observaciones",
+            fecha: fechaActual,
+            creadoPorId: recursoForm.creadoPorId || "p1",
+            creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
           }];
 
     setRecursos([...recursos, ...nuevos]);
     setSeleccionado(null);
-    setAccion("Vista");
+
+    if (modulo === "Recursos") {
+      setAccion("Nuevo");
+    } else {
+      setAccion("Vista");
+    }
+
     limpiarRecursoForm();
   }
 
@@ -313,11 +338,7 @@ export default function Home() {
 
   return (
     <main style={page}>
-      <div style={versionBadge}>
-        FUENTE ACTUAL: V14 · BIBLIOTECA SIN DESCRIPCIÓN · ARCHIVOS MÚLTIPLES
-      </div>
-
-      <style>{`
+<style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -338,6 +359,9 @@ export default function Home() {
           value={busqueda}
           onFocus={() => volverALista()}
           onChange={(e) => volverALista(e.target.value)}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+          }}
           placeholder="Buscar..."
           style={search}
         />
@@ -353,7 +377,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V11</span></>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V15</span></>}
             </h2>
 
             <div style={actions}>
@@ -789,6 +813,10 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso }: any) {
         ))}
       </select>
 
+      <div style={createdByBox}>
+        Creado por: {recursoForm.creadoPorNombre || "Elvin González Rodríguez"}
+      </div>
+
       {archivos.length > 0 && (
         <div style={previewBox}>
           <strong>Archivos seleccionados</strong>
@@ -970,7 +998,7 @@ function iconoArchivo(tipo: string) {
 function lineaConsulta(modulo: Modulo | "Personas" | "Entidades", item: any) {
   if (modulo === "Personas") return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}`;
   if (modulo === "Entidades") return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
-  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"}`;
+  if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ✍️ ${item.creadoPorNombre || "Elvin González Rodríguez"}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"}`;
   return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
 }
 
@@ -992,7 +1020,6 @@ function nombreModulo(m: Modulo) {
 
 const page = { minHeight: "100vh", padding: 18, paddingBottom: 120, background: "linear-gradient(135deg,#f8f5ef,#ffffff,#eef2f7)", fontFamily: "Georgia, serif", color: "#1f2937" };
 const wrap = { maxWidth: 1100, margin: "0 auto" };
-const versionBadge = { position: "fixed" as const, top: 8, left: 8, zIndex: 9999, background: "#991b1b", color: "white", padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 800, boxShadow: "0 2px 8px rgba(0,0,0,.2)" };
 const eyebrow = { letterSpacing: 3, color: "#64748b", fontSize: 11, margin: 0, textAlign: "center" as const };
 const titleLine = { display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" as const };
 const title = { fontSize: "clamp(2.1rem,6vw,4.2rem)", margin: "6px 0 12px" };
@@ -1020,11 +1047,12 @@ const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border
 const filePickerBox = { display: "flex", alignItems: "center", gap: 8, minWidth: 190 };
 const folderButton = { width: 52, height: 46, borderRadius: 14, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const fileSelectedText = { flex: 1, padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", background: "white", fontSize: 13, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-const previewGrid = { display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 10 };
+const previewGrid = { display: "flex", gap: 10, flexWrap: "nowrap" as const, marginTop: 10, overflowX: "auto" as const, paddingBottom: 8 };
 const previewItem = { width: 150, border: "1px solid #e5e7eb", borderRadius: 12, background: "white", padding: 8 };
 const previewImage = { width: "100%", height: 90, objectFit: "cover" as const, borderRadius: 8, border: "1px solid #e5e7eb", display: "block" };
 const fileIcon = { height: 90, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, background: "#f1f5f9", borderRadius: 8 };
 const fileCaption = { marginTop: 6, fontSize: 12, color: "#475569", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
+const createdByBox = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 13 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
@@ -1033,4 +1061,3 @@ function chip(active: boolean) {
 function iconButton(active: boolean) {
   return { width: 42, height: 42, borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", fontSize: 18 };
 }
-//force deploy clean previewGrid2026-06-24
