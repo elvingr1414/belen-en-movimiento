@@ -363,6 +363,14 @@ function guardarRecurso() {
           }];
 
     setRecursos([...nuevos, ...recursos]);
+    const recienGuardado = nuevos[0] || null;
+    setRecursoBibliotecaActivo(recienGuardado);
+    setSeleccionado(recienGuardado);
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+    if (recienGuardado) {
+      setRecursoForm({ ...recursoForm, ...recienGuardado, archivos: recienGuardado.archivos || [] });
+    }
     setSeleccionado(null);
     setAccion("Nuevo");
     limpiarRecursoForm();
@@ -472,11 +480,11 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V49</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V50</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
-              {seleccionado && (
+              {(seleccionado || recursoBibliotecaActivo || recursoForm?.id) && (
                 <>
                   <button
                     title="Editar"
@@ -550,7 +558,7 @@ function guardarRecurso() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -564,7 +572,7 @@ function guardarRecurso() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -856,7 +864,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, setSeleccionado, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = (!!bibliotecaModoNuevo && archivos.length > 0) || !!bibliotecaModoEditar;
   const archivoActivo = !!bibliotecaModoNuevo;
@@ -1342,7 +1350,7 @@ const listWide = { display: "grid", gap: 8, minWidth: 880 };
 const rowWide = { textAlign: "left" as const, padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: 14, whiteSpace: "nowrap" as const, overflow: "visible" };
 const relationRow = { display: "flex", gap: 12, flexWrap: "wrap" as const, alignItems: "center", padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontSize: 14 };
 const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 10, marginTop: 12 };
-const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", fontSize: 14, background: "white", boxSizing: "border-box" as const };
+const field = { padding: "12px 14px", borderRadius: 12, border: "1px solid #d1d5db", fontSize: 14, background: "white", boxSizing: "border-box" as const , minHeight: 48};
 const primary = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 700, cursor: "pointer" };
 const iconPrimary = { width: 42, height: 42, padding: 0, borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 900, fontSize: 30, lineHeight: "42px", cursor: "pointer" };
 const searchLine = { display: "flex", gap: 8, marginTop: 12, alignItems: "center" };
@@ -1350,7 +1358,7 @@ const libraryHeader = { display: "flex", alignItems: "center", justifyContent: "
 const libraryHeaderTitle = { fontSize: 18, fontWeight: 800 };
 const libraryUser = { fontSize: 13, color: "#475569", background: "#f8fafc", border: "1px solid #e5e7eb", padding: "6px 10px", borderRadius: 999 };
 const libraryUserInline = { fontSize: 13, color: "#475569", fontWeight: 500 };
-const fileOneButton = { padding: "12px 14px", borderRadius: 12, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", whiteSpace: "nowrap" as const };
+const fileOneButton = { padding: "12px 14px", borderRadius: 12, border: "1px solid #1e3a8a", background: "#eff6ff", color: "#1e3a8a", fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", whiteSpace: "nowrap" as const , minHeight: 48, boxSizing: "border-box" as const};
 const recentObs = { marginTop: 3, fontSize: 11, color: "#334155", whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 const previewBox = { gridColumn: "1 / -1", padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc", color: "#475569", fontSize: 14 };
 const previewGrid = { display: "flex", gap: 10, flexWrap: "nowrap" as const, marginTop: 10, overflowX: "auto" as const, paddingBottom: 8 };
@@ -1388,7 +1396,7 @@ const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f
 
 const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
 
-const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", fontSize: 14, background: "#eff6ff", color: "#335c7a", boxSizing: "border-box" as const, cursor: "not-allowed", opacity: .95 };
+const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", fontSize: 14, background: "#eff6ff", color: "#335c7a", boxSizing: "border-box" as const, cursor: "not-allowed", opacity: .95 , minHeight: 48};
 const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", fontSize: 14, background: "#eff6ff", color: "#335c7a", boxSizing: "border-box" as const, cursor: "not-allowed", opacity: .95 };
 const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#93c5fd", color: "#f8fafc", fontWeight: 700, cursor: "not-allowed", opacity: .82 };
 const handleLine = { display: "block", margin: "2px 0 8px", textAlign: "center" as const, letterSpacing: 2.0, fontSize: 11, color: "#3b6f94", opacity: .82, fontWeight: 700, textDecoration: "none" };
@@ -1403,7 +1411,7 @@ const dialogText = { margin: "0 0 14px", color: "#475569", lineHeight: 1.45 };
 const dialogButton = { border: "none", background: "#1e3a8a", color: "white", borderRadius: 999, padding: "9px 18px", fontWeight: 800, cursor: "pointer", float: "right" as const };
 
 
-const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#335c7a", cursor: "not-allowed", fontWeight: 800, opacity: .95 };
+const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#335c7a", cursor: "not-allowed", fontWeight: 800, opacity: .95 , minHeight: 48, boxSizing: "border-box" as const};
 
 
 const visorActions = { display: "flex", justifyContent: "flex-end", gap: 8, margin: "0 0 10px", flexWrap: "wrap" as const };
