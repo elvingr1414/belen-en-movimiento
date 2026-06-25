@@ -122,6 +122,7 @@ export default function Home() {
   const [fecha, setFecha] = useState("");
 
   const [archivoConsultado, setArchivoConsultado] = useState<any>(null);
+  const [recursoActivoId, setRecursoActivoId] = useState<string | null>(null);
   const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
@@ -260,8 +261,9 @@ export default function Home() {
     }));
 
     setRecursos([...nuevos, ...recursos]);
-    setArchivoConsultado(null);
-    limpiarRecursoForm();
+    setRecursoActivoId(nuevos[0]?.id || null);
+    setArchivoConsultado(nuevos[0] || null);
+    setRecursoForm({ ...recursoForm, ...nuevos[0], archivos: nuevos[0]?.archivos || [] });
   }
 
   function guardarRecurso() {
@@ -329,6 +331,33 @@ export default function Home() {
     setSeleccionado(null);
     setAccion("Nuevo");
     limpiarRecursoForm();
+  }
+
+  function actualizarRecursoActivo(cambios: any, silencioso = true) {
+    if (!recursoActivoId) return;
+
+    const actual = recursos.find((r) => r.id === recursoActivoId);
+    if (!actual) return;
+
+    const actualizado = {
+      ...actual,
+      ...cambios,
+      descripcion: cambios.observaciones?.trim() || cambios.descripcion || actual.descripcion,
+      modificadoEnMs: Date.now(),
+    };
+
+    setRecursos(recursos.map((r) => (r.id === recursoActivoId ? actualizado : r)));
+    setArchivoConsultado(actualizado);
+    setRecursoForm({ ...recursoForm, ...actualizado, archivos: actualizado.archivos || [] });
+
+    if (!silencioso) {
+      const faltantes = [];
+      if (!actualizado.tipo) faltantes.push("tipo");
+      if (!actualizado.visibilidad) faltantes.push("visibilidad");
+      if (!actualizado.propietarioTipo) faltantes.push("relación");
+      if (!actualizado.propietarioId) faltantes.push("persona o entidad");
+      if (faltantes.length) alert("Faltan datos requeridos: " + faltantes.join(", "));
+    }
   }
 
   function excluirRecurso() {
@@ -434,7 +463,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V29</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V30</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -509,7 +538,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} recursoActivoId={recursoActivoId} setRecursoActivoId={setRecursoActivoId} actualizarRecursoActivo={actualizarRecursoActivo} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -523,7 +552,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} recursoActivoId={recursoActivoId} setRecursoActivoId={setRecursoActivoId} actualizarRecursoActivo={actualizarRecursoActivo} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -787,9 +816,9 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarArchivosDirecto, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, archivoConsultado, setArchivoConsultado }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarArchivosDirecto, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, archivoConsultado, setArchivoConsultado, recursoActivoId, setRecursoActivoId, actualizarRecursoActivo }: any) {
   const archivos = recursoForm.archivos || [];
-  const camposActivos = !!archivoConsultado;
+  const camposActivos = !!recursoActivoId;
 
 const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
@@ -811,7 +840,7 @@ const misRecursos = [...recursos]
           style={field}
           value={recursoForm.tipo}
           disabled={!camposActivos}
-          onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
+          onChange={(e) => { const cambios = { ...recursoForm, tipo: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ tipo: e.target.value }); }}
         >
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
         </select>
@@ -827,7 +856,8 @@ const misRecursos = [...recursos]
               const seleccionados = Array.from(e.target.files || []).map((archivo: any) => ({
                 nombre: archivo.name,
                 tipo: archivo.type || "Archivo",
-                preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
+                url: URL.createObjectURL(archivo),
+                  preview: archivo.type?.startsWith("image/") ? URL.createObjectURL(archivo) : "",
               }));
 
               if (seleccionados.length > 0) {
@@ -848,7 +878,7 @@ const misRecursos = [...recursos]
           style={field}
           value={recursoForm.visibilidad}
           disabled={!camposActivos}
-          onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
+          onChange={(e) => { const cambios = { ...recursoForm, visibilidad: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ visibilidad: e.target.value }); }}
         >
           {visibilidades.map((v) => <option key={v}>{v}</option>)}
         </select>
@@ -857,7 +887,7 @@ const misRecursos = [...recursos]
           style={field}
           value={recursoForm.propietarioTipo}
           disabled={!camposActivos}
-          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
+          onChange={(e) => { const cambios = { ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioTipo: cambios.propietarioTipo, propietarioId: cambios.propietarioId }); }}
         >
           <option value="Personas">Relacionado: Persona</option>
           <option value="Entidades">Relacionado: Entidad</option>
@@ -867,7 +897,7 @@ const misRecursos = [...recursos]
           style={field}
           value={recursoForm.propietarioId}
           disabled={!camposActivos}
-          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
+          onChange={(e) => { const cambios = { ...recursoForm, propietarioId: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioId: e.target.value }); }}
         >
           {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
             <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
@@ -875,10 +905,11 @@ const misRecursos = [...recursos]
         </select>
 
         <textarea
-          placeholder="Observaciones / descripción del archivo"
+          placeholder={camposActivos ? "Observaciones / descripción del archivo" : "Seleccione un archivo reciente para editar observaciones"}
           value={recursoForm.observaciones}
           disabled={!camposActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
+          onBlur={() => actualizarRecursoActivo?.({ observaciones: recursoForm.observaciones }, false)}
           style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
         />
       </div>
@@ -898,16 +929,19 @@ const misRecursos = [...recursos]
             return (
               <div
                 key={r.id}
-                style={r.pendiente ? pendingCard : (archivoConsultado?.id === r.id ? recentCardSelected : recentCard)}
+                style={r.pendiente ? pendingCard : (recursoActivoId === r.id ? recentCardSelected : recentCard)}
                 onClick={() => {
                   if (r.pendiente) return;
-                  setArchivoConsultado?.({ ...r, previewAbierto: false });
+                  setRecursoActivoId?.(r.id);
+                  setArchivoConsultado?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onDoubleClick={() => {
                   if (r.pendiente) return;
-                  setArchivoConsultado?.({ ...r, previewAbierto: true });
-                  setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
+                  const archivo = r.archivos?.[0];
+                  const url = archivo?.url || archivo?.preview;
+                  if (url) window.open(url, "_blank");
+                  else alert("Este archivo no tiene una vista previa disponible en esta versión de prueba.");
                 }}
                 title="Un clic: consultar. Doble clic: abrir vista previa."
               >
@@ -935,36 +969,6 @@ const misRecursos = [...recursos]
           })}
         </div>
       </div>
-
-      {archivoConsultado && (
-        <div style={consultaBox}>
-          <div style={consultaHeader}>
-            <strong>{archivoConsultado.previewAbierto ? "Vista previa" : "Consulta rápida del archivo"}</strong>
-            <button style={consultaClose} onClick={() => setArchivoConsultado(null)}>Cerrar</button>
-          </div>
-
-          <div style={consultaTitle}>{archivoConsultado.ubicacion || archivoConsultado.descripcion}</div>
-          <div style={consultaMeta}>
-            {iconoArchivoReal(archivoConsultado)} {archivoConsultado.tipo} · {archivoConsultado.fecha || "Sin fecha"} {archivoConsultado.hora || ""}
-          </div>
-
-          {archivoConsultado.previewAbierto && (
-            <div style={consultaPreview}>
-              {archivoConsultado.archivos?.[0]?.preview ? (
-                <img src={archivoConsultado.archivos[0].preview} alt={archivoConsultado.ubicacion} style={consultaImage} />
-              ) : (
-                <div style={consultaIcon}>{iconoArchivoReal(archivoConsultado)}</div>
-              )}
-            </div>
-          )}
-
-          {(archivoConsultado.observaciones || archivoConsultado.descripcion) && (
-            <div style={consultaObs}>
-              {archivoConsultado.observaciones || archivoConsultado.descripcion}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -985,7 +989,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
         <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
       </div>
 
-      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones / descripción del archivo" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
+      <textarea readOnly value={recurso.observaciones || ""} placeholder={camposActivos ? "Observaciones / descripción del archivo" : "Seleccione un archivo reciente para editar observaciones"} style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
 
       <h3 style={miniTitle}>Vinculado a</h3>
       <div style={list}>
@@ -1213,15 +1217,6 @@ const pendingBadge = { position: "absolute" as const, top: 6, left: 6, backgroun
 
 
 const recentCardSelected = { width: 145, minWidth: 145, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
-const consultaBox = { marginTop: 12, padding: 14, borderRadius: 16, border: "1px solid #c7d2fe", background: "#f8fafc" };
-const consultaHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 };
-const consultaClose = { border: "1px solid #d1d5db", background: "white", borderRadius: 999, padding: "6px 10px", cursor: "pointer" };
-const consultaTitle = { fontWeight: 800, color: "#1f2937", marginBottom: 4, whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-const consultaMeta = { fontSize: 13, color: "#64748b", marginBottom: 10 };
-const consultaPreview = { minHeight: 180, borderRadius: 14, background: "white", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: 10 };
-const consultaImage = { maxWidth: "100%", maxHeight: 420, objectFit: "contain" as const };
-const consultaIcon = { fontSize: 62, padding: 30 };
-const consultaObs = { padding: 10, borderRadius: 12, background: "white", color: "#334155", whiteSpace: "pre-wrap" as const };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
