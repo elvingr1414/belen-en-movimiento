@@ -252,7 +252,42 @@ export default function Home() {
     setMensajeSistema({ titulo, texto, tipo });
   }
 
-  function guardarRecurso() {
+  
+  function guardarCambiosRecurso() {
+    const idActual = recursoBibliotecaActivo?.id || recursoForm?.id;
+
+    if (!idActual) {
+      mostrarMensajeSistema("Seleccione un archivo", "Primero seleccione un archivo para poder editarlo.", "aviso");
+      return;
+    }
+
+    const base = recursoBibliotecaActivo || recursos.find((r: any) => r.id === idActual) || recursoForm;
+
+    const actualizado = {
+      ...base,
+      visibilidad: recursoForm.visibilidad,
+      propietarioTipo: recursoForm.propietarioTipo,
+      propietarioId: recursoForm.propietarioId,
+      observaciones: recursoForm.observaciones,
+      descripcion: recursoForm.descripcion,
+      archivos: base.archivos || recursoForm.archivos || [],
+      tipo: base.tipo,
+      ubicacion: base.ubicacion,
+      fecha: base.fecha,
+      hora: base.hora,
+      creadoEnMs: base.creadoEnMs,
+      fechaHoraCreacion: base.fechaHoraCreacion,
+    };
+
+    setRecursos(recursos.map((r: any) => r.id === idActual ? actualizado : r));
+    setRecursoBibliotecaActivo(actualizado);
+    setRecursoForm({ ...recursoForm, ...actualizado, archivos: actualizado.archivos || [] });
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+    mostrarMensajeSistema("Cambios guardados", "La información del archivo fue actualizada correctamente.", "aviso");
+  }
+
+function guardarRecurso() {
     const archivosNuevos = recursoForm.archivos || [];
     const existeDuplicado = archivosNuevos.some((archivoNuevo: any) =>
       recursos.some((r: any) =>
@@ -437,7 +472,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V46</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V47</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -514,7 +549,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -528,7 +563,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -820,7 +855,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = (!!bibliotecaModoNuevo && archivos.length > 0) || !!bibliotecaModoEditar;
   const archivoActivo = !!bibliotecaModoNuevo;
@@ -929,7 +964,7 @@ const misRecursos = [...recursos]
       </div>
 
       <div style={saveBar}>
-        <button style={controlesActivos ? primary : primaryDisabled} disabled={!controlesActivos} onClick={guardarRecurso}>
+        <button style={controlesActivos ? primary : primaryDisabled} disabled={!controlesActivos} onClick={bibliotecaModoEditar ? guardarCambiosRecurso : guardarRecurso}>
           {textoGuardarBiblioteca(recursoForm.tipo)}
         </button>
       </div>
