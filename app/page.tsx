@@ -405,7 +405,7 @@ export default function Home() {
       <section style={wrap}>
         <header>
           <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
-          <a style={handleLine} href="https://www.instagram.com/deusestudiodebiblia" target="_blank" rel="noreferrer">DEUS estudio de biblia</a>
+          <a style={handleLine} href="https://www.youtube.com/@DeusEstudiodeBiblia" target="_blank" rel="noreferrer">DEUS estudio de biblia</a>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -435,7 +435,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V42</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V43</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -1280,10 +1280,10 @@ const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f
 
 const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
 
-const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
-const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
-const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "#ffffff", fontWeight: 700, cursor: "not-allowed" };
-const handleLine = { display: "block", margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.0, fontSize: 11, color: "#64748b", opacity: .78, fontWeight: 700, textDecoration: "none" };
+const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", fontSize: 14, background: "#eff6ff", color: "#335c7a", boxSizing: "border-box" as const, cursor: "not-allowed", opacity: .95 };
+const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", fontSize: 14, background: "#eff6ff", color: "#335c7a", boxSizing: "border-box" as const, cursor: "not-allowed", opacity: .95 };
+const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#93c5fd", color: "#f8fafc", fontWeight: 700, cursor: "not-allowed", opacity: .82 };
+const handleLine = { display: "block", margin: "2px 0 8px", textAlign: "center" as const, letterSpacing: 2.0, fontSize: 11, color: "#3b6f94", opacity: .82, fontWeight: 700, textDecoration: "none" };
 
 
 const dialogOverlay = { position: "fixed" as const, inset: 0, background: "rgba(15,23,42,.42)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 18 };
@@ -1295,7 +1295,7 @@ const dialogText = { margin: "0 0 14px", color: "#475569", lineHeight: 1.45 };
 const dialogButton = { border: "none", background: "#1e3a8a", color: "white", borderRadius: 999, padding: "9px 18px", fontWeight: 800, cursor: "pointer", float: "right" as const };
 
 
-const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed", fontWeight: 800 };
+const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#335c7a", cursor: "not-allowed", fontWeight: 800, opacity: .95 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
