@@ -122,6 +122,7 @@ export default function Home() {
   const [fecha, setFecha] = useState("");
 
   const [visorRecurso, setVisorRecurso] = useState<any | null>(null);
+  const [mensajeSistema, setMensajeSistema] = useState<any | null>(null);
   const [recursoBibliotecaActivo, setRecursoBibliotecaActivo] = useState<any | null>(null);
   useEffect(() => {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
@@ -243,6 +244,10 @@ export default function Home() {
     limpiarVinculo();
   }
 
+  function mostrarMensajeSistema(titulo: string, texto: string, tipo = "error") {
+    setMensajeSistema({ titulo, texto, tipo });
+  }
+
   function guardarRecurso() {
     const archivosNuevos = recursoForm.archivos || [];
     const existeDuplicado = archivosNuevos.some((archivoNuevo: any) =>
@@ -254,14 +259,14 @@ export default function Home() {
     );
 
     if (existeDuplicado) {
-      alert("Este archivo ya existe en Mis archivos recientes. No se puede agregar dos veces.");
+      mostrarMensajeSistema("Archivo duplicado", "Este archivo ya existe en Mis archivos recientes. No se puede agregar dos veces.", "error");
       return;
     }
 
     const archivosSeleccionados = recursoForm.archivos || [];
 
     if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.observaciones?.trim()) {
-      alert("Debe seleccionar al menos un archivo o escribir una observación.");
+      mostrarMensajeSistema("Mensaje del sistema", "Debe seleccionar al menos un archivo o escribir una observación.", "aviso");
       return;
     }
 
@@ -339,12 +344,12 @@ export default function Home() {
     if (!recurso) return;
 
     if ((recurso.creadoPorId || "p1") !== "p1") {
-      alert("Solo puede eliminar recursos creados por usted.");
+      mostrarMensajeSistema("Mensaje del sistema", "Solo puede eliminar recursos creados por usted.", "aviso");
       return;
     }
 
     if (tieneVinculos) {
-      alert("Este recurso ya está vinculado. Primero debe desvincularse antes de eliminarlo.");
+      mostrarMensajeSistema("Mensaje del sistema", "Este recurso ya está vinculado. Primero debe desvincularse antes de eliminarlo.", "aviso");
       return;
     }
 
@@ -428,7 +433,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V40</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V41</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -503,7 +508,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -517,7 +522,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -609,6 +614,10 @@ export default function Home() {
       </section>
       {visorRecurso && (
         <VisorRecurso recurso={visorRecurso} cerrar={() => setVisorRecurso(null)} />
+      )}
+
+      {mensajeSistema && (
+        <MensajeSistema mensaje={mensajeSistema} cerrar={() => setMensajeSistema(null)} />
       )}
 
     </main>
@@ -785,7 +794,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = archivos.length > 0;
 
@@ -1001,6 +1010,24 @@ function RecursoDetalle({ recurso, vinculos }: any) {
   );
 }
 
+
+
+function MensajeSistema({ mensaje, cerrar }: any) {
+  const esError = mensaje?.tipo === "error";
+
+  return (
+    <div style={dialogOverlay} onClick={cerrar}>
+      <div style={dialogBox} onClick={(e) => e.stopPropagation()}>
+        <div style={dialogIcon}>{esError ? "⚠️" : "ℹ️"}</div>
+        <div style={dialogContent}>
+          <strong style={dialogTitle}>{mensaje?.titulo || "Mensaje del sistema"}</strong>
+          <p style={dialogText}>{mensaje?.texto}</p>
+          <button style={dialogButton} onClick={cerrar}>Aceptar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function VisorRecurso({ recurso, cerrar }: any) {
   const archivo = recurso?.archivos?.[0];
@@ -1262,6 +1289,15 @@ const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px sol
 const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
 const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "#ffffff", fontWeight: 700, cursor: "not-allowed" };
 const handleLine = { display: "block", margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.0, fontSize: 11, color: "#64748b", opacity: .78, fontWeight: 700, textDecoration: "none" };
+
+
+const dialogOverlay = { position: "fixed" as const, inset: 0, background: "rgba(15,23,42,.42)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 18 };
+const dialogBox = { width: "min(460px, 92vw)", background: "white", borderRadius: 22, padding: 18, display: "flex", gap: 14, boxShadow: "0 24px 90px rgba(15,23,42,.35)", border: "1px solid #e5e7eb" };
+const dialogIcon = { width: 42, height: 42, borderRadius: 999, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 };
+const dialogContent = { flex: 1 };
+const dialogTitle = { display: "block", fontSize: 18, color: "#1f2937", marginBottom: 6 };
+const dialogText = { margin: "0 0 14px", color: "#475569", lineHeight: 1.45 };
+const dialogButton = { border: "none", background: "#1e3a8a", color: "white", borderRadius: 999, padding: "9px 18px", fontWeight: 800, cursor: "pointer", float: "right" as const };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
