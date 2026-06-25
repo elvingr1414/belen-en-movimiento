@@ -435,7 +435,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V44</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V45</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -1046,6 +1046,28 @@ function VisorRecurso({ recurso, cerrar }: any) {
           <button style={visorCerrar} onClick={cerrar}>×</button>
         </div>
 
+        <div style={visorActions}>
+          <button
+            style={visorActionButton}
+            onClick={() => {
+              const texto = encodeURIComponent(`Comparto este archivo desde Belén en Movimiento: ${nombre}`);
+              window.open(`https://wa.me/?text=${texto}`, "_blank");
+            }}
+          >
+            🟢 WhatsApp
+          </button>
+          {url && (
+            <a href={url} target="_blank" rel="noreferrer" style={visorActionLink}>
+              🔗 Abrir
+            </a>
+          )}
+          {url && (
+            <a href={url} download={nombre} style={visorActionLink}>
+              📥 Descargar
+            </a>
+          )}
+        </div>
+
         <div style={visorContenido}>
           {url && esImagen ? (
             <img src={url} alt={nombre} style={visorImagen} />
@@ -1297,6 +1319,11 @@ const dialogButton = { border: "none", background: "#1e3a8a", color: "white", bo
 
 
 const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#335c7a", cursor: "not-allowed", fontWeight: 800, opacity: .95 };
+
+
+const visorActions = { display: "flex", justifyContent: "flex-end", gap: 8, margin: "0 0 10px", flexWrap: "wrap" as const };
+const visorActionButton = { border: "1px solid #bbf7d0", background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "8px 12px", fontWeight: 800, cursor: "pointer" };
+const visorActionLink = { border: "1px solid #bfdbfe", background: "#eff6ff", color: "#1e3a8a", borderRadius: 999, padding: "8px 12px", fontWeight: 800, textDecoration: "none" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
