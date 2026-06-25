@@ -125,6 +125,8 @@ export default function Home() {
   const [mensajeSistema, setMensajeSistema] = useState<any | null>(null);
   const [recursoBibliotecaActivo, setRecursoBibliotecaActivo] = useState<any | null>(null);
   const [bibliotecaModoNuevo, setBibliotecaModoNuevo] = useState(false);
+  const [bibliotecaModoEditar, setBibliotecaModoEditar] = useState(false);
+  const [confirmarBorrado, setConfirmarBorrado] = useState<any | null>(null);
   useEffect(() => {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
       setRecursoBibliotecaActivo(seleccionado);
@@ -405,7 +407,7 @@ export default function Home() {
       <section style={wrap}>
         <header>
           <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
-          <a style={handleLine} href="https://www.youtube.com/@DeusEstudiodeBiblia" target="_blank" rel="noreferrer">DEUS estudio de biblia</a>
+          <a style={handleLine} href="https://www.youtube.com/@DeusEstudiodeBiblia" target="_blank" rel="noreferrer">DEUS Estudio de Biblia</a>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -435,7 +437,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V45</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V46</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -445,7 +447,7 @@ export default function Home() {
                     title="Editar"
                     onClick={() => {
                       if (modulo === "Recursos") setRecursoForm({ ...(seleccionado || recursoBibliotecaActivo) });
-                      setAccion("Editar");
+                      if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); } setAccion("Editar");
                     }}
                     style={iconButton(accion === "Editar")}
                   >
@@ -512,7 +514,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -526,7 +528,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -622,6 +624,26 @@ export default function Home() {
 
       {mensajeSistema && (
         <MensajeSistema mensaje={mensajeSistema} cerrar={() => setMensajeSistema(null)} />
+      )}
+
+      {confirmarBorrado && (
+        <ConfirmarBorradoRecurso
+          recurso={confirmarBorrado}
+          cerrar={() => setConfirmarBorrado(null)}
+          desvincular={() => {
+            setConfirmarBorrado(null);
+            mostrarMensajeSistema("Vínculo eliminado", "El archivo fue desvinculado de este registro. El archivo permanece en la biblioteca.", "aviso");
+          }}
+          eliminar={() => {
+            setRecursos(recursos.filter((r: any) => r.id !== confirmarBorrado.id));
+            setConfirmarBorrado(null);
+            setRecursoBibliotecaActivo(null);
+            setBibliotecaModoNuevo(false);
+            setBibliotecaModoEditar(false);
+            limpiarRecursoForm();
+            mostrarMensajeSistema("Archivo eliminado", "El archivo fue eliminado de la biblioteca.", "aviso");
+          }}
+        />
       )}
 
     </main>
@@ -798,9 +820,10 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
   const archivos = recursoForm.archivos || [];
-  const controlesActivos = !!bibliotecaModoNuevo && archivos.length > 0;
+  const controlesActivos = (!!bibliotecaModoNuevo && archivos.length > 0) || !!bibliotecaModoEditar;
+  const archivoActivo = !!bibliotecaModoNuevo;
 
 const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
@@ -828,18 +851,18 @@ const misRecursos = [...recursos]
     <div style={{ marginTop: 12 }}>
       <div style={grid}>
         <select
-          style={bibliotecaModoNuevo ? field : fieldDisabled}
-          disabled={!bibliotecaModoNuevo}
+          style={archivoActivo ? field : fieldDisabled}
+          disabled={!archivoActivo}
           value={recursoForm.tipo}
           onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
         >
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
         </select>
 
-        <label style={bibliotecaModoNuevo ? fileOneButton : fileOneButtonDisabled} title={bibliotecaModoNuevo ? "Seleccionar archivo(s)" : "Presione + para agregar archivos"}>
+        <label style={archivoActivo ? fileOneButton : fileOneButtonDisabled} title={archivoActivo ? "Seleccionar archivo(s)" : "Presione + para agregar archivos"}>
           📁 {textoArchivo}
           <input
-            disabled={!bibliotecaModoNuevo}
+            disabled={!archivoActivo}
             type="file"
             multiple
             style={{ display: "none" }}
@@ -1008,6 +1031,32 @@ function RecursoDetalle({ recurso, vinculos }: any) {
 
 
 
+
+function ConfirmarBorradoRecurso({ recurso, cerrar, desvincular, eliminar }: any) {
+  const nombre = recurso?.ubicacion || recurso?.archivos?.[0]?.nombre || recurso?.descripcion || "Archivo";
+  const vinculos = recurso?.vinculosCount || recurso?.vinculos?.length || 1;
+
+  return (
+    <div style={dialogOverlay} onClick={cerrar}>
+      <div style={deleteDialogBox} onClick={(e) => e.stopPropagation()}>
+        <div style={dialogIcon}>🗑️</div>
+        <div style={dialogContent}>
+          <strong style={dialogTitle}>Eliminar o desvincular archivo</strong>
+          <p style={dialogText}>
+            <strong>{nombre}</strong><br />
+            Este archivo puede estar vinculado a {vinculos} registro(s). Puede quitar solo este vínculo o eliminarlo definitivamente de la biblioteca.
+          </p>
+          <div style={deleteActions}>
+            <button style={secondaryButton} onClick={cerrar}>Cancelar</button>
+            <button style={warningButton} onClick={desvincular}>Desvincular</button>
+            <button style={dangerButton} onClick={eliminar}>Eliminar definitivo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MensajeSistema({ mensaje, cerrar }: any) {
   const esError = mensaje?.tipo === "error";
 
@@ -1050,8 +1099,8 @@ function VisorRecurso({ recurso, cerrar }: any) {
           <button
             style={visorActionButton}
             onClick={() => {
-              const texto = encodeURIComponent(`Comparto este archivo desde Belén en Movimiento: ${nombre}`);
-              window.open(`https://wa.me/?text=${texto}`, "_blank");
+              const texto = encodeURIComponent(`Comparto este archivo desde Belén en Movimiento: ${nombre}${url ? "\n" + url : ""}`);
+              window.open(`https://web.whatsapp.com/send?text=${texto}`, "_blank");
             }}
           >
             🟢 WhatsApp
@@ -1324,6 +1373,13 @@ const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyCo
 const visorActions = { display: "flex", justifyContent: "flex-end", gap: 8, margin: "0 0 10px", flexWrap: "wrap" as const };
 const visorActionButton = { border: "1px solid #bbf7d0", background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "8px 12px", fontWeight: 800, cursor: "pointer" };
 const visorActionLink = { border: "1px solid #bfdbfe", background: "#eff6ff", color: "#1e3a8a", borderRadius: 999, padding: "8px 12px", fontWeight: 800, textDecoration: "none" };
+
+
+const deleteDialogBox = { width: "min(560px, 94vw)", background: "white", borderRadius: 22, padding: 18, display: "flex", gap: 14, boxShadow: "0 24px 90px rgba(15,23,42,.35)", border: "1px solid #e5e7eb" };
+const deleteActions = { display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" as const };
+const secondaryButton = { border: "1px solid #cbd5e1", background: "#f8fafc", color: "#334155", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
+const warningButton = { border: "1px solid #fde68a", background: "#fef3c7", color: "#92400e", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
+const dangerButton = { border: "1px solid #fecaca", background: "#fee2e2", color: "#991b1b", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
