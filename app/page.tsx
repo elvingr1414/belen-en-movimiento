@@ -398,7 +398,7 @@ export default function Home() {
       <section style={wrap}>
         <header>
           <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
-          <p style={handleLine}>@deusestudiodebiblia</p>
+          <a style={handleLine} href="https://www.instagram.com/deusestudiodebiblia" target="_blank" rel="noreferrer">DEUS estudio de biblia</a>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -428,7 +428,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V39</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V40</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -810,7 +810,11 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
     })
     .slice(0, 20);
 
-  const cintaRecursos = [...pendientes, ...misRecursos];
+  const cintaRecursos = [...pendientes, ...misRecursos].sort((a: any, b: any) => {
+    const fechaB = b.creadoEnMs || new Date(b.fechaHoraCreacion || `${b.fecha || ""} ${b.hora || ""}`).getTime() || 0;
+    const fechaA = a.creadoEnMs || new Date(a.fechaHoraCreacion || `${a.fecha || ""} ${a.hora || ""}`).getTime() || 0;
+    return fechaB - fechaA;
+  });
 
   const textoArchivo =
     archivos.length === 0
@@ -1257,7 +1261,7 @@ const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a
 const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
 const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
 const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "#ffffff", fontWeight: 700, cursor: "not-allowed" };
-const handleLine = { margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.4, fontSize: 11, color: "#64748b", opacity: .72, fontWeight: 700 };
+const handleLine = { display: "block", margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.0, fontSize: 11, color: "#64748b", opacity: .78, fontWeight: 700, textDecoration: "none" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
