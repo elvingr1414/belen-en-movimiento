@@ -244,6 +244,20 @@ export default function Home() {
   }
 
   function guardarRecurso() {
+    const archivosNuevos = recursoForm.archivos || [];
+    const existeDuplicado = archivosNuevos.some((archivoNuevo: any) =>
+      recursos.some((r: any) =>
+        (r.archivos || []).some((archivoExistente: any) =>
+          (archivoExistente.nombre || "").toLowerCase() === (archivoNuevo.nombre || "").toLowerCase()
+        )
+      )
+    );
+
+    if (existeDuplicado) {
+      alert("Este archivo ya existe en Mis archivos recientes. No se puede agregar dos veces.");
+      return;
+    }
+
     const archivosSeleccionados = recursoForm.archivos || [];
 
     if (archivosSeleccionados.length === 0 && !recursoForm.ubicacion && !recursoForm.observaciones?.trim()) {
@@ -413,7 +427,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V36</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V37</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -749,29 +763,9 @@ function VincularRecurso(props: any) {
                 style={rowWide}
                 onClick={() => {
                   props.setDestinoRecursoSeleccionado(item);
-                  props.setMostrarListaDestinoRecurso(false);
-                }}
-              >
-                {lineaConsulta(props.tipoDestinoRecurso, item)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {props.destinoRecursoSeleccionado && (
-        <div style={{ textAlign: "right", marginTop: 10 }}>
-          <button style={primary} onClick={props.guardarVinculoRecurso}>
-            Guardar vínculo
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
+                  propfunction RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
   const archivos = recursoForm.archivos || [];
+  const controlesActivos = archivos.length > 0;
 
   const pendientes = archivos.map((archivo: any, index: number) => ({
     id: `pendiente-${index}`,
@@ -846,6 +840,8 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
         <select
           style={field}
           value={recursoForm.visibilidad}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
         >
           {visibilidades.map((v) => <option key={v}>{v}</option>)}
@@ -854,6 +850,8 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
         <select
           style={field}
           value={recursoForm.propietarioTipo}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
         >
           <option value="Personas">Relacionado: Persona</option>
@@ -863,6 +861,8 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
         <select
           style={field}
           value={recursoForm.propietarioId}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
         >
           {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
@@ -873,13 +873,15 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
         <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
           style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
         />
       </div>
 
       <div style={saveBar}>
-        <button style={primary} onClick={guardarRecurso}>
+        <button style={controlesActivos ? primary : primaryDisabled} disabled={!controlesActivos} onClick={guardarRecurso}>
           {textoGuardarBiblioteca(recursoForm.tipo)}
         </button>
       </div>
@@ -905,6 +907,10 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
                   setRecursoBibliotecaActivo?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
+                onClick={() => {
+                  if (r.pendiente) return;
+                  setRecursoForm({ ...recursoForm, ...r, archivos: r.archivos || [] });
+                }}
                 onDoubleClick={() => {
                   if (r.pendiente) return;
                   setVisorRecurso?.(r);
@@ -923,6 +929,22 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
 
                 <div style={recentName}>{r.ubicacion || r.descripcion}</div>
                 <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
+                {(r.observaciones || r.descripcion) && (
+                  <div style={recentObs}>{r.observaciones || r.descripcion}</div>
+                )}
+
+                {!r.pendiente && !tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
+                  <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+ha"} {r.hora || ""}</div>
                 {(r.observaciones || r.descripcion) && (
                   <div style={recentObs}>{r.observaciones || r.descripcion}</div>
                 )}
@@ -1233,6 +1255,11 @@ const visorLink = { display: "inline-block", marginTop: 10, padding: "9px 14px",
 const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f8fafc", color: "#334155", whiteSpace: "pre-wrap" as const };
 
 const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
+
+const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed" };
+const textareaDisabled = { gridColumn: "1 / -1", minHeight: 72, padding: 12, borderRadius: 14, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed" };
+const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "white", fontWeight: 800, cursor: "not-allowed" };
+
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
 }
