@@ -121,8 +121,7 @@ export default function Home() {
   const [directiva, setDirectiva] = useState("No");
   const [fecha, setFecha] = useState("");
 
-  const [archivoConsultado, setArchivoConsultado] = useState<any>(null);
-  const [recursoActivoId, setRecursoActivoId] = useState<string | null>(null);
+  const [visorRecurso, setVisorRecurso] = useState<any | null>(null);
   const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
@@ -235,47 +234,6 @@ export default function Home() {
     limpiarVinculo();
   }
 
-  function guardarArchivosDirecto(archivosSeleccionados: any[]) {
-    if (!archivosSeleccionados || archivosSeleccionados.length === 0) return;
-
-    const faltantes = [];
-    if (!recursoForm.tipo) faltantes.push("tipo");
-    if (!recursoForm.visibilidad) faltantes.push("visibilidad");
-    if (!recursoForm.propietarioTipo) faltantes.push("relación");
-    if (!recursoForm.propietarioId) faltantes.push("persona o entidad");
-    if (faltantes.length) {
-      alert("Faltan datos requeridos: " + faltantes.join(", "));
-      return;
-    }
-
-    const ahora = new Date();
-    const fechaActual = ahora.toISOString().slice(0, 10);
-    const horaActual = ahora.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
-    const fechaHoraCreacion = ahora.toISOString();
-    const baseMs = ahora.getTime();
-
-    const nuevos = archivosSeleccionados.map((archivo: any, index: number) => ({
-      id: `r${baseMs}-${index}`,
-      ...recursoForm,
-      tipo: detectarTipoArchivo(archivo, recursoForm.tipo),
-      descripcion: recursoForm.observaciones?.trim() || archivo.nombre,
-      ubicacion: archivo.nombre,
-      archivos: [archivo],
-      fecha: fechaActual,
-      hora: horaActual,
-      fechaHoraCreacion,
-      creadoEnMs: baseMs + index,
-      creadoPorId: recursoForm.creadoPorId || "p1",
-      creadoPorNombre: recursoForm.creadoPorNombre || "Elvin González Rodríguez",
-      vinculosCount: 0,
-    }));
-
-    setRecursos([...nuevos, ...recursos]);
-    setRecursoActivoId(nuevos[0]?.id || null);
-    setArchivoConsultado(nuevos[0] || null);
-    setRecursoForm({ ...recursoForm, ...nuevos[0], archivos: nuevos[0]?.archivos || [] });
-  }
-
   function guardarRecurso() {
     const archivosSeleccionados = recursoForm.archivos || [];
 
@@ -341,33 +299,6 @@ export default function Home() {
     setSeleccionado(null);
     setAccion("Nuevo");
     limpiarRecursoForm();
-  }
-
-  function actualizarRecursoActivo(cambios: any, silencioso = true) {
-    if (!recursoActivoId) return;
-
-    const actual = recursos.find((r) => r.id === recursoActivoId);
-    if (!actual) return;
-
-    const actualizado = {
-      ...actual,
-      ...cambios,
-      descripcion: cambios.observaciones?.trim() || cambios.descripcion || actual.descripcion,
-      modificadoEnMs: Date.now(),
-    };
-
-    setRecursos(recursos.map((r) => (r.id === recursoActivoId ? actualizado : r)));
-    setArchivoConsultado(actualizado);
-    setRecursoForm({ ...recursoForm, ...actualizado, archivos: actualizado.archivos || [] });
-
-    if (!silencioso) {
-      const faltantes = [];
-      if (!actualizado.tipo) faltantes.push("tipo");
-      if (!actualizado.visibilidad) faltantes.push("visibilidad");
-      if (!actualizado.propietarioTipo) faltantes.push("relación");
-      if (!actualizado.propietarioId) faltantes.push("persona o entidad");
-      if (faltantes.length) alert("Faltan datos requeridos: " + faltantes.join(", "));
-    }
   }
 
   function excluirRecurso() {
@@ -473,7 +404,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V33</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V34</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -548,7 +479,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} recursoActivoId={recursoActivoId} setRecursoActivoId={setRecursoActivoId} actualizarRecursoActivo={actualizarRecursoActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -562,7 +493,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarArchivosDirecto={guardarArchivosDirecto} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} recursoActivoId={recursoActivoId} setRecursoActivoId={setRecursoActivoId} actualizarRecursoActivo={actualizarRecursoActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -652,6 +583,10 @@ export default function Home() {
           )}
         </section>
       </section>
+      {visorRecurso && (
+        <VisorRecurso recurso={visorRecurso} cerrar={() => setVisorRecurso(null)} />
+      )}
+
     </main>
   );
 }
@@ -826,10 +761,22 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarArchivosDirecto, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, archivoConsultado, setArchivoConsultado, recursoActivoId, setRecursoActivoId, actualizarRecursoActivo }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso }: any) {
   const archivos = recursoForm.archivos || [];
-  
-const misRecursos = [...recursos]
+
+  const pendientes = archivos.map((archivo: any, index: number) => ({
+    id: `pendiente-${index}`,
+    tipo: recursoForm.tipo,
+    ubicacion: archivo.nombre,
+    descripcion: recursoForm.observaciones || archivo.nombre,
+    observaciones: recursoForm.observaciones || "",
+    fecha: "Pendiente",
+    hora: "",
+    archivos: [archivo],
+    pendiente: true,
+  }));
+
+  const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
     .sort((a: any, b: any) => {
       const ax = a.creadoEnMs || Date.parse(a.fechaHoraCreacion || "") || 0;
@@ -838,7 +785,7 @@ const misRecursos = [...recursos]
     })
     .slice(0, 20);
 
-  const cintaRecursos = misRecursos;
+  const cintaRecursos = [...pendientes, ...misRecursos];
 
   const textoArchivo =
     archivos.length === 0
@@ -853,8 +800,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.tipo}
-          disabled={!true}
-          onChange={(e) => { const cambios = { ...recursoForm, tipo: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ tipo: e.target.value }); }}
+          onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
         >
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
         </select>
@@ -891,8 +837,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.visibilidad}
-          disabled={!true}
-          onChange={(e) => { const cambios = { ...recursoForm, visibilidad: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ visibilidad: e.target.value }); }}
+          onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
         >
           {visibilidades.map((v) => <option key={v}>{v}</option>)}
         </select>
@@ -900,8 +845,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.propietarioTipo}
-          disabled={!true}
-          onChange={(e) => { const cambios = { ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioTipo: cambios.propietarioTipo, propietarioId: cambios.propietarioId }); }}
+          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
         >
           <option value="Personas">Relacionado: Persona</option>
           <option value="Entidades">Relacionado: Entidad</option>
@@ -910,8 +854,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.propietarioId}
-          disabled={!true}
-          onChange={(e) => { const cambios = { ...recursoForm, propietarioId: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioId: e.target.value }); }}
+          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
         >
           {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
             <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
@@ -921,25 +864,14 @@ const misRecursos = [...recursos]
         <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
-          disabled={!true}
           onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-          onBlur={() => actualizarRecursoActivo?.({ observaciones: recursoForm.observaciones }, false)}
           style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
         />
       </div>
 
       <div style={saveBar}>
-        <button
-          style={primary}
-          onClick={() => {
-            if (!recursoForm.archivos || recursoForm.archivos.length === 0) {
-              alert("Primero seleccione uno o varios archivos.");
-              return;
-            }
-            guardarArchivosDirecto?.(recursoForm.archivos);
-          }}
-        >
-          Agregar archivo
+        <button style={primary} onClick={guardarRecurso}>
+          {textoGuardarBiblioteca(recursoForm.tipo)}
         </button>
       </div>
 
@@ -948,7 +880,7 @@ const misRecursos = [...recursos]
 
         <div style={recentScroll}>
           {cintaRecursos.length === 0 && (
-            <div style={emptyRecent}>Al seleccionar archivos, aparecerán aquí automáticamente.</div>
+            <div style={emptyRecent}>Cuando seleccione o guarde archivos, aparecerán aquí.</div>
           )}
 
           {cintaRecursos.map((r: any) => {
@@ -958,21 +890,14 @@ const misRecursos = [...recursos]
             return (
               <div
                 key={r.id}
-                style={r.pendiente ? pendingCard : (recursoActivoId === r.id ? recentCardSelected : recentCard)}
-                onClick={() => {
-                  setRecursoActivoId?.(r.id);
-                  setArchivoConsultado?.(r);
-                  setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
-                }}
+                style={r.pendiente ? pendingCard : recentCard}
                 onDoubleClick={() => {
-                  const archivo = r.archivos?.[0];
-                  const url = archivo?.url || archivo?.preview;
-                  if (url) window.open(url, "_blank");
-                  else alert("Este archivo no tiene una vista previa disponible en esta versión de prueba.");
+                  if (r.pendiente) return;
+                  setVisorRecurso?.(r);
                 }}
-                title="Un clic: consultar. Doble clic: abrir vista previa."
+                title="Doble clic: vista previa."
               >
-                {r.pendiente && <div style={pendingBadge}></div>}
+                {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
 
                 <div style={recentThumb}>
                   {archivoPrincipal?.preview ? (
@@ -1033,6 +958,58 @@ function RecursoDetalle({ recurso, vinculos }: any) {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+
+function VisorRecurso({ recurso, cerrar }: any) {
+  const archivo = recurso?.archivos?.[0];
+  const url = archivo?.url || archivo?.preview || "";
+  const nombre = recurso?.ubicacion || recurso?.descripcion || archivo?.nombre || "Archivo";
+  const tipo = recurso?.tipo || archivo?.tipo || "Archivo";
+  const mime = (archivo?.tipo || "").toLowerCase();
+  const esImagen = !!archivo?.preview || /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(nombre);
+  const esPdf = /\.pdf$/i.test(nombre) || mime.includes("pdf");
+  const esVideo = /\.(mp4|mov|avi|mkv|webm)$/i.test(nombre) || mime.startsWith("video/");
+
+  return (
+    <div style={visorOverlay} onClick={cerrar}>
+      <div style={visorCaja} onClick={(e) => e.stopPropagation()}>
+        <div style={visorHeader}>
+          <div>
+            <strong>{nombre}</strong>
+            <div style={visorMeta}>{tipo} · {recurso?.fecha || "Sin fecha"} {recurso?.hora || ""}</div>
+          </div>
+          <button style={visorCerrar} onClick={cerrar}>×</button>
+        </div>
+
+        <div style={visorContenido}>
+          {url && esImagen ? (
+            <img src={url} alt={nombre} style={visorImagen} />
+          ) : url && esPdf ? (
+            <iframe src={url} title={nombre} style={visorFrame} />
+          ) : url && esVideo ? (
+            <video src={url} controls style={visorVideo} />
+          ) : url ? (
+            <div style={visorMensaje}>
+              <div style={visorIcono}>{iconoArchivoReal(recurso)}</div>
+              <p>Este tipo de archivo no tiene visor integrado todavía.</p>
+              <a href={url} target="_blank" rel="noreferrer" style={visorLink}>Abrir archivo</a>
+            </div>
+          ) : (
+            <div style={visorMensaje}>
+              <div style={visorIcono}>{iconoArchivoReal(recurso)}</div>
+              <strong>Vista previa no disponible</strong>
+              <p>Este archivo fue registrado, pero todavía no tiene una dirección de vista previa disponible.</p>
+            </div>
+          )}
+        </div>
+
+        {(recurso?.observaciones || recurso?.descripcion) && (
+          <div style={visorObs}>{recurso.observaciones || recurso.descripcion}</div>
+        )}
       </div>
     </div>
   );
@@ -1126,22 +1103,6 @@ function nombrePropietario(recurso: any) {
 }
 
 
-
-
-function detectarTipoArchivo(archivo: any, tipoSeleccionado = "Documento") {
-  const nombre = (archivo?.nombre || "").toLowerCase();
-  const mime = (archivo?.tipo || "").toLowerCase();
-
-  if (mime.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic)$/.test(nombre)) return "Fotografía";
-  if (mime.startsWith("video/") || /\.(mp4|mov|avi|mkv|webm)$/.test(nombre)) return "Video";
-  if (mime.includes("pdf") || nombre.endsWith(".pdf")) return "Documento PDF";
-  if (/\.(doc|docx)$/.test(nombre)) return "Documento Word";
-  if (/\.(xls|xlsx)$/.test(nombre)) return "Hoja de cálculo";
-  if (/\.(ppt|pptx)$/.test(nombre)) return "Presentación";
-  if (/\.(mp3|wav|m4a)$/.test(nombre)) return "Audio";
-
-  return tipoSeleccionado || "Documento";
-}
 
 function iconoArchivoReal(recurso: any) {
   const archivo = recurso?.archivos?.[0];
@@ -1243,7 +1204,19 @@ const pendingCard = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", bo
 const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800, maxWidth: 130, whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
 
 
-const recentCardSelected = { width: 145, minWidth: 145, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
+const visorOverlay = { position: "fixed" as const, inset: 0, background: "rgba(15,23,42,.55)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 18 };
+const visorCaja = { width: "min(920px, 94vw)", maxHeight: "90vh", overflow: "auto" as const, background: "white", borderRadius: 22, padding: 16, boxShadow: "0 24px 90px rgba(15,23,42,.35)" };
+const visorHeader = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12 };
+const visorMeta = { fontSize: 13, color: "#64748b", marginTop: 3 };
+const visorCerrar = { border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 34, height: 34, fontSize: 24, cursor: "pointer", lineHeight: "30px" };
+const visorContenido = { minHeight: 260, borderRadius: 16, background: "#f8fafc", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" };
+const visorImagen = { maxWidth: "100%", maxHeight: "68vh", objectFit: "contain" as const };
+const visorFrame = { width: "100%", height: "68vh", border: "none", background: "white" };
+const visorVideo = { maxWidth: "100%", maxHeight: "68vh" };
+const visorMensaje = { padding: 24, textAlign: "center" as const, color: "#334155" };
+const visorIcono = { fontSize: 72, marginBottom: 10 };
+const visorLink = { display: "inline-block", marginTop: 10, padding: "9px 14px", borderRadius: 999, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700 };
+const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f8fafc", color: "#334155", whiteSpace: "pre-wrap" as const };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
