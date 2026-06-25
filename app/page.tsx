@@ -122,6 +122,15 @@ export default function Home() {
   const [fecha, setFecha] = useState("");
 
   const [visorRecurso, setVisorRecurso] = useState<any | null>(null);
+  const [recursoBibliotecaActivo, setRecursoBibliotecaActivo] = useState<any | null>(null);
+  useEffect(() => {
+    if (modulo === "Recursos" && seleccionado && accion === "Vista") {
+      setRecursoBibliotecaActivo(seleccionado);
+      setRecursoForm((prev: any) => ({ ...prev, ...seleccionado, archivos: seleccionado.archivos || [] }));
+      setAccion("Nuevo");
+    }
+  }, [modulo, seleccionado, accion]);
+
   const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
@@ -404,7 +413,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V34</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V35</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -479,7 +488,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -493,7 +502,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -761,7 +770,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
   const archivos = recursoForm.archivos || [];
 
   const pendientes = archivos.map((archivo: any, index: number) => ({
@@ -890,12 +899,17 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
             return (
               <div
                 key={r.id}
-                style={r.pendiente ? pendingCard : recentCard}
+                style={recursoBibliotecaActivo?.id === r.id ? recentCardSelected : (r.pendiente ? pendingCard : recentCard)}
+                onClick={() => {
+                  if (r.pendiente) return;
+                  setRecursoBibliotecaActivo?.(r);
+                  setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
+                }}
                 onDoubleClick={() => {
                   if (r.pendiente) return;
                   setVisorRecurso?.(r);
                 }}
-                title="Doble clic: vista previa."
+                title="Un clic: cargar datos arriba. Doble clic: vista previa."
               >
                 {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
 
@@ -1218,6 +1232,7 @@ const visorIcono = { fontSize: 72, marginBottom: 10 };
 const visorLink = { display: "inline-block", marginTop: 10, padding: "9px 14px", borderRadius: 999, background: "#1e3a8a", color: "white", textDecoration: "none", fontWeight: 700 };
 const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f8fafc", color: "#334155", whiteSpace: "pre-wrap" as const };
 
+const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
 }
