@@ -238,6 +238,16 @@ export default function Home() {
   function guardarArchivosDirecto(archivosSeleccionados: any[]) {
     if (!archivosSeleccionados || archivosSeleccionados.length === 0) return;
 
+    const faltantes = [];
+    if (!recursoForm.tipo) faltantes.push("tipo");
+    if (!recursoForm.visibilidad) faltantes.push("visibilidad");
+    if (!recursoForm.propietarioTipo) faltantes.push("relación");
+    if (!recursoForm.propietarioId) faltantes.push("persona o entidad");
+    if (faltantes.length) {
+      alert("Faltan datos requeridos: " + faltantes.join(", "));
+      return;
+    }
+
     const ahora = new Date();
     const fechaActual = ahora.toISOString().slice(0, 10);
     const horaActual = ahora.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
@@ -463,7 +473,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V32</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V33</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -830,7 +840,12 @@ const misRecursos = [...recursos]
 
   const cintaRecursos = misRecursos;
 
-  const textoArchivo = "Seleccionar archivo";
+  const textoArchivo =
+    archivos.length === 0
+      ? "Seleccionar archivo"
+      : archivos.length === 1
+        ? "Archivo listo"
+        : `${archivos.length} archivos listos`;
 
   return (
     <div style={{ marginTop: 12 }}>
@@ -913,6 +928,21 @@ const misRecursos = [...recursos]
         />
       </div>
 
+      <div style={saveBar}>
+        <button
+          style={primary}
+          onClick={() => {
+            if (!recursoForm.archivos || recursoForm.archivos.length === 0) {
+              alert("Primero seleccione uno o varios archivos.");
+              return;
+            }
+            guardarArchivosDirecto?.(recursoForm.archivos);
+          }}
+        >
+          Agregar archivo
+        </button>
+      </div>
+
       <div style={recentBox}>
         <strong>Mis archivos recientes</strong>
 
@@ -930,13 +960,11 @@ const misRecursos = [...recursos]
                 key={r.id}
                 style={r.pendiente ? pendingCard : (recursoActivoId === r.id ? recentCardSelected : recentCard)}
                 onClick={() => {
-                  if (r.pendiente) return;
                   setRecursoActivoId?.(r.id);
                   setArchivoConsultado?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onDoubleClick={() => {
-                  if (r.pendiente) return;
                   const archivo = r.archivos?.[0];
                   const url = archivo?.url || archivo?.preview;
                   if (url) window.open(url, "_blank");
