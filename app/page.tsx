@@ -131,6 +131,7 @@ export default function Home() {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
       setRecursoBibliotecaActivo(seleccionado);
       setBibliotecaModoNuevo(false);
+      setBibliotecaModoEditar(false);
       setRecursoForm((prev: any) => ({ ...prev, ...seleccionado, archivos: seleccionado.archivos || [] }));
       setAccion("Nuevo");
     }
@@ -193,7 +194,7 @@ export default function Home() {
     setModulo(m);
     setBusqueda("");
     setSeleccionado(null);
-    setAccion("Vista");
+    setAccion("Nuevo");
     limpiarVinculo();
     limpiarRecursoDestino();
   }
@@ -201,7 +202,7 @@ export default function Home() {
   function volverALista(valorActual?: string) {
     if (valorActual !== undefined) setBusqueda(valorActual);
     setSeleccionado(null);
-    setAccion("Vista");
+    setAccion("Nuevo");
     limpiarVinculo();
     limpiarRecursoDestino();
   }
@@ -323,7 +324,7 @@ function guardarRecurso() {
 
       setRecursos(actualizados);
       setSeleccionado({ ...seleccionado, ...recursoForm, descripcion: descripcionFinal });
-      setAccion("Vista");
+      setAccion("Nuevo");
       return;
     }
 
@@ -372,7 +373,7 @@ function guardarRecurso() {
     setRecursos(recursos.filter((r) => r.id !== seleccionado.id));
     setRecursoVinculos(recursoVinculos.filter((v) => v.recursoId !== seleccionado.id));
     setSeleccionado(null);
-    setAccion("Vista");
+    setAccion("Nuevo");
   }
 
   function eliminarRecursoLibre(recursoId: string) {
@@ -471,7 +472,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V48</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V49</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -481,7 +482,7 @@ function guardarRecurso() {
                     title="Editar"
                     onClick={() => {
                       if (modulo === "Recursos") setRecursoForm({ ...(seleccionado || recursoBibliotecaActivo) });
-                      if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); } setAccion("Editar");
+                      if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); } if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); setAccion("Nuevo"); } else { setAccion("Editar"); }
                     }}
                     style={iconButton(accion === "Editar")}
                   >
@@ -518,6 +519,7 @@ function guardarRecurso() {
                   setSeleccionado(null);
                   setRecursoBibliotecaActivo(null);
                   setBibliotecaModoNuevo(true);
+                  setBibliotecaModoEditar(false);
                   limpiarRecursoForm();
                   setAccion("Nuevo");
                 }}
@@ -537,7 +539,7 @@ function guardarRecurso() {
                     style={rowWide}
                     onClick={() => {
                       setSeleccionado(item);
-                      setAccion("Vista");
+                      setAccion("Nuevo");
                     }}
                   >
                     {lineaConsulta(modulo, item)}
@@ -640,7 +642,7 @@ function guardarRecurso() {
                       onClick={() => {
                         setModulo("Recursos");
                         setSeleccionado(r);
-                        setAccion("Vista");
+                        setAccion("Nuevo");
                       }}
                     >
                       {lineaConsulta("Recursos", r)}
