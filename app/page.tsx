@@ -398,7 +398,7 @@ export default function Home() {
       <section style={wrap}>
         <header>
           <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
-      <p style={handleLine}>@deusestudiodebiblia</p>
+          <p style={handleLine}>@deusestudiodebiblia</p>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -428,7 +428,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V38</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V39</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -764,7 +764,28 @@ function VincularRecurso(props: any) {
                 style={rowWide}
                 onClick={() => {
                   props.setDestinoRecursoSeleccionado(item);
-                  function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
+                  props.setMostrarListaDestinoRecurso(false);
+                }}
+              >
+                {lineaConsulta(props.tipoDestinoRecurso, item)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {props.destinoRecursoSeleccionado && (
+        <div style={{ textAlign: "right", marginTop: 10 }}>
+          <button style={primary} onClick={props.guardarVinculoRecurso}>
+            Guardar vínculo
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = archivos.length > 0;
 
@@ -842,8 +863,6 @@ function VincularRecurso(props: any) {
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
           value={recursoForm.visibilidad}
-          style={controlesActivos ? field : fieldDisabled}
-          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, visibilidad: e.target.value })}
         >
           {visibilidades.map((v) => <option key={v}>{v}</option>)}
@@ -853,8 +872,6 @@ function VincularRecurso(props: any) {
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
           value={recursoForm.propietarioTipo}
-          style={controlesActivos ? field : fieldDisabled}
-          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
         >
           <option value="Personas">Relacionado: Persona</option>
@@ -865,8 +882,6 @@ function VincularRecurso(props: any) {
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
           value={recursoForm.propietarioId}
-          style={controlesActivos ? field : fieldDisabled}
-          disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
         >
           {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
@@ -877,10 +892,9 @@ function VincularRecurso(props: any) {
         <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
-          style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
           onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
-          style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
+          style={controlesActivos ? { ...field, minHeight: 70, gridColumn: "1 / -1" } : textareaDisabled}
         />
       </div>
 
@@ -911,14 +925,6 @@ function VincularRecurso(props: any) {
                   setRecursoBibliotecaActivo?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
-                onClick={() => {
-                  if (r.pendiente) return;
-                  setRecursoForm({ ...recursoForm, ...r, archivos: r.archivos || [] });
-                }}
-                onClick={() => {
-                  if (r.pendiente) return;
-                  setRecursoForm({ ...recursoForm, ...r, archivos: r.archivos || [] });
-                }}
                 onDoubleClick={() => {
                   if (r.pendiente) return;
                   setVisorRecurso?.(r);
@@ -937,22 +943,6 @@ function VincularRecurso(props: any) {
 
                 <div style={recentName}>{r.ubicacion || r.descripcion}</div>
                 <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
-                {(r.observaciones || r.descripcion) && (
-                  <div style={recentObs}>{r.observaciones || r.descripcion}</div>
-                )}
-
-                {!r.pendiente && !tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
-                  <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-ha"} {r.hora || ""}</div>
                 {(r.observaciones || r.descripcion) && (
                   <div style={recentObs}>{r.observaciones || r.descripcion}</div>
                 )}
@@ -1264,11 +1254,11 @@ const visorObs = { marginTop: 12, padding: 12, borderRadius: 14, background: "#f
 
 const recentCardSelected = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
 
-const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed" };
-const textareaDisabled = { gridColumn: "1 / -1", minHeight: 72, padding: 12, borderRadius: 14, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed" };
-const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "white", fontWeight: 800, cursor: "not-allowed" };
+const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
+const textareaDisabled = { gridColumn: "1 / -1", minHeight: 70, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 14, background: "#f3f4f6", color: "#9ca3af", boxSizing: "border-box" as const, cursor: "not-allowed" };
+const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "#ffffff", fontWeight: 700, cursor: "not-allowed" };
+const handleLine = { margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.4, fontSize: 11, color: "#64748b", opacity: .72, fontWeight: 700 };
 
-const handleLine = { margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.5, fontSize: 11, color: "#64748b", opacity: .72, fontWeight: 700 };
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
 }
