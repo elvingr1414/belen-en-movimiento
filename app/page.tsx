@@ -435,7 +435,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V43</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V44</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -444,7 +444,7 @@ export default function Home() {
                   <button
                     title="Editar"
                     onClick={() => {
-                      if (modulo === "Recursos") setRecursoForm({ ...seleccionado });
+                      if (modulo === "Recursos") setRecursoForm({ ...(seleccionado || recursoBibliotecaActivo) });
                       setAccion("Editar");
                     }}
                     style={iconButton(accion === "Editar")}
@@ -931,6 +931,7 @@ const misRecursos = [...recursos]
                   if (r.pendiente) return;
                   setRecursoBibliotecaActivo?.(r);
                   setBibliotecaModoNuevo?.(false);
+                  setRecursoBibliotecaActivo?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onDoubleClick={() => {
