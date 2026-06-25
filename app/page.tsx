@@ -463,7 +463,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V30</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V32</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -818,8 +818,7 @@ function VincularRecurso(props: any) {
 
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarArchivosDirecto, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, archivoConsultado, setArchivoConsultado, recursoActivoId, setRecursoActivoId, actualizarRecursoActivo }: any) {
   const archivos = recursoForm.archivos || [];
-  const camposActivos = !!recursoActivoId;
-
+  
 const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
     .sort((a: any, b: any) => {
@@ -839,7 +838,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.tipo}
-          disabled={!camposActivos}
+          disabled={!true}
           onChange={(e) => { const cambios = { ...recursoForm, tipo: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ tipo: e.target.value }); }}
         >
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
@@ -877,7 +876,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.visibilidad}
-          disabled={!camposActivos}
+          disabled={!true}
           onChange={(e) => { const cambios = { ...recursoForm, visibilidad: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ visibilidad: e.target.value }); }}
         >
           {visibilidades.map((v) => <option key={v}>{v}</option>)}
@@ -886,7 +885,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.propietarioTipo}
-          disabled={!camposActivos}
+          disabled={!true}
           onChange={(e) => { const cambios = { ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioTipo: cambios.propietarioTipo, propietarioId: cambios.propietarioId }); }}
         >
           <option value="Personas">Relacionado: Persona</option>
@@ -896,7 +895,7 @@ const misRecursos = [...recursos]
         <select
           style={field}
           value={recursoForm.propietarioId}
-          disabled={!camposActivos}
+          disabled={!true}
           onChange={(e) => { const cambios = { ...recursoForm, propietarioId: e.target.value }; setRecursoForm(cambios); actualizarRecursoActivo?.({ propietarioId: e.target.value }); }}
         >
           {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
@@ -905,9 +904,9 @@ const misRecursos = [...recursos]
         </select>
 
         <textarea
-          placeholder={camposActivos ? "Observaciones / descripción del archivo" : "Seleccione un archivo reciente para editar observaciones"}
+          placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
-          disabled={!camposActivos}
+          disabled={!true}
           onChange={(e) => setRecursoForm({ ...recursoForm, observaciones: e.target.value })}
           onBlur={() => actualizarRecursoActivo?.({ observaciones: recursoForm.observaciones }, false)}
           style={{ ...field, minHeight: 70, gridColumn: "1 / -1" }}
@@ -989,7 +988,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
         <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
       </div>
 
-      <textarea readOnly value={recurso.observaciones || ""} placeholder={camposActivos ? "Observaciones / descripción del archivo" : "Seleccione un archivo reciente para editar observaciones"} style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
+      <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones / descripción del archivo" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
 
       <h3 style={miniTitle}>Vinculado a</h3>
       <div style={list}>
