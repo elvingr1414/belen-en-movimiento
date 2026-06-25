@@ -398,6 +398,7 @@ export default function Home() {
       <section style={wrap}>
         <header>
           <p style={eyebrow}>Construyendo la memoria digital de Belén</p>
+      <p style={handleLine}>@deusestudiodebiblia</p>
 
           <div style={titleLine}>
             <h1 style={title}>Belén en Movimiento</h1>
@@ -427,7 +428,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V37</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V38</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -763,7 +764,7 @@ function VincularRecurso(props: any) {
                 style={rowWide}
                 onClick={() => {
                   props.setDestinoRecursoSeleccionado(item);
-                  propfunction RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
+                  function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = archivos.length > 0;
 
@@ -838,7 +839,8 @@ function VincularRecurso(props: any) {
         </label>
 
         <select
-          style={field}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           value={recursoForm.visibilidad}
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
@@ -848,7 +850,8 @@ function VincularRecurso(props: any) {
         </select>
 
         <select
-          style={field}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           value={recursoForm.propietarioTipo}
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
@@ -859,7 +862,8 @@ function VincularRecurso(props: any) {
         </select>
 
         <select
-          style={field}
+          style={controlesActivos ? field : fieldDisabled}
+          disabled={!controlesActivos}
           value={recursoForm.propietarioId}
           style={controlesActivos ? field : fieldDisabled}
           disabled={!controlesActivos}
@@ -906,6 +910,10 @@ function VincularRecurso(props: any) {
                   if (r.pendiente) return;
                   setRecursoBibliotecaActivo?.(r);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
+                }}
+                onClick={() => {
+                  if (r.pendiente) return;
+                  setRecursoForm({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onClick={() => {
                   if (r.pendiente) return;
@@ -1260,6 +1268,7 @@ const fieldDisabled = { padding: "12px 14px", borderRadius: 12, border: "1px sol
 const textareaDisabled = { gridColumn: "1 / -1", minHeight: 72, padding: 12, borderRadius: 14, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed" };
 const primaryDisabled = { padding: "10px 18px", borderRadius: 999, border: "none", background: "#cbd5e1", color: "white", fontWeight: 800, cursor: "not-allowed" };
 
+const handleLine = { margin: "2px 0 0", textAlign: "center" as const, letterSpacing: 2.5, fontSize: 11, color: "#64748b", opacity: .72, fontWeight: 700 };
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
 }
