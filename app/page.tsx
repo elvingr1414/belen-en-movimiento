@@ -124,9 +124,11 @@ export default function Home() {
   const [visorRecurso, setVisorRecurso] = useState<any | null>(null);
   const [mensajeSistema, setMensajeSistema] = useState<any | null>(null);
   const [recursoBibliotecaActivo, setRecursoBibliotecaActivo] = useState<any | null>(null);
+  const [bibliotecaModoNuevo, setBibliotecaModoNuevo] = useState(false);
   useEffect(() => {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
       setRecursoBibliotecaActivo(seleccionado);
+      setBibliotecaModoNuevo(false);
       setRecursoForm((prev: any) => ({ ...prev, ...seleccionado, archivos: seleccionado.archivos || [] }));
       setAccion("Nuevo");
     }
@@ -433,7 +435,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V41</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V42</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -478,6 +480,8 @@ export default function Home() {
                 title="Nuevo"
                 onClick={() => {
                   setSeleccionado(null);
+                  setRecursoBibliotecaActivo(null);
+                  setBibliotecaModoNuevo(true);
                   limpiarRecursoForm();
                   setAccion("Nuevo");
                 }}
@@ -508,7 +512,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -522,7 +526,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -794,23 +798,11 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, bibliotecaModoNuevo, setBibliotecaModoNuevo }: any) {
   const archivos = recursoForm.archivos || [];
-  const controlesActivos = archivos.length > 0;
+  const controlesActivos = !!bibliotecaModoNuevo && archivos.length > 0;
 
-  const pendientes = archivos.map((archivo: any, index: number) => ({
-    id: `pendiente-${index}`,
-    tipo: recursoForm.tipo,
-    ubicacion: archivo.nombre,
-    descripcion: recursoForm.observaciones || archivo.nombre,
-    observaciones: recursoForm.observaciones || "",
-    fecha: "Pendiente",
-    hora: "",
-    archivos: [archivo],
-    pendiente: true,
-  }));
-
-  const misRecursos = [...recursos]
+const misRecursos = [...recursos]
     .filter((r: any) => (r.creadoPorId || "p1") === "p1")
     .sort((a: any, b: any) => {
       const ax = a.creadoEnMs || Date.parse(a.fechaHoraCreacion || "") || 0;
@@ -819,7 +811,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
     })
     .slice(0, 20);
 
-  const cintaRecursos = [...pendientes, ...misRecursos].sort((a: any, b: any) => {
+  const cintaRecursos = [...misRecursos].sort((a: any, b: any) => {
     const fechaB = b.creadoEnMs || new Date(b.fechaHoraCreacion || `${b.fecha || ""} ${b.hora || ""}`).getTime() || 0;
     const fechaA = a.creadoEnMs || new Date(a.fechaHoraCreacion || `${a.fecha || ""} ${a.hora || ""}`).getTime() || 0;
     return fechaB - fechaA;
@@ -836,16 +828,18 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
     <div style={{ marginTop: 12 }}>
       <div style={grid}>
         <select
-          style={field}
+          style={bibliotecaModoNuevo ? field : fieldDisabled}
+          disabled={!bibliotecaModoNuevo}
           value={recursoForm.tipo}
           onChange={(e) => setRecursoForm({ ...recursoForm, tipo: e.target.value })}
         >
           {tiposRecurso.map((t) => <option key={t}>{t}</option>)}
         </select>
 
-        <label style={fileOneButton} title="Seleccionar archivo(s)">
+        <label style={bibliotecaModoNuevo ? fileOneButton : fileOneButtonDisabled} title={bibliotecaModoNuevo ? "Seleccionar archivo(s)" : "Presione + para agregar archivos"}>
           📁 {textoArchivo}
           <input
+            disabled={!bibliotecaModoNuevo}
             type="file"
             multiple
             style={{ display: "none" }}
@@ -936,6 +930,7 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
                 onClick={() => {
                   if (r.pendiente) return;
                   setRecursoBibliotecaActivo?.(r);
+                  setBibliotecaModoNuevo?.(false);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onDoubleClick={() => {
@@ -1298,6 +1293,9 @@ const dialogContent = { flex: 1 };
 const dialogTitle = { display: "block", fontSize: 18, color: "#1f2937", marginBottom: 6 };
 const dialogText = { margin: "0 0 14px", color: "#475569", lineHeight: 1.45 };
 const dialogButton = { border: "none", background: "#1e3a8a", color: "white", borderRadius: 999, padding: "9px 18px", fontWeight: 800, cursor: "pointer", float: "right" as const };
+
+
+const fileOneButtonDisabled = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", color: "#9ca3af", cursor: "not-allowed", fontWeight: 800 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
