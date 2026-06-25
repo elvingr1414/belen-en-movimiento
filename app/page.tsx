@@ -121,7 +121,6 @@ export default function Home() {
   const [directiva, setDirectiva] = useState("No");
   const [fecha, setFecha] = useState("");
 
-  const [archivoConsultado, setArchivoConsultado] = useState<any>(null);
   const [recursoForm, setRecursoForm] = useState<any>({
     tipo: "Fotografía",
     descripcion: "",
@@ -404,7 +403,7 @@ export default function Home() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V25</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V27</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -479,7 +478,7 @@ export default function Home() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -493,7 +492,7 @@ export default function Home() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} archivoConsultado={archivoConsultado} setArchivoConsultado={setArchivoConsultado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setSeleccionado={setSeleccionado} setAccion={setAccion} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -757,7 +756,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion, archivoConsultado, setArchivoConsultado }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setSeleccionado, setAccion }: any) {
   const archivos = recursoForm.archivos || [];
 
   const pendientes = archivos.map((archivo: any, index: number) => ({
@@ -885,18 +884,23 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
             return (
               <div
                 key={r.id}
-                style={r.pendiente ? pendingCard : (archivoConsultado?.id === r.id ? recentCardSelected : recentCard)}
+                style={r.pendiente ? pendingCard : recentCard}
                 onClick={() => {
                   if (r.pendiente) return;
-                  setArchivoConsultado?.({ ...r, previewAbierto: false });
                   setSeleccionado?.(r);
                   setAccion?.("Vista");
                 }}
                 onDoubleClick={() => {
                   if (r.pendiente) return;
-                  setArchivoConsultado?.({ ...r, previewAbierto: true });
+                  const preview = r.archivos?.[0]?.preview;
+                  if (preview) {
+                    window.open(preview, "_blank");
+                  } else {
+                    setSeleccionado?.(r);
+                    setAccion?.("Vista");
+                  }
                 }}
-                title="Un clic: consultar. Doble clic: vista previa."
+                title="Un clic: consultar. Doble clic: abrir vista previa."
               >
                 {r.pendiente && <div style={pendingBadge}>Pendiente</div>}
 
@@ -922,36 +926,6 @@ function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, recursos = [
           })}
         </div>
       </div>
-
-      {archivoConsultado && (
-        <div style={consultaBox}>
-          <div style={consultaHeader}>
-            <strong>{archivoConsultado.previewAbierto ? "Vista previa del archivo" : "Consulta del archivo"}</strong>
-            <button style={consultaClose} onClick={() => setArchivoConsultado(null)}>Cerrar</button>
-          </div>
-
-          <div style={consultaTitle}>{archivoConsultado.ubicacion || archivoConsultado.descripcion}</div>
-          <div style={consultaMeta}>
-            {archivoConsultado.tipo} · {archivoConsultado.fecha || "Sin fecha"} {archivoConsultado.hora || ""}
-          </div>
-
-          {archivoConsultado.previewAbierto && (
-            <div style={consultaPreview}>
-              {archivoConsultado.archivos?.[0]?.preview ? (
-                <img src={archivoConsultado.archivos[0].preview} alt={archivoConsultado.ubicacion} style={consultaImage} />
-              ) : (
-                <div style={consultaIcon}>{iconoArchivoReal(archivoConsultado)}</div>
-              )}
-            </div>
-          )}
-
-          {(archivoConsultado.observaciones || archivoConsultado.descripcion) && (
-            <div style={consultaObs}>
-              {archivoConsultado.observaciones || archivoConsultado.descripcion}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -1181,18 +1155,6 @@ const emptyRecent = { minWidth: 260, color: "#64748b", fontSize: 13, padding: 10
 const deleteMini = { position: "absolute" as const, top: 6, right: 6, border: "none", background: "#fee2e2", color: "#991b1b", borderRadius: 999, width: 28, height: 28, cursor: "pointer" };
 const pendingCard = { width: 150, minWidth: 150, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const };
 const pendingBadge = { position: "absolute" as const, top: 6, left: 6, background: "#1e3a8a", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 10, fontWeight: 800, maxWidth: 130, whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis" };
-
-
-const recentCardSelected = { width: 145, minWidth: 145, border: "2px solid #1e3a8a", borderRadius: 14, background: "#eff6ff", padding: 8, position: "relative" as const, cursor: "pointer" };
-const consultaBox = { marginTop: 12, padding: 14, borderRadius: 16, border: "1px solid #c7d2fe", background: "#f8fafc" };
-const consultaHeader = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 };
-const consultaClose = { border: "1px solid #d1d5db", background: "white", borderRadius: 999, padding: "6px 10px", cursor: "pointer" };
-const consultaTitle = { fontWeight: 800, color: "#1f2937", marginBottom: 4 };
-const consultaMeta = { fontSize: 13, color: "#64748b", marginBottom: 10 };
-const consultaPreview = { minHeight: 180, borderRadius: 14, background: "white", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: 10 };
-const consultaImage = { maxWidth: "100%", maxHeight: 420, objectFit: "contain" as const };
-const consultaIcon = { fontSize: 62, padding: 30 };
-const consultaObs = { padding: 10, borderRadius: 12, background: "white", color: "#334155", whiteSpace: "pre-wrap" as const };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
