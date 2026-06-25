@@ -284,7 +284,6 @@ export default function Home() {
     setRecursoForm({ ...recursoForm, ...actualizado, archivos: actualizado.archivos || [] });
     setBibliotecaModoNuevo(false);
     setBibliotecaModoEditar(false);
-    mostrarMensajeSistema("Cambios guardados", "La información del archivo fue actualizada correctamente.", "aviso");
   }
 
 function guardarRecurso() {
@@ -472,7 +471,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V47</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V48</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
