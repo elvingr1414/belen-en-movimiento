@@ -10,7 +10,7 @@ type Modulo =
   | "Recursos"
   | "Comunicaciones";
 
-type Accion = "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
+type Accion = "Lista" | "Vista" | "Editar" | "Excluir" | "Vincular" | "Recursos" | "Nuevo";
 
 const modulos: Modulo[] = [
   "Recursos",
@@ -77,7 +77,7 @@ export default function Home() {
   const [busqueda, setBusqueda] = useState("");
   const buscadorRef = useRef<HTMLInputElement | null>(null);
   const [seleccionado, setSeleccionado] = useState<any | null>(null);
-  const [accion, setAccion] = useState<Accion>("Vista");
+  const [accion, setAccion] = useState<Accion>("Lista");
 
   const [vinculos, setVinculos] = useState<any[]>([
     { personaId: "p2", entidadId: "e1", puesto: "Presidenta", directiva: "Sí", fecha: "2026-01-15" },
@@ -195,9 +195,13 @@ export default function Home() {
     setModulo(m);
     setBusqueda("");
     setSeleccionado(null);
-    setAccion("Nuevo");
+    setRecursoBibliotecaActivo(null);
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+    setAccion("Lista");
     limpiarVinculo();
     limpiarRecursoDestino();
+    setTimeout(() => buscadorRef.current?.focus(), 0);
   }
 
   function volverALista(valorActual?: string) {
@@ -206,7 +210,8 @@ export default function Home() {
     setRecursoBibliotecaActivo(null);
     setBibliotecaModoNuevo(false);
     setBibliotecaModoEditar(false);
-limpiarVinculo();
+    setAccion("Lista");
+    limpiarVinculo();
     limpiarRecursoDestino();
   }
 
@@ -487,8 +492,8 @@ function guardarRecurso() {
         <input
           ref={buscadorRef}
           value={busqueda}
-          onFocus={() => volverALista()}
-          onClick={() => volverALista()}
+          onFocus={() => volverALista(busqueda)}
+          onClick={() => volverALista(busqueda)}
           onChange={(e) => volverALista(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -516,11 +521,11 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V54</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V56</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
-              {(seleccionado || recursoBibliotecaActivo || recursoForm?.id) && (
+              {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo || recursoForm?.id) && (
                 <>
                   <button
                     title="Editar"
@@ -574,7 +579,7 @@ function guardarRecurso() {
             </div>
           </div>
 
-          {!seleccionado && accion !== "Nuevo" && (
+          {accion === "Lista" && (
             <div style={scrollArea}>
               <div style={listWide}>
                 {lista.map((item, index) => (
@@ -583,7 +588,15 @@ function guardarRecurso() {
                     style={rowWide}
                     onClick={() => {
                       setSeleccionado(item);
-                      setAccion("Nuevo");
+                      if (modulo === "Recursos") {
+                        setRecursoBibliotecaActivo(item);
+                        setRecursoForm((prev: any) => ({ ...prev, ...item, archivos: item.archivos || [] }));
+                        setBibliotecaModoNuevo(false);
+                        setBibliotecaModoEditar(false);
+                        setAccion("Nuevo");
+                      } else {
+                        setAccion("Vista");
+                      }
                     }}
                   >
                     {lineaConsulta(modulo, item)}
