@@ -249,6 +249,22 @@ export default function Home() {
     return () => window.removeEventListener("keydown", manejarEscapeGlobal);
   }, [busqueda, modulo]);
 
+  function pedirBorradoRecurso(recurso?: any) {
+    const objetivo = recurso || recursoBibliotecaActivo || seleccionado || (recursoForm?.id ? recursoForm : null);
+
+    if (!objetivo) {
+      mostrarMensajeSistema("Seleccione un archivo", "Seleccione primero un archivo para eliminar o desvincular.", "aviso");
+      return;
+    }
+
+    setRecursoBibliotecaActivo(objetivo);
+    setSeleccionado(objetivo);
+    setRecursoForm((prev: any) => ({ ...prev, ...objetivo, archivos: objetivo.archivos || [] }));
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+    setConfirmarBorrado(objetivo);
+  }
+
   function limpiarRecursoForm() {
     setRecursoForm({
       tipo: "Fotografía",
@@ -521,7 +537,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V56</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V57</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -607,7 +623,7 @@ function guardarRecurso() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} pedirBorradoRecurso={pedirBorradoRecurso} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
@@ -621,7 +637,7 @@ function guardarRecurso() {
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} pedirBorradoRecurso={pedirBorradoRecurso} />
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
@@ -643,7 +659,7 @@ function guardarRecurso() {
                     if (modulo === "Recursos") excluirRecurso();
                   }}
                 >
-                  Confirmar exclusión
+                  Eliminar / quitar documento
                 </button>
               </div>
             </>
@@ -913,7 +929,7 @@ function VincularRecurso(props: any) {
   );
 }
 
-function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, setSeleccionado, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado }: any) {
+function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, setSeleccionado, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado, pedirBorradoRecurso }: any) {
   const archivos = recursoForm.archivos || [];
   const controlesActivos = (!!bibliotecaModoNuevo && archivos.length > 0) || !!bibliotecaModoEditar;
   const archivoActivo = !!bibliotecaModoNuevo;
