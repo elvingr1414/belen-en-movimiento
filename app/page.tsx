@@ -206,8 +206,7 @@ export default function Home() {
     setRecursoBibliotecaActivo(null);
     setBibliotecaModoNuevo(false);
     setBibliotecaModoEditar(false);
-    setAccion("Lista");
-    limpiarVinculo();
+limpiarVinculo();
     limpiarRecursoDestino();
   }
 
