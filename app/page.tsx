@@ -429,9 +429,7 @@ function guardarRecurso() {
       observaciones: "",
       descripcion: "",
     });
-    setSeleccionado(null);
     setAccion("Nuevo");
-    limpiarRecursoForm();
   }
 
   function excluirRecurso() {
@@ -440,6 +438,22 @@ function guardarRecurso() {
     setRecursoVinculos(recursoVinculos.filter((v) => v.recursoId !== seleccionado.id));
     setSeleccionado(null);
     setAccion("Nuevo");
+  }
+
+  function borrarSeleccionado() {
+    if (!seleccionado) {
+      mostrarMensajeSistema("Seleccione un registro", "Seleccione primero un registro para eliminar.", "aviso");
+      return;
+    }
+
+    if (modulo === "Recursos") {
+      pedirBorradoRecurso(seleccionado);
+      return;
+    }
+
+    mostrarMensajeSistema("Acción pendiente", "La eliminación definitiva de este registro se activará cuando conectemos la base de datos.", "aviso");
+    setSeleccionado(null);
+    setAccion("Lista");
   }
 
   function eliminarRecursoLibre(recursoId: string) {
@@ -548,7 +562,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V65</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V66</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -1085,7 +1099,7 @@ const misRecursos = [...recursos]
                 )}
 
                 {!r.pendiente && !tieneVinculos && (r.creadoPorId || "p1") === "p1" && (
-                  <button style={deleteMini} onClick={() => eliminarRecursoLibre?.(r.id)}>🗑</button>
+                  <button style={deleteMini} onClick={(e) => { e.stopPropagation(); r.pendiente ? eliminarRecursoLibre?.(r.id) : pedirBorradoRecurso?.(r); }}>🗑</button>
                 )}
               </div>
             );
