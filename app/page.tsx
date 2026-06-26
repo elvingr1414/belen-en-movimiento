@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type Modulo =
   | "Personas"
@@ -75,6 +75,7 @@ const visibilidades = ["Público", "Privado", "Compartido"];
 export default function Home() {
   const [modulo, setModulo] = useState<Modulo>("Recursos");
   const [busqueda, setBusqueda] = useState("");
+  const buscadorRef = useRef<HTMLInputElement | null>(null);
   const [seleccionado, setSeleccionado] = useState<any | null>(null);
   const [accion, setAccion] = useState<Accion>("Vista");
 
@@ -202,7 +203,10 @@ export default function Home() {
   function volverALista(valorActual?: string) {
     if (valorActual !== undefined) setBusqueda(valorActual);
     setSeleccionado(null);
-    setAccion("Nuevo");
+    setRecursoBibliotecaActivo(null);
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+    setAccion("Lista");
     limpiarVinculo();
     limpiarRecursoDestino();
   }
@@ -223,13 +227,23 @@ export default function Home() {
   }
 
   function activarBusquedaModulo(valor = busqueda) {
-    setBusqueda(valor);
-    setSeleccionado(null);
-    if (modulo === "Recursos") {
-      setBibliotecaModoNuevo(false);
-      setBibliotecaModoEditar(false);
-    }
+    volverALista(valor);
   }
+
+  useEffect(() => {
+    function manejarEscapeGlobal(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setVisorRecurso?.(null);
+        setMensajeSistema?.(null);
+        setConfirmarBorrado?.(null);
+        volverALista(busqueda);
+        setTimeout(() => buscadorRef.current?.focus(), 0);
+      }
+    }
+    window.addEventListener("keydown", manejarEscapeGlobal);
+    return () => window.removeEventListener("keydown", manejarEscapeGlobal);
+  }, [busqueda, modulo]);
 
   function limpiarRecursoForm() {
     setRecursoForm({
@@ -472,11 +486,21 @@ function guardarRecurso() {
         </header>
 
         <input
+          ref={buscadorRef}
           value={busqueda}
           onFocus={() => volverALista()}
+          onClick={() => volverALista()}
           onChange={(e) => volverALista(e.target.value)}
           onKeyDown={(e) => {
-            e.stopPropagation();
+            if (e.key === "Enter") {
+              e.preventDefault();
+              volverALista(busqueda);
+            }
+            if (e.key === "Escape") {
+              e.preventDefault();
+              volverALista(busqueda);
+              setTimeout(() => buscadorRef.current?.focus(), 0);
+            }
           }}
           placeholder="Buscar..."
           style={search}
@@ -493,7 +517,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V52</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V54</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
