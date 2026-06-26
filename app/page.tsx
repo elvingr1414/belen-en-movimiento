@@ -265,6 +265,17 @@ export default function Home() {
     setConfirmarBorrado(objetivo);
   }
 
+  function corregirExcluirRecursos() {
+    if (modulo === "Recursos" && accion === "Excluir") {
+      setAccion("Nuevo");
+      pedirBorradoRecurso();
+    }
+  }
+
+  useEffect(() => {
+    corregirExcluirRecursos();
+  }, [accion, modulo]);
+
   function limpiarRecursoForm() {
     setRecursoForm({
       tipo: "Fotografía",
@@ -537,7 +548,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V57</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V58</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -554,7 +565,7 @@ function guardarRecurso() {
                     ✏️
                   </button>
 
-                  <button title="Excluir" onClick={() => setAccion("Excluir")} style={iconButton(accion === "Excluir")}>
+                  <button title="Excluir" onClick={() => { if (modulo === "Recursos") pedirBorradoRecurso(); else if (modulo === "Recursos") { pedirBorradoRecurso(); } else { setAccion("Excluir"); } }} style={iconButton(accion === "Excluir")}>
                     🗑️
                   </button>
 
@@ -644,7 +655,7 @@ function guardarRecurso() {
             <Formulario modulo={modulo} datos={seleccionado} />
           )}
 
-          {seleccionado && accion === "Excluir" && (
+          {seleccionado && accion === "Excluir" && modulo !== "Recursos" && (
             <>
               {modulo === "Recursos" ? (
                 <RecursoDetalle recurso={seleccionado} vinculos={vinculosDelRecurso()} />
