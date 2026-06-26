@@ -548,7 +548,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V63</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V65</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -655,11 +655,11 @@ function guardarRecurso() {
             <Formulario modulo={modulo} datos={seleccionado} />
           )}
 
-                      {seleccionado && accion === "Excluir" && modulo !== "Recursos" && (
+                            {seleccionado && accion === "Excluir" && modulo !== "Recursos" && (
         <>
           <Formulario modulo={modulo} datos={seleccionado} lectura />
           <div style={{ textAlign: "right", marginTop: 10 }}>
-            <button style={danger} onClick={() => borrarSeleccionado()}>
+            <button style={dangerButton} onClick={() => borrarSeleccionado()}>
               Eliminar / quitar documento
             </button>
           </div>
