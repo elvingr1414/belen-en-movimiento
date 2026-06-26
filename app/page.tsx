@@ -422,6 +422,9 @@ function guardarRecurso() {
     setSeleccionado(recienGuardado);
     setBibliotecaModoNuevo(true);
     setBibliotecaModoEditar(false);
+    setBibliotecaModoNuevo(true);
+    setBibliotecaModoEditar(false);
+    setAccion("Nuevo");
     setRecursoForm({
       ...recursoForm,
       archivos: [],
@@ -429,7 +432,6 @@ function guardarRecurso() {
       observaciones: "",
       descripcion: "",
     });
-    setAccion("Nuevo");
   }
 
   function excluirRecurso() {
@@ -562,17 +564,30 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V66</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V68</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
-              {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo || recursoForm?.id) && (
+              {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo) && (
                 <>
                   <button
                     title="Editar"
                     onClick={() => {
-                      if (modulo === "Recursos") setRecursoForm({ ...(seleccionado || recursoBibliotecaActivo) });
-                      if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); } if (modulo === "Recursos") { setBibliotecaModoNuevo(false); setBibliotecaModoEditar(true); setAccion("Nuevo"); } else { setAccion("Editar"); }
+                      if (modulo === "Recursos") {
+                        const objetivo = recursoBibliotecaActivo || seleccionado;
+                        if (!objetivo) {
+                          mostrarMensajeSistema("Seleccione un archivo", "Seleccione primero un archivo para editar.", "aviso");
+                          return;
+                        }
+                        setRecursoForm({ ...objetivo, archivos: objetivo.archivos || [] });
+                        setRecursoBibliotecaActivo(objetivo);
+                        setSeleccionado(objetivo);
+                        setBibliotecaModoNuevo(false);
+                        setBibliotecaModoEditar(true);
+                        setAccion("Nuevo");
+                      } else {
+                        setAccion("Editar");
+                      }
                     }}
                     style={iconButton(accion === "Editar")}
                   >
@@ -946,7 +961,7 @@ function VincularRecurso(props: any) {
 
 function RecursoForm({ recursoForm, setRecursoForm, guardarRecurso, guardarCambiosRecurso, recursos = [], eliminarRecursoLibre, recursoVinculos = [], setVisorRecurso, mostrarMensajeSistema, recursoBibliotecaActivo, setRecursoBibliotecaActivo, setSeleccionado, bibliotecaModoNuevo, setBibliotecaModoNuevo, bibliotecaModoEditar, setBibliotecaModoEditar, setConfirmarBorrado, pedirBorradoRecurso }: any) {
   const archivos = recursoForm.archivos || [];
-  const controlesActivos = (!!bibliotecaModoNuevo && archivos.length > 0) || !!bibliotecaModoEditar;
+  const controlesActivos = !!bibliotecaModoNuevo || !!bibliotecaModoEditar;
   const archivoActivo = !!bibliotecaModoNuevo;
 
 const misRecursos = [...recursos]
@@ -1072,8 +1087,9 @@ const misRecursos = [...recursos]
                 onClick={() => {
                   if (r.pendiente) return;
                   setRecursoBibliotecaActivo?.(r);
+                  setSeleccionado?.(r);
                   setBibliotecaModoNuevo?.(false);
-                  setRecursoBibliotecaActivo?.(r);
+                  setBibliotecaModoEditar?.(false);
                   setRecursoForm?.({ ...recursoForm, ...r, archivos: r.archivos || [] });
                 }}
                 onDoubleClick={() => {
