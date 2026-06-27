@@ -660,7 +660,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V74</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V75</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -1475,6 +1475,26 @@ function VisorRecurso({ recurso, cerrar }: any) {
 
 
 
+
+const tiposEntidadCatalogo = ["Empresa","Asociación","Fundación","Institución pública","Institución privada","Comité","Cooperativa","Grupo comunal","Organización religiosa","Organización deportiva","Organización cultural","Otro"];
+
+const formasJuridicasEntidad: Record<string, string[]> = {
+  Empresa: ["Sociedad Anónima (S.A.)","Sociedad de Responsabilidad Limitada (S.R.L.)","Empresa individual","Persona física con actividad lucrativa","Cooperativa","Otra"],
+  Asociación: ["Asociación de Desarrollo Integral","Asociación de Desarrollo Específica","Asociación Deportiva","Asociación Cultural","Asociación Religiosa","Asociación de Adultos Mayores","Asociación Ambiental","Asociación Empresarial","Asociación Profesional","Otra"],
+  Fundación: ["Fundación"],
+  "Institución pública": ["Municipalidad","Ministerio","Escuela","Colegio","Universidad pública","EBAIS","Clínica","Hospital","Policía","Bomberos","Cruz Roja","Otra"],
+  "Institución privada": ["Centro educativo privado","Clínica privada","Organización privada","Otra"],
+  Comité: ["Comité comunal","Comité de deportes","Comité cultural","Comité de apoyo","Otro"],
+  Cooperativa: ["Cooperativa de ahorro y crédito","Cooperativa de servicios","Cooperativa agropecuaria","Otra"],
+  "Grupo comunal": ["Grupo organizado","Grupo informal","Red de vecinos","Otro"],
+  "Organización religiosa": ["Iglesia","Grupo pastoral","Grupo de servicio","Otra"],
+  "Organización deportiva": ["Equipo deportivo","Club deportivo","Escuela deportiva","Otra"],
+  "Organización cultural": ["Grupo artístico","Grupo musical","Grupo folclórico","Otra"],
+  Otro: ["Otro"],
+};
+
+const actividadesEconomicasEntidad = ["Comercial","Industrial","Servicios","Tecnología","Agricultura","Ganadería","Construcción","Transporte","Turismo","Salud","Educación","Alimentación","Financiera","Cultura","Deportes","Religiosa","Desarrollo social","Ambiente","Seguridad","Otra"];
+
 const provinciasCR = ["Heredia", "San José", "Alajuela", "Cartago", "Guanacaste", "Puntarenas", "Limón"];
 const cantonesDemo: Record<string, string[]> = {
   Heredia: ["Belén", "Heredia", "Flores", "San Pablo"],
@@ -1504,6 +1524,8 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
     distrito: datos?.distrito || "San Antonio",
     tipo: datos?.tipo || "",
     categoria: datos?.categoria || "",
+    formaJuridica: datos?.formaJuridica || "",
+    actividadEconomica: datos?.actividadEconomica || "",
     fecha: datos?.fecha || "",
     relacionado: datos?.relacionado || "",
     descripcion: datos?.descripcion || "",
@@ -1521,6 +1543,8 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
       distrito: datos?.distrito || "San Antonio",
       tipo: datos?.tipo || "",
       categoria: datos?.categoria || "",
+    formaJuridica: datos?.formaJuridica || "",
+    actividadEconomica: datos?.actividadEconomica || "",
       fecha: datos?.fecha || "",
       relacionado: datos?.relacionado || "",
       descripcion: datos?.descripcion || "",
@@ -1538,6 +1562,11 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
   const cambiarCanton = (canton: string) => {
     const distrito = (distritosDemo[canton] || [canton || ""])[0];
     setForm((prev: any) => ({ ...prev, canton, distrito }));
+  };
+
+  const cambiarTipoEntidad = (tipo: string) => {
+    const formaJuridica = (formasJuridicasEntidad[tipo] || ["Otro"])[0];
+    setForm((prev: any) => ({ ...prev, tipo, formaJuridica }));
   };
 
   const guardar = () => {
@@ -1558,8 +1587,10 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
         ? {
             id: form.id,
             nombre: form.nombre || "Entidad sin nombre",
-            tipo: form.tipo || "Entidad",
-            categoria: form.categoria,
+            tipo: form.tipo || "Empresa",
+            formaJuridica: form.formaJuridica || ((formasJuridicasEntidad[form.tipo || "Empresa"] || [""])[0]),
+            actividadEconomica: form.actividadEconomica || "Servicios",
+            categoria: form.actividadEconomica || form.categoria,
             provincia: form.provincia,
             canton: form.canton,
             distrito: form.distrito,
@@ -1603,8 +1634,15 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
         ) : modulo === "Entidades" ? (
           <>
             <input readOnly={lectura} placeholder="Nombre de entidad" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
-            <input readOnly={lectura} placeholder="Tipo de entidad" value={form.tipo} onChange={(e) => set("tipo", e.target.value)} style={field} />
-            <input readOnly={lectura} placeholder="Categoría" value={form.categoria} onChange={(e) => set("categoria", e.target.value)} style={field} />
+            <select disabled={lectura} value={form.tipo || "Empresa"} onChange={(e) => cambiarTipoEntidad(e.target.value)} style={field}>
+              {tiposEntidadCatalogo.map((t) => <option key={t}>{t}</option>)}
+            </select>
+            <select disabled={lectura} value={form.formaJuridica || ((formasJuridicasEntidad[form.tipo || "Empresa"] || [""])[0])} onChange={(e) => set("formaJuridica", e.target.value)} style={field}>
+              {(formasJuridicasEntidad[form.tipo || "Empresa"] || ["Otro"]).map((f) => <option key={f}>{f}</option>)}
+            </select>
+            <select disabled={lectura} value={form.actividadEconomica || "Servicios"} onChange={(e) => set("actividadEconomica", e.target.value)} style={field}>
+              {actividadesEconomicasEntidad.map((a) => <option key={a}>{a}</option>)}
+            </select>
             <select disabled={lectura} value={form.provincia} onChange={(e) => cambiarProvincia(e.target.value)} style={field}>
               {provinciasCR.map((p) => <option key={p}>{p}</option>)}
             </select>
