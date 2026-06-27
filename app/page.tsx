@@ -564,7 +564,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V68</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V69</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -611,7 +611,7 @@ function guardarRecurso() {
                   </button>
 
                   {modulo !== "Recursos" && (
-                    <button title="Recursos" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
+                    <button title="Agregar documento" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
                       📁
                     </button>
                   )}
@@ -666,14 +666,38 @@ function guardarRecurso() {
             <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} pedirBorradoRecurso={pedirBorradoRecurso} />
           )}
 
-          {accion === "Nuevo" && modulo !== "Recursos" && <Formulario modulo={modulo} datos={null} />}
+          {accion === "Nuevo" && modulo !== "Recursos" && (
+            <>
+              <Formulario modulo={modulo} datos={null} />
+              <ArchivosRelacionados
+                recursos={[]}
+                abrir={(r: any) => setVisorRecurso(r)}
+                seleccionar={() => {}}
+                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero debe existir el registro.", "aviso")}
+              />
+            </>
+          )}
 
           {seleccionado && accion === "Vista" && modulo === "Recursos" && (
             <RecursoDetalle recurso={seleccionado} vinculos={vinculosDelRecurso()} />
           )}
 
           {seleccionado && accion === "Vista" && modulo !== "Recursos" && (
-            <Formulario modulo={modulo} datos={seleccionado} lectura />
+            <>
+              <Formulario modulo={modulo} datos={seleccionado} lectura />
+              <ArchivosRelacionados
+                recursos={recursosVinculadosAlRegistro()}
+                abrir={(r: any) => setVisorRecurso(r)}
+                seleccionar={(r: any) => {
+                  setModulo("Recursos");
+                  setSeleccionado(r);
+                  setRecursoBibliotecaActivo(r);
+                  setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
+                  setAccion("Nuevo");
+                }}
+                agregarDocumento={() => setAccion("Recursos")}
+              />
+            </>
           )}
 
           {seleccionado && accion === "Editar" && modulo === "Recursos" && (
@@ -681,7 +705,21 @@ function guardarRecurso() {
           )}
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
-            <Formulario modulo={modulo} datos={seleccionado} />
+            <>
+              <Formulario modulo={modulo} datos={seleccionado} />
+              <ArchivosRelacionados
+                recursos={recursosVinculadosAlRegistro()}
+                abrir={(r: any) => setVisorRecurso(r)}
+                seleccionar={(r: any) => {
+                  setModulo("Recursos");
+                  setSeleccionado(r);
+                  setRecursoBibliotecaActivo(r);
+                  setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
+                  setAccion("Nuevo");
+                }}
+                agregarDocumento={() => setAccion("Recursos")}
+              />
+            </>
           )}
 
                             {seleccionado && accion === "Excluir" && modulo !== "Recursos" && (
@@ -734,7 +772,7 @@ function guardarRecurso() {
 
           {seleccionado && accion === "Recursos" && modulo !== "Recursos" && (
             <div style={{ marginTop: 12 }}>
-              <h3 style={miniTitle}>Biblioteca asociada</h3>
+              <h3 style={miniTitle}>Archivos vinculados</h3>
 
               <div style={scrollArea}>
                 <div style={listWide}>
@@ -786,6 +824,50 @@ function guardarRecurso() {
       )}
 
     </main>
+  );
+}
+
+
+function ArchivosRelacionados({ recursos, abrir, seleccionar, agregarDocumento }: any) {
+  return (
+    <div style={relatedFilesBox}>
+      <div style={relatedFilesHeader}>
+        <strong>Archivos vinculados</strong>
+        <button style={smallPrimary} onClick={agregarDocumento}>+ Agregar documento</button>
+      </div>
+
+      {(!recursos || recursos.length === 0) ? (
+        <div style={emptyRecent}>Este registro todavía no tiene archivos vinculados.</div>
+      ) : (
+        <div style={recentScroll}>
+          {recursos.map((r: any) => {
+            const archivoPrincipal = r.archivos?.[0];
+            return (
+              <div
+                key={r.id}
+                style={recentCard}
+                onClick={() => seleccionar?.(r)}
+                onDoubleClick={() => abrir?.(r)}
+                title="Un clic: seleccionar. Doble clic: vista previa."
+              >
+                <div style={recentThumb}>
+                  {archivoPrincipal?.preview ? (
+                    <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} />
+                  ) : (
+                    <span>{iconoArchivoReal(r)}</span>
+                  )}
+                </div>
+                <div style={recentName}>{r.ubicacion || r.descripcion}</div>
+                <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
+                {(r.observaciones || r.descripcion) && (
+                  <div style={recentObs}>{r.observaciones || r.descripcion}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1515,6 +1597,11 @@ const deleteActions = { display: "flex", justifyContent: "flex-end", gap: 8, fle
 const secondaryButton = { border: "1px solid #cbd5e1", background: "#f8fafc", color: "#334155", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
 const warningButton = { border: "1px solid #fde68a", background: "#fef3c7", color: "#92400e", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
 const dangerButton = { border: "1px solid #fecaca", background: "#fee2e2", color: "#991b1b", borderRadius: 999, padding: "9px 14px", fontWeight: 800, cursor: "pointer" };
+
+
+const relatedFilesBox = { marginTop: 16, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#ffffff" };
+const relatedFilesHeader = { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" as const };
+const smallPrimary = { padding: "8px 13px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 800, cursor: "pointer", fontSize: 13 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
