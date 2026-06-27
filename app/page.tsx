@@ -677,7 +677,7 @@ if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === selecc
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V79</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V80</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -712,15 +712,7 @@ if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === selecc
                     🗑️
                   </button>
 
-                  {modulo === "Recursos" && (
-                  <button
-                    title="Vínculos del documento"
-                    onClick={abrirModalVinculosBiblioteca}
-                    style={iconButton(false)}
-                  >
-                    🔗
-                  </button>
-                )}
+                  
 
                   {modulo !== "Recursos" && (
                     <button title="Agregar documento" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
@@ -1232,7 +1224,7 @@ const misRecursos = [...recursos]
 
         
 
-        <button type="button" style={secondaryButton} onClick={abrirModalVinculosBiblioteca}>🔗 Vínculos</button>
+        
       <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
