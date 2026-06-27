@@ -78,6 +78,7 @@ export default function Home() {
   const buscadorRef = useRef<HTMLInputElement | null>(null);
   const [seleccionado, setSeleccionado] = useState<any | null>(null);
   const [accion, setAccion] = useState<Accion>("Lista");
+  const [datos, setDatos] = useState<Record<Modulo, any[]>>(datosBase);
 
   const [vinculos, setVinculos] = useState<any[]>([
     { personaId: "p2", entidadId: "e1", puesto: "Presidenta", directiva: "Sí", fecha: "2026-01-15" },
@@ -171,7 +172,7 @@ export default function Home() {
   const lista =
     modulo === "Recursos"
       ? recursos.filter((item) => coincideBusqueda(item, busqueda))
-      : datosBase[modulo].filter((item) => coincideBusqueda(item, busqueda));
+      : datos[modulo].filter((item) => coincideBusqueda(item, busqueda));
 
   const listaVinculo =
     modulo === "Personas"
@@ -289,6 +290,33 @@ export default function Home() {
       creadoPorId: "p1",
       creadoPorNombre: "Elvin González Rodríguez",
     });
+  }
+
+  function guardarRegistroModulo(registro: any) {
+    if (modulo === "Recursos") return;
+
+    const prefijo = {
+      Personas: "p",
+      Entidades: "e",
+      Actividades: "a",
+      Proyectos: "pr",
+      Comunicaciones: "c",
+      Recursos: "r",
+    }[modulo];
+
+    const guardado = registro?.id ? registro : { ...registro, id: `${prefijo}${Date.now()}` };
+
+    setDatos((prev: Record<Modulo, any[]>) => {
+      const listaActual = prev[modulo] || [];
+      const nuevaLista = registro?.id
+        ? listaActual.map((x: any) => x.id === guardado.id ? guardado : x)
+        : [guardado, ...listaActual];
+
+      return { ...prev, [modulo]: nuevaLista };
+    });
+
+    setSeleccionado(guardado);
+    setAccion("Vista");
   }
 
   function guardarVinculo() {
@@ -564,7 +592,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V69</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V70</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -668,7 +696,7 @@ function guardarRecurso() {
 
           {accion === "Nuevo" && modulo !== "Recursos" && (
             <>
-              <Formulario modulo={modulo} datos={null} />
+              <Formulario modulo={modulo} datos={null} onGuardar={guardarRegistroModulo} />
               <ArchivosRelacionados
                 recursos={[]}
                 abrir={(r: any) => setVisorRecurso(r)}
@@ -706,7 +734,7 @@ function guardarRecurso() {
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
             <>
-              <Formulario modulo={modulo} datos={seleccionado} />
+              <Formulario modulo={modulo} datos={seleccionado} onGuardar={guardarRegistroModulo} />
               <ArchivosRelacionados
                 recursos={recursosVinculadosAlRegistro()}
                 abrir={(r: any) => setVisorRecurso(r)}
@@ -1364,46 +1392,225 @@ function VisorRecurso({ recurso, cerrar }: any) {
   );
 }
 
-function Formulario({ modulo, datos, lectura = false }: { modulo: Modulo; datos: any | null; lectura?: boolean }) {
+
+function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Modulo; datos: any | null; lectura?: boolean; onGuardar?: (registro: any) => void }) {
+  const [form, setForm] = useState<any>({
+    id: datos?.id,
+    cedula: datos?.cedula || "",
+    nombre: datos?.nombre || "",
+    apellido1: datos?.apellido1 || "",
+    apellido2: datos?.apellido2 || "",
+    provincia: datos?.provincia || "Heredia",
+    canton: datos?.canton || "Belén",
+    distrito: datos?.distrito || "San Antonio",
+    telefono: datos?.telefono || "",
+    correo: datos?.correo || "",
+    tipo: datos?.tipo || "",
+    categoria: datos?.categoria || "",
+    fecha: datos?.fecha || "",
+    relacionado: datos?.relacionado || "",
+    descripcion: datos?.descripcion || "",
+  });
+
+  useEffect(() => {
+    setForm({
+      id: datos?.id,
+      cedula: datos?.cedula || "",
+      nombre: datos?.nombre || "",
+      apellido1: datos?.apellido1 || "",
+      apellido2: datos?.apellido2 || "",
+      provincia: datos?.provincia || "Heredia",
+      canton: datos?.canton || "Belén",
+      distrito: datos?.distrito || "San Antonio",
+      telefono: datos?.telefono || "",
+      correo: datos?.correo || "",
+      tipo: datos?.tipo || "",
+      categoria: datos?.categoria || "",
+      fecha: datos?.fecha || "",
+      relacionado: datos?.relacionado || "",
+      descripcion: datos?.descripcion || "",
+    });
+  }, [datos?.id, modulo]);
+
+  const set = (campo: string, valor: any) => setForm((prev: any) => ({ ...prev, [campo]: valor }));
+
+  const guardar = () => {
+    const base =
+      modulo === "Personas"
+        ? {
+            id: form.id,
+            cedula: form.cedula,
+            nombre: form.nombre || "Persona sin nombre",
+            apellido1: form.apellido1,
+            apellido2: form.apellido2,
+            provincia: form.provincia,
+            canton: form.canton,
+            distrito: form.distrito,
+            telefono: form.telefono,
+            correo: form.correo,
+            descripcion: form.descripcion,
+          }
+        : modulo === "Entidades"
+        ? {
+            id: form.id,
+            nombre: form.nombre || "Entidad sin nombre",
+            tipo: form.tipo || "Entidad",
+            categoria: form.categoria,
+            provincia: form.provincia,
+            canton: form.canton,
+            distrito: form.distrito,
+            telefono: form.telefono,
+            correo: form.correo,
+            descripcion: form.descripcion,
+          }
+        : {
+            id: form.id,
+            nombre: form.nombre || "Registro sin nombre",
+            tipo: form.tipo || "General",
+            fecha: form.fecha,
+            relacionado: form.relacionado,
+            descripcion: form.descripcion,
+          };
+
+    onGuardar?.(base);
+  };
+
   return (
     <div style={{ marginTop: 12 }}>
       <div style={grid}>
         {modulo === "Personas" ? (
           <>
-            <input readOnly={lectura} placeholder="Cédula" defaultValue={datos?.cedula || ""} style={field} />
-            <input readOnly={lectura} placeholder="Nombre" defaultValue={datos?.nombre || ""} style={field} />
-            <input readOnly={lectura} placeholder="Primer apellido" defaultValue={datos?.apellido1 || ""} style={field} />
-            <input readOnly={lectura} placeholder="Segundo apellido" defaultValue={datos?.apellido2 || ""} style={field} />
-            <input readOnly={lectura} placeholder="Distrito" defaultValue={datos?.distrito || ""} style={field} />
-            <input readOnly={lectura} placeholder="Teléfono principal" defaultValue={datos?.telefono || ""} style={field} />
-            <input readOnly={lectura} placeholder="Correo principal" defaultValue={datos?.correo || ""} style={field} />
+            <input readOnly={lectura} placeholder="Cédula" value={form.cedula} onChange={(e) => set("cedula", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Nombre" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Primer apellido" value={form.apellido1} onChange={(e) => set("apellido1", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Segundo apellido" value={form.apellido2} onChange={(e) => set("apellido2", e.target.value)} style={field} />
+            <select disabled={lectura} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} style={field}>
+              <option>Heredia</option>
+              <option>San José</option>
+              <option>Alajuela</option>
+              <option>Cartago</option>
+              <option>Guanacaste</option>
+              <option>Puntarenas</option>
+              <option>Limón</option>
+            </select>
+            <select disabled={lectura} value={form.canton} onChange={(e) => set("canton", e.target.value)} style={field}>
+              <option>Belén</option>
+              <option>Heredia</option>
+              <option>Flores</option>
+              <option>San Pablo</option>
+            </select>
+            <select disabled={lectura} value={form.distrito} onChange={(e) => set("distrito", e.target.value)} style={field}>
+              <option>San Antonio</option>
+              <option>La Ribera</option>
+              <option>La Asunción</option>
+            </select>
+            <input readOnly={lectura} placeholder="Teléfono principal" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" value={form.correo} onChange={(e) => set("correo", e.target.value)} style={field} />
           </>
         ) : modulo === "Entidades" ? (
           <>
-            <input readOnly={lectura} placeholder="Nombre de entidad" defaultValue={datos?.nombre || ""} style={field} />
-            <input readOnly={lectura} placeholder="Tipo de entidad" defaultValue={datos?.tipo || ""} style={field} />
-            <input readOnly={lectura} placeholder="Categoría" defaultValue={datos?.categoria || ""} style={field} />
-            <input readOnly={lectura} placeholder="Distrito" defaultValue={datos?.distrito || ""} style={field} />
-            <input readOnly={lectura} placeholder="Teléfono principal" defaultValue={datos?.telefono || ""} style={field} />
-            <input readOnly={lectura} placeholder="Correo principal" defaultValue={datos?.correo || ""} style={field} />
+            <input readOnly={lectura} placeholder="Nombre de entidad" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Tipo de entidad" value={form.tipo} onChange={(e) => set("tipo", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Categoría" value={form.categoria} onChange={(e) => set("categoria", e.target.value)} style={field} />
+            <select disabled={lectura} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} style={field}>
+              <option>Heredia</option>
+              <option>San José</option>
+              <option>Alajuela</option>
+              <option>Cartago</option>
+              <option>Guanacaste</option>
+              <option>Puntarenas</option>
+              <option>Limón</option>
+            </select>
+            <select disabled={lectura} value={form.canton} onChange={(e) => set("canton", e.target.value)} style={field}>
+              <option>Belén</option>
+              <option>Heredia</option>
+              <option>Flores</option>
+              <option>San Pablo</option>
+            </select>
+            <select disabled={lectura} value={form.distrito} onChange={(e) => set("distrito", e.target.value)} style={field}>
+              <option>San Antonio</option>
+              <option>La Ribera</option>
+              <option>La Asunción</option>
+            </select>
+            <input readOnly={lectura} placeholder="Teléfono principal" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Correo principal" value={form.correo} onChange={(e) => set("correo", e.target.value)} style={field} />
           </>
         ) : (
           <>
-            <input readOnly={lectura} placeholder="Título / Nombre" defaultValue={datos?.nombre || ""} style={field} />
-            <input readOnly={lectura} placeholder="Tipo / Categoría" defaultValue={datos?.tipo || ""} style={field} />
-            <input readOnly={lectura} placeholder="Fecha" defaultValue={datos?.fecha || ""} style={field} />
-            <input readOnly={lectura} placeholder="Relacionado con" defaultValue={datos?.relacionado || ""} style={field} />
+            <input readOnly={lectura} placeholder="Título / Nombre" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Tipo / Categoría" value={form.tipo} onChange={(e) => set("tipo", e.target.value)} style={field} />
+            <input readOnly={lectura} type="date" placeholder="Fecha" value={form.fecha} onChange={(e) => set("fecha", e.target.value)} style={field} />
+            <input readOnly={lectura} placeholder="Relacionado con" value={form.relacionado} onChange={(e) => set("relacionado", e.target.value)} style={field} />
           </>
         )}
       </div>
 
-      <textarea readOnly={lectura} placeholder="Descripción / observaciones" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 10 }} />
+      <textarea
+        readOnly={lectura}
+        placeholder="Descripción / observaciones"
+        value={form.descripcion}
+        onChange={(e) => set("descripcion", e.target.value)}
+        style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 10 }}
+      />
+
+      {(modulo === "Personas" || modulo === "Entidades") && (
+        <MediosContacto lectura={lectura} telefono={form.telefono} correo={form.correo} />
+      )}
 
       {!lectura && (
         <div style={{ textAlign: "right", marginTop: 10 }}>
-          <button style={primary}>Guardar</button>
+          <button style={primary} onClick={guardar}>Guardar</button>
         </div>
       )}
+    </div>
+  );
+}
+
+function MediosContacto({ lectura, telefono, correo }: any) {
+  const [medios, setMedios] = useState<any[]>([
+    telefono ? { tipo: "Teléfono", valor: telefono, principal: true, observacion: "Principal" } : null,
+    correo ? { tipo: "Correo", valor: correo, principal: true, observacion: "Principal" } : null,
+  ].filter(Boolean));
+
+  const agregarMedio = () => {
+    setMedios([...medios, { tipo: "Teléfono", valor: "", principal: false, observacion: "" }]);
+  };
+
+  const actualizar = (index: number, campo: string, valor: any) => {
+    setMedios(medios.map((m, i) => i === index ? { ...m, [campo]: valor } : m));
+  };
+
+  return (
+    <div style={contactBox}>
+      <div style={relatedFilesHeader}>
+        <strong>Medios de contacto</strong>
+        {!lectura && <button style={smallPrimary} onClick={agregarMedio}>+ Agregar medio</button>}
+      </div>
+
+      {medios.length === 0 && (
+        <div style={emptyRecent}>No hay medios de contacto adicionales.</div>
+      )}
+
+      {medios.map((m, i) => (
+        <div key={i} style={contactRow}>
+          <select disabled={lectura} value={m.tipo} onChange={(e) => actualizar(i, "tipo", e.target.value)} style={field}>
+            <option>Teléfono</option>
+            <option>Celular</option>
+            <option>WhatsApp</option>
+            <option>Correo</option>
+            <option>Facebook</option>
+            <option>Instagram</option>
+            <option>Sitio web</option>
+            <option>Otro</option>
+          </select>
+          <input readOnly={lectura} placeholder="Dato de contacto" value={m.valor} onChange={(e) => actualizar(i, "valor", e.target.value)} style={field} />
+          <select disabled={lectura} value={m.principal ? "Sí" : "No"} onChange={(e) => actualizar(i, "principal", e.target.value === "Sí")} style={field}>
+            <option>Sí</option>
+            <option>No</option>
+          </select>
+          <input readOnly={lectura} placeholder="Observación" value={m.observacion} onChange={(e) => actualizar(i, "observacion", e.target.value)} style={field} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -1602,6 +1809,10 @@ const dangerButton = { border: "1px solid #fecaca", background: "#fee2e2", color
 const relatedFilesBox = { marginTop: 16, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#ffffff" };
 const relatedFilesHeader = { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" as const };
 const smallPrimary = { padding: "8px 13px", borderRadius: 999, border: "none", background: "#1e3a8a", color: "#ffffff", fontWeight: 800, cursor: "pointer", fontSize: 13 };
+
+
+const contactBox = { marginTop: 14, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc" };
+const contactRow = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 8, marginTop: 8 };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
