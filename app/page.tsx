@@ -97,7 +97,7 @@ export default function Home() {
       propietarioTipo: "Personas",
       propietarioId: "p1",
       creadoPorId: "p1",
-      creadoPorNombre: "Elvin González Rodríguez",
+      creadoPorNombre: "{contextoBiblioteca ? `Biblioteca de ${contextoBiblioteca.nombreOrigen}` : "Elvin González Rodríguez"}",
     },
     {
       id: "r2",
@@ -130,6 +130,7 @@ export default function Home() {
   const [bibliotecaModoEditar, setBibliotecaModoEditar] = useState(false);
   const [confirmarBorrado, setConfirmarBorrado] = useState<any | null>(null);
   const [modalMediosContacto, setModalMediosContacto] = useState<any | null>(null);
+  const [contextoBiblioteca, setContextoBiblioteca] = useState<any | null>(null);
   useEffect(() => {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
       setRecursoBibliotecaActivo(seleccionado);
@@ -291,6 +292,65 @@ export default function Home() {
       creadoPorId: "p1",
       creadoPorNombre: "Elvin González Rodríguez",
     });
+  }
+
+  function abrirBibliotecaContextual(registro: any) {
+    if (!registro?.id) {
+      mostrarMensajeSistema(
+        "Primero guarde el registro",
+        "Para agregar documentos, primero guarde el registro. Luego podrá abrir su Biblioteca contextual.",
+        "aviso"
+      );
+      return;
+    }
+
+    const nombre = tituloRegistro(registro, modulo);
+    setContextoBiblioteca({
+      moduloOrigen: modulo,
+      registroOrigen: registro,
+      nombreOrigen: nombre,
+    });
+
+    setModulo("Recursos");
+    setSeleccionado(null);
+    setRecursoBibliotecaActivo(null);
+    setBibliotecaModoNuevo(true);
+    setBibliotecaModoEditar(false);
+    limpiarRecursoForm();
+    setRecursoForm((prev: any) => ({
+      ...prev,
+      tipo: "Fotografía",
+      visibilidad: "Compartido",
+      relacionadoTipo: modulo === "Personas" ? "Persona" : modulo === "Entidades" ? "Entidad" : modulo.slice(0, -1),
+      relacionadoId: registro.id,
+      propietarioId: registro.id,
+      propietarioNombre: nombre,
+      ubicacion: `Biblioteca / ${modulo} / ${nombre}`,
+    }));
+    setAccion("Nuevo");
+  }
+
+  function cerrarBibliotecaContextual() {
+    if (!contextoBiblioteca) return;
+    const origen = contextoBiblioteca.moduloOrigen as Modulo;
+    const registro = contextoBiblioteca.registroOrigen;
+
+    setModulo(origen);
+    setSeleccionado(registro);
+    setAccion("Vista");
+    setContextoBiblioteca(null);
+    setBibliotecaModoNuevo(false);
+    setBibliotecaModoEditar(false);
+  }
+
+  function recursosVisiblesBiblioteca() {
+    if (!contextoBiblioteca) return recursos;
+    return recursos.filter((r: any) =>
+      (r.vinculos || []).some((v: any) =>
+        v.id === contextoBiblioteca.registroOrigen?.id &&
+        v.tipo === contextoBiblioteca.moduloOrigen
+      )
+    );
   }
 
   function guardarRegistroModulo(registro: any) {
@@ -593,11 +653,17 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V72</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V73</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
-              {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo) && (
+              {contextoBiblioteca && modulo === "Recursos" && (
+            <button title="Volver a registro" onClick={cerrarBibliotecaContextual} style={iconButton(false)}>
+              ←
+            </button>
+          )}
+
+          {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo) && (
                 <>
                   <button
                     title="Editar"
@@ -692,7 +758,7 @@ function guardarRecurso() {
           )}
 
           {accion === "Nuevo" && modulo === "Recursos" && (
-            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursos} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} pedirBorradoRecurso={pedirBorradoRecurso} />
+            <RecursoForm recursoForm={recursoForm} setRecursoForm={setRecursoForm} guardarRecurso={guardarRecurso} guardarCambiosRecurso={guardarCambiosRecurso} recursos={recursosVisiblesBiblioteca()} eliminarRecursoLibre={eliminarRecursoLibre} recursoVinculos={recursoVinculos} setVisorRecurso={setVisorRecurso} mostrarMensajeSistema={mostrarMensajeSistema} recursoBibliotecaActivo={recursoBibliotecaActivo} setRecursoBibliotecaActivo={setRecursoBibliotecaActivo} setSeleccionado={setSeleccionado} bibliotecaModoNuevo={bibliotecaModoNuevo} setBibliotecaModoNuevo={setBibliotecaModoNuevo} bibliotecaModoEditar={bibliotecaModoEditar} setBibliotecaModoEditar={setBibliotecaModoEditar} setConfirmarBorrado={setConfirmarBorrado} pedirBorradoRecurso={pedirBorradoRecurso} />
           )}
 
           {accion === "Nuevo" && modulo !== "Recursos" && (
@@ -702,7 +768,7 @@ function guardarRecurso() {
                 recursos={[]}
                 abrir={(r: any) => setVisorRecurso(r)}
                 seleccionar={() => {}}
-                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero guarde el registro. Luego podrá vincular archivos desde Biblioteca.", "aviso")}
+                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero guarde el registro. Luego podrá abrir su Biblioteca contextual.", "aviso")}
               />
             </>
           )}
@@ -724,13 +790,7 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() =>
-                  mostrarMensajeSistema(
-                    "Vinculación múltiple pendiente",
-                    "Este botón abrirá una ventana sobrepuesta para seleccionar archivos de Biblioteca y vincularlos a este registro. Por ahora, la función queda protegida para no perder la pantalla master.",
-                    "aviso"
-                  )
-                }
+                agregarDocumento={() => abrirBibliotecaContextual(seleccionado)}
               />
             </>
           )}
@@ -752,13 +812,7 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() =>
-                  mostrarMensajeSistema(
-                    "Vinculación múltiple pendiente",
-                    "Este botón abrirá una ventana sobrepuesta para seleccionar archivos de Biblioteca y vincularlos a este registro. Por ahora, la función queda protegida para no perder la pantalla master.",
-                    "aviso"
-                  )
-                }
+                agregarDocumento={() => abrirBibliotecaContextual(seleccionado)}
               />
             </>
           )}
