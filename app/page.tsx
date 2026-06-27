@@ -591,7 +591,7 @@ function guardarRecurso() {
 
   function vinculosActuales() {
     if (!seleccionado) return [];
-    if (modulo === "Personas") return vinculos.filter((v) => v.personaId === seleccionado.id);
+    if (modulo === "Personas") return `${item.cedula || "Sin cédula"} | ${item.nombre || ""} ${item.apellido1 || ""} ${item.apellido2 || ""}`;
     if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
     return [];
   }
@@ -678,15 +678,10 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V76</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V79</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
-              {contextoBiblioteca && modulo === "Recursos" && (
-            <button title="Volver a registro" onClick={cerrarBibliotecaContextual} style={iconButton(false)}>
-              ←
-            </button>
-          )}
 
           {accion !== "Lista" && (seleccionado || recursoBibliotecaActivo) && (
                 <>
@@ -718,21 +713,15 @@ function guardarRecurso() {
                     🗑️
                   </button>
 
+                  {modulo === "Recursos" && (
                   <button
-                    title={modulo === "Recursos" ? "Vínculos del documento" : "Vincular"}
-                    onClick={() => {
-                      if (modulo === "Recursos") {
-                        abrirModalVinculosBiblioteca();
-                      } else {
-                        setAccion("Vincular");
-                        limpiarVinculo();
-                        limpiarRecursoDestino();
-                      }
-                    }}
-                    style={iconButton(accion === "Vincular")}
+                    title="Vínculos del documento"
+                    onClick={abrirModalVinculosBiblioteca}
+                    style={iconButton(false)}
                   >
                     🔗
                   </button>
+                )}
 
                   {modulo !== "Recursos" && (
                     <button title="Agregar documento" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
@@ -797,7 +786,6 @@ function guardarRecurso() {
                 recursos={[]}
                 abrir={(r: any) => setVisorRecurso(r)}
                 seleccionar={() => {}}
-                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero guarde el registro. Luego podrá abrir su Biblioteca contextual.", "aviso")}
               />
             </>
           )}
@@ -819,7 +807,6 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() => abrirBibliotecaContextual(seleccionado)}
               />
             </>
           )}
@@ -841,7 +828,6 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() => abrirBibliotecaContextual(seleccionado)}
               />
             </>
           )}
@@ -857,26 +843,6 @@ function guardarRecurso() {
         </>
       )}
 
-{seleccionado && accion === "Vincular" && modulo !== "Recursos" && (
-            <VincularPersonaEntidad
-              modulo={modulo}
-              vinculosActuales={vinculosActuales()}
-              busquedaVinculo={busquedaVinculo}
-              setBusquedaVinculo={setBusquedaVinculo}
-              mostrarListaVinculo={mostrarListaVinculo}
-              setMostrarListaVinculo={setMostrarListaVinculo}
-              vinculoSeleccionado={vinculoSeleccionado}
-              setVinculoSeleccionado={setVinculoSeleccionado}
-              listaVinculo={listaVinculo}
-              puesto={puesto}
-              setPuesto={setPuesto}
-              directiva={directiva}
-              setDirectiva={setDirectiva}
-              fecha={fecha}
-              setFecha={setFecha}
-              guardarVinculo={guardarVinculo}
-            />
-          )}
 
           {seleccionado && accion === "Vincular" && modulo === "Recursos" && (
             <VincularRecurso
@@ -970,7 +936,8 @@ function guardarRecurso() {
 
 
 
-function ArchivosRelacionados({ recursos, abrir, seleccionar, agregarDocumento }: any) {
+
+function ArchivosRelacionados({ recursos, abrir, seleccionar }: any) {
   if (!recursos || recursos.length === 0) return null;
 
   return (
@@ -982,13 +949,25 @@ function ArchivosRelacionados({ recursos, abrir, seleccionar, agregarDocumento }
         {recursos.map((r: any) => {
           const archivoPrincipal = r.archivos?.[0];
           return (
-            <div key={r.id} style={recentCard} onClick={() => seleccionar?.(r)} onDoubleClick={() => abrir?.(r)} title="Un clic: seleccionar. Doble clic: vista previa.">
+            <div
+              key={r.id}
+              style={recentCard}
+              onClick={() => seleccionar?.(r)}
+              onDoubleClick={() => abrir?.(r)}
+              title="Un clic: seleccionar. Doble clic: vista previa."
+            >
               <div style={recentThumb}>
-                {archivoPrincipal?.preview ? <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} /> : <span>{iconoArchivoReal(r)}</span>}
+                {archivoPrincipal?.preview ? (
+                  <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} />
+                ) : (
+                  <span>{iconoArchivoReal(r)}</span>
+                )}
               </div>
               <div style={recentName}>{r.ubicacion || r.descripcion}</div>
               <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
-              {(r.observaciones || r.descripcion) && <div style={recentObs}>{r.observaciones || r.descripcion}</div>}
+              {(r.observaciones || r.descripcion) && (
+                <div style={recentObs}>{r.observaciones || r.descripcion}</div>
+              )}
             </div>
           );
         })}
@@ -1247,22 +1226,14 @@ const misRecursos = [...recursos]
           value={recursoForm.propietarioTipo}
           onChange={(e) => setRecursoForm({ ...recursoForm, propietarioTipo: e.target.value, propietarioId: e.target.value === "Entidades" ? "e1" : "p1" })}
         >
-          <option value="Personas">Relacionado: Persona</option>
-          <option value="Entidades">Relacionado: Entidad</option>
+          <option value="Personas">Vínculos del documento</option>
+          <option value="Entidades">Vínculos del documento</option>
         </select>
 
-        <select
-          style={controlesActivos ? field : fieldDisabled}
-          disabled={!controlesActivos}
-          value={recursoForm.propietarioId}
-          onChange={(e) => setRecursoForm({ ...recursoForm, propietarioId: e.target.value })}
-        >
-          {(recursoForm.propietarioTipo === "Entidades" ? entidadesBase : personasBase).map((x) => (
-            <option key={x.id} value={x.id}>{tituloRegistro(x, recursoForm.propietarioTipo)}</option>
-          ))}
-        </select>
+        
 
-        <textarea
+        <button type="button" style={secondaryButton} onClick={abrirModalVinculosBiblioteca}>🔗 Vínculos</button>
+      <textarea
           placeholder="Observaciones / descripción del archivo"
           value={recursoForm.observaciones}
           disabled={!controlesActivos}
@@ -1348,7 +1319,7 @@ function RecursoDetalle({ recurso, vinculos }: any) {
         <input readOnly value={`Tipo: ${recurso.tipo}`} style={field} />
         <input readOnly value={`Visibilidad: ${recurso.visibilidad}`} style={field} />
         <input readOnly value={`Ubicación: ${recurso.ubicacion || "Sin ubicación"}`} style={field} />
-        <input readOnly value={`Propietario: ${nombrePropietario(recurso)}`} style={field} />
+        <input readOnly value={`Dueño: ${nombrePropietario(recurso)}`} style={field} />
       </div>
 
       <textarea readOnly value={recurso.observaciones || ""} placeholder="Observaciones / descripción del archivo" style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 10 }} />
@@ -1578,12 +1549,13 @@ function VisorRecurso({ recurso, cerrar }: any) {
 
 
 
-const tiposEntidadCatalogo = ["Empresa","Asociación","Fundación","Institución pública","Institución privada","Comité","Cooperativa","Grupo comunal","Organización religiosa","Organización deportiva","Organización cultural","Otro"];
+const tiposEntidadCatalogo = ["Empresa","Asociación","Fundación","Familia","Institución pública","Institución privada","Comité","Cooperativa","Grupo comunal","Organización religiosa","Organización deportiva","Organización cultural","Otro"];
 
 const formasJuridicasEntidad: Record<string, string[]> = {
   Empresa: ["Sociedad Anónima (S.A.)","Sociedad de Responsabilidad Limitada (S.R.L.)","Empresa individual","Persona física con actividad lucrativa","Cooperativa","Otra"],
   Asociación: ["Asociación de Desarrollo Integral","Asociación de Desarrollo Específica","Asociación Deportiva","Asociación Cultural","Asociación Religiosa","Asociación de Adultos Mayores","Asociación Ambiental","Asociación Empresarial","Asociación Profesional","Otra"],
   Fundación: ["Fundación"],
+  Familia: ["Familia nuclear", "Familia extendida", "Familia unipersonal", "Familia de apoyo", "Otra"],
   "Institución pública": ["Municipalidad","Ministerio","Escuela","Colegio","Universidad pública","EBAIS","Clínica","Hospital","Policía","Bomberos","Cruz Roja","Otra"],
   "Institución privada": ["Centro educativo privado","Clínica privada","Organización privada","Otra"],
   Comité: ["Comité comunal","Comité de deportes","Comité cultural","Comité de apoyo","Otro"],
@@ -1596,6 +1568,27 @@ const formasJuridicasEntidad: Record<string, string[]> = {
 };
 
 const actividadesEconomicasEntidad = ["Comercial","Industrial","Servicios","Tecnología","Agricultura","Ganadería","Construcción","Transporte","Turismo","Salud","Educación","Alimentación","Financiera","Cultura","Deportes","Religiosa","Desarrollo social","Ambiente","Seguridad","Otra"];
+
+
+const parentescosFamiliaCatalogo = [
+  "Padre",
+  "Madre",
+  "Hijo",
+  "Hija",
+  "Abuelo",
+  "Abuela",
+  "Nieto",
+  "Nieta",
+  "Hermano",
+  "Hermana",
+  "Tío",
+  "Tía",
+  "Primo",
+  "Prima",
+  "Tutor",
+  "Encargado",
+  "Otro",
+];
 
 const provinciasCR = ["Heredia", "San José", "Alajuela", "Cartago", "Guanacaste", "Puntarenas", "Limón"];
 const cantonesDemo: Record<string, string[]> = {
@@ -1621,6 +1614,7 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
     nombre: datos?.nombre || "",
     apellido1: datos?.apellido1 || "",
     apellido2: datos?.apellido2 || "",
+    fechaNacimiento: datos?.fechaNacimiento || "",
     provincia: datos?.provincia || "Heredia",
     canton: datos?.canton || "Belén",
     distrito: datos?.distrito || "San Antonio",
@@ -1640,6 +1634,7 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
       nombre: datos?.nombre || "",
       apellido1: datos?.apellido1 || "",
       apellido2: datos?.apellido2 || "",
+    fechaNacimiento: datos?.fechaNacimiento || "",
       provincia: datos?.provincia || "Heredia",
       canton: datos?.canton || "Belén",
       distrito: datos?.distrito || "San Antonio",
@@ -1680,6 +1675,7 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
             nombre: form.nombre || "Persona sin nombre",
             apellido1: form.apellido1,
             apellido2: form.apellido2,
+            fechaNacimiento: form.fechaNacimiento,
             provincia: form.provincia,
             canton: form.canton,
             distrito: form.distrito,
@@ -1722,6 +1718,7 @@ function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosCont
             <input readOnly={lectura} placeholder="Nombre" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Primer apellido" value={form.apellido1} onChange={(e) => set("apellido1", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Segundo apellido" value={form.apellido2} onChange={(e) => set("apellido2", e.target.value)} style={field} />
+            <input readOnly={lectura} type="date" placeholder="Fecha de nacimiento" value={form.fechaNacimiento} onChange={(e) => set("fechaNacimiento", e.target.value)} style={field} />
             <select disabled={lectura} value={form.provincia} onChange={(e) => cambiarProvincia(e.target.value)} style={field}>
               {provinciasCR.map((p) => <option key={p}>{p}</option>)}
             </select>
