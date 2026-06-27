@@ -129,6 +129,7 @@ export default function Home() {
   const [bibliotecaModoNuevo, setBibliotecaModoNuevo] = useState(false);
   const [bibliotecaModoEditar, setBibliotecaModoEditar] = useState(false);
   const [confirmarBorrado, setConfirmarBorrado] = useState<any | null>(null);
+  const [modalVinculosBiblioteca, setModalVinculosBiblioteca] = useState<any | null>(null);
   const [modalMediosContacto, setModalMediosContacto] = useState<any | null>(null);
   const [contextoBiblioteca, setContextoBiblioteca] = useState<any | null>(null);
   useEffect(() => {
@@ -595,12 +596,29 @@ function guardarRecurso() {
     return [];
   }
 
+  function listaPorModuloDestino(destino: Modulo) {
+    if (destino === "Recursos") return recursos;
+    return datos?.[destino] || datosBase[destino] || [];
+  }
+
+  function abrirModalVinculosBiblioteca() {
+    const recurso = recursoBibliotecaActivo || seleccionado || (recursoForm?.id ? recursoForm : null);
+    if (!recurso?.id) {
+      mostrarMensajeSistema("Seleccione un archivo", "Primero seleccione o guarde un archivo de Biblioteca para poder vincularlo.", "aviso");
+      return;
+    }
+    setModalVinculosBiblioteca(recurso);
+  }
+
   function recursosVinculadosAlRegistro() {
-    if (!seleccionado) return [];
-    return recursoVinculos
-      .filter((v) => v.destinoTipo === modulo && v.destinoId === seleccionado.id)
-      .map((v) => recursos.find((r) => r.id === v.recursoId))
+    if (!seleccionado || modulo === "Recursos") return [];
+
+    const porTabla = recursoVinculos
+      .filter((v: any) => v.destinoTipo === modulo && v.destinoId === seleccionado.id)
+      .map((v: any) => recursos.find((r: any) => r.id === v.recursoId))
       .filter(Boolean);
+
+    return porTabla.filter((r: any, i: number) => porTabla.findIndex((x: any) => x?.id === r?.id) === i);
   }
 
   function vinculosDelRecurso() {
@@ -660,7 +678,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V75</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V76</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -701,11 +719,15 @@ function guardarRecurso() {
                   </button>
 
                   <button
-                    title="Vincular"
+                    title={modulo === "Recursos" ? "Vínculos del documento" : "Vincular"}
                     onClick={() => {
-                      setAccion("Vincular");
-                      limpiarVinculo();
-                      limpiarRecursoDestino();
+                      if (modulo === "Recursos") {
+                        abrirModalVinculosBiblioteca();
+                      } else {
+                        setAccion("Vincular");
+                        limpiarVinculo();
+                        limpiarRecursoDestino();
+                      }
                     }}
                     style={iconButton(accion === "Vincular")}
                   >
@@ -912,6 +934,16 @@ function guardarRecurso() {
         />
       )}
 
+      {modalVinculosBiblioteca && (
+        <ModalVinculosBiblioteca
+          recurso={modalVinculosBiblioteca}
+          vinculos={recursoVinculos}
+          setVinculos={setRecursoVinculos}
+          listaPorModulo={listaPorModuloDestino}
+          cerrar={() => setModalVinculosBiblioteca(null)}
+        />
+      )}
+
       {confirmarBorrado && (
         <ConfirmarBorradoRecurso
           recurso={confirmarBorrado}
@@ -937,48 +969,34 @@ function guardarRecurso() {
 }
 
 
+
 function ArchivosRelacionados({ recursos, abrir, seleccionar, agregarDocumento }: any) {
+  if (!recursos || recursos.length === 0) return null;
+
   return (
     <div style={relatedFilesBox}>
       <div style={relatedFilesHeader}>
         <strong>Archivos vinculados</strong>
-        <button style={smallPrimary} onClick={agregarDocumento}>+ Agregar documento</button>
       </div>
-
-      {(!recursos || recursos.length === 0) ? (
-        <div style={emptyRecent}>Este registro todavía no tiene archivos vinculados.</div>
-      ) : (
-        <div style={recentScroll}>
-          {recursos.map((r: any) => {
-            const archivoPrincipal = r.archivos?.[0];
-            return (
-              <div
-                key={r.id}
-                style={recentCard}
-                onClick={() => seleccionar?.(r)}
-                onDoubleClick={() => abrir?.(r)}
-                title="Un clic: seleccionar. Doble clic: vista previa."
-              >
-                <div style={recentThumb}>
-                  {archivoPrincipal?.preview ? (
-                    <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} />
-                  ) : (
-                    <span>{iconoArchivoReal(r)}</span>
-                  )}
-                </div>
-                <div style={recentName}>{r.ubicacion || r.descripcion}</div>
-                <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
-                {(r.observaciones || r.descripcion) && (
-                  <div style={recentObs}>{r.observaciones || r.descripcion}</div>
-                )}
+      <div style={recentScroll}>
+        {recursos.map((r: any) => {
+          const archivoPrincipal = r.archivos?.[0];
+          return (
+            <div key={r.id} style={recentCard} onClick={() => seleccionar?.(r)} onDoubleClick={() => abrir?.(r)} title="Un clic: seleccionar. Doble clic: vista previa.">
+              <div style={recentThumb}>
+                {archivoPrincipal?.preview ? <img src={archivoPrincipal.preview} alt={r.ubicacion} style={recentImage} /> : <span>{iconoArchivoReal(r)}</span>}
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div style={recentName}>{r.ubicacion || r.descripcion}</div>
+              <div style={recentMeta}>{r.tipo} · {r.fecha || "Sin fecha"} {r.hora || ""}</div>
+              {(r.observaciones || r.descripcion) && <div style={recentObs}>{r.observaciones || r.descripcion}</div>}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
 
 function VincularPersonaEntidad(props: any) {
   return (
@@ -1356,6 +1374,90 @@ function RecursoDetalle({ recurso, vinculos }: any) {
 }
 
 
+
+
+function ModalVinculosBiblioteca({ recurso, vinculos, setVinculos, listaPorModulo, cerrar }: any) {
+  const destinos: Modulo[] = ["Personas", "Entidades", "Actividades", "Proyectos", "Comunicaciones"];
+  const [destinoTipo, setDestinoTipo] = useState<Modulo>("Personas");
+  const [buscar, setBuscar] = useState("");
+  const [seleccionados, setSeleccionados] = useState<any[]>((vinculos || []).filter((v: any) => v.recursoId === recurso.id));
+
+  const lista = (listaPorModulo(destinoTipo) || []).filter((item: any) =>
+    JSON.stringify(item).toLowerCase().includes(buscar.toLowerCase())
+  );
+
+  const yaSeleccionado = (tipo: Modulo, id: string) =>
+    seleccionados.some((v: any) => v.destinoTipo === tipo && v.destinoId === id);
+
+  const alternar = (item: any) => {
+    if (yaSeleccionado(destinoTipo, item.id)) {
+      setSeleccionados(seleccionados.filter((v: any) => !(v.destinoTipo === destinoTipo && v.destinoId === item.id)));
+    } else {
+      setSeleccionados([...seleccionados, { recursoId: recurso.id, destinoTipo, destinoId: item.id, destinoNombre: tituloRegistro(item, destinoTipo) }]);
+    }
+  };
+
+  const guardar = () => {
+    const otros = (vinculos || []).filter((v: any) => v.recursoId !== recurso.id);
+    setVinculos([...otros, ...seleccionados]);
+    cerrar();
+  };
+
+  return (
+    <div style={dialogOverlay} onClick={cerrar}>
+      <div style={linkModalBox} onClick={(e) => e.stopPropagation()}>
+        <div style={visorHeader}>
+          <div>
+            <strong>Vincular documento</strong>
+            <div style={visorMeta}>{recurso?.ubicacion || recurso?.descripcion || "Documento"}</div>
+          </div>
+          <button style={visorCerrar} onClick={cerrar}>×</button>
+        </div>
+
+        <div style={linkTypeBar}>
+          {destinos.map((d) => (
+            <button key={d} style={chip(destinoTipo === d)} onClick={() => { setDestinoTipo(d); setBuscar(""); }}>
+              {icono(d)} {nombreModulo(d)}
+            </button>
+          ))}
+        </div>
+
+        <input value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder={`Buscar en ${nombreModulo(destinoTipo)}...`} style={search} />
+
+        <div style={linkGrid}>
+          <div>
+            <strong>Resultados</strong>
+            <div style={linkResults}>
+              {lista.map((item: any) => (
+                <button key={item.id} style={linkRow} onClick={() => alternar(item)}>
+                  <span>{yaSeleccionado(destinoTipo, item.id) ? "☑" : "☐"}</span>
+                  <span>{lineaConsulta(destinoTipo, item)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <strong>Vinculados ({seleccionados.length})</strong>
+            <div style={linkSelected}>
+              {seleccionados.length === 0 && <div style={emptyRecent}>Sin vínculos todavía.</div>}
+              {seleccionados.map((v: any, i: number) => (
+                <button key={i} style={linkRow} onClick={() => setSeleccionados(seleccionados.filter((_: any, ix: number) => ix !== i))}>
+                  ✓ {nombreModulo(v.destinoTipo)}: {v.destinoNombre || v.destinoId}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "right", marginTop: 12 }}>
+          <button style={secondaryButton} onClick={cerrar}>Cancelar</button>{" "}
+          <button style={primary} onClick={guardar}>Guardar vínculos</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 
 function ConfirmarBorradoRecurso({ recurso, cerrar, desvincular, eliminar }: any) {
@@ -2005,6 +2107,14 @@ const starPrincipal = { display: "flex", alignItems: "center", justifyContent: "
 const contactRowActions = { display: "flex", gap: 5, justifyContent: "flex-end" };
 const miniCircle = { width: 30, height: 30, borderRadius: 999, border: "none", background: "#dbeafe", color: "#1e3a8a", fontWeight: 900, cursor: "pointer" };
 const miniCircleDanger = { width: 30, height: 30, borderRadius: 999, border: "none", background: "#fee2e2", color: "#991b1b", fontWeight: 900, cursor: "pointer" };
+
+
+const linkModalBox = { width: "min(920px, 96vw)", maxHeight: "90vh", overflow: "auto" as const, background: "white", borderRadius: 22, padding: 16, boxShadow: "0 24px 90px rgba(15,23,42,.35)", border: "1px solid #e5e7eb" };
+const linkTypeBar = { display: "flex", flexWrap: "wrap" as const, gap: 8, margin: "10px 0" };
+const linkGrid = { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(260px,.65fr)", gap: 12, marginTop: 10 };
+const linkResults = { display: "grid", gap: 6, maxHeight: 280, overflow: "auto" as const, marginTop: 8 };
+const linkSelected = { display: "grid", gap: 6, maxHeight: 280, overflow: "auto" as const, marginTop: 8, background: "#f8fafc", borderRadius: 12, padding: 8, border: "1px solid #e5e7eb" };
+const linkRow = { textAlign: "left" as const, border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 10px", cursor: "pointer", display: "flex", gap: 8, alignItems: "center", fontSize: 13, overflow: "hidden" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
