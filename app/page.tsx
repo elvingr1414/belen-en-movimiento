@@ -97,7 +97,7 @@ export default function Home() {
       propietarioTipo: "Personas",
       propietarioId: "p1",
       creadoPorId: "p1",
-      creadoPorNombre: "{contextoBiblioteca ? `Biblioteca de ${contextoBiblioteca.nombreOrigen}` : "Elvin González Rodríguez"}",
+      creadoPorNombre: "{contextoBiblioteca ? `Biblioteca de Elvin González Rodríguez",
     },
     {
       id: "r2",
@@ -341,6 +341,13 @@ export default function Home() {
     setContextoBiblioteca(null);
     setBibliotecaModoNuevo(false);
     setBibliotecaModoEditar(false);
+  }
+
+  function subtituloModuloActual() {
+    if (contextoBiblioteca && modulo === "Recursos") {
+      return `Biblioteca de ${contextoBiblioteca.nombreOrigen}`;
+    }
+    return "Elvin González Rodríguez";
   }
 
   function recursosVisiblesBiblioteca() {
@@ -653,7 +660,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V73</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V74</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
