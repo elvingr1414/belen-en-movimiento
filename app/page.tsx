@@ -591,8 +591,7 @@ function guardarRecurso() {
 
   function vinculosActuales() {
     if (!seleccionado) return [];
-    if (modulo === "Personas") return `${item.cedula || "Sin cédula"} | ${item.nombre || ""} ${item.apellido1 || ""} ${item.apellido2 || ""}`;
-    if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
+if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
     return [];
   }
 
@@ -933,6 +932,7 @@ function guardarRecurso() {
     </main>
   );
 }
+
 
 
 
@@ -1965,7 +1965,7 @@ function iconoArchivo(tipo: string) {
 }
 
 function lineaConsulta(modulo: Modulo | "Personas" | "Entidades", item: any) {
-  if (modulo === "Personas") return `👤 ${item.nombre} ${item.apellido1} ${item.apellido2}   |   📞 ${item.telefono}   |   ✉ ${item.correo}`;
+  if (modulo === "Personas") return `${item.cedula || "Sin cédula"} | ${item.nombre || ""} ${item.apellido1 || ""} ${item.apellido2 || ""}`;
   if (modulo === "Entidades") return `🏢 ${item.nombre}   |   📞 ${item.telefono}   |   ✉ ${item.correo}   |   ${item.tipo}   |   📍 ${item.distrito}`;
   if (modulo === "Recursos") return `${iconoArchivo(item.tipo)} ${item.tipo}   |   📄 ${item.ubicacion || item.descripcion}   |   👤 ${nombrePropietario(item)}   |   ${item.observaciones || item.descripcion || "Sin observaciones"}   |   🔒 ${item.visibilidad}   |   📅 ${item.fecha || "Sin fecha"} ${item.hora || ""}`;
   return `${item.nombre}   |   ${item.tipo}   |   📅 ${item.fecha || ""}   |   ${item.relacionado || ""}`;
