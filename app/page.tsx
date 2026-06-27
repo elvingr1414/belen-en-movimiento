@@ -129,6 +129,7 @@ export default function Home() {
   const [bibliotecaModoNuevo, setBibliotecaModoNuevo] = useState(false);
   const [bibliotecaModoEditar, setBibliotecaModoEditar] = useState(false);
   const [confirmarBorrado, setConfirmarBorrado] = useState<any | null>(null);
+  const [modalMediosContacto, setModalMediosContacto] = useState<any | null>(null);
   useEffect(() => {
     if (modulo === "Recursos" && seleccionado && accion === "Vista") {
       setRecursoBibliotecaActivo(seleccionado);
@@ -592,7 +593,7 @@ function guardarRecurso() {
         <section style={panel}>
           <div style={topLine}>
             <h2 style={sectionTitle}>
-              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V70</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
+              {seleccionado && modulo !== "Recursos" ? tituloRegistro(seleccionado, modulo) : <>{icono(modulo)} {nombreModulo(modulo)} <span style={versionTag}>V72</span>{modulo === "Recursos" && <span style={libraryUserInline}> · Elvin González Rodríguez</span>}</>}
             </h2>
 
             <div style={actions}>
@@ -696,12 +697,12 @@ function guardarRecurso() {
 
           {accion === "Nuevo" && modulo !== "Recursos" && (
             <>
-              <Formulario modulo={modulo} datos={null} onGuardar={guardarRegistroModulo} />
+              <Formulario modulo={modulo} datos={null} onGuardar={guardarRegistroModulo} abrirMediosContacto={(registro: any) => setModalMediosContacto({ modulo, registro })} />
               <ArchivosRelacionados
                 recursos={[]}
                 abrir={(r: any) => setVisorRecurso(r)}
                 seleccionar={() => {}}
-                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero debe existir el registro.", "aviso")}
+                agregarDocumento={() => mostrarMensajeSistema("Primero guarde el registro", "Para agregar documentos, primero guarde el registro. Luego podrá vincular archivos desde Biblioteca.", "aviso")}
               />
             </>
           )}
@@ -712,7 +713,7 @@ function guardarRecurso() {
 
           {seleccionado && accion === "Vista" && modulo !== "Recursos" && (
             <>
-              <Formulario modulo={modulo} datos={seleccionado} lectura />
+              <Formulario modulo={modulo} datos={seleccionado} lectura abrirMediosContacto={(registro: any) => setModalMediosContacto({ modulo, registro })} />
               <ArchivosRelacionados
                 recursos={recursosVinculadosAlRegistro()}
                 abrir={(r: any) => setVisorRecurso(r)}
@@ -723,7 +724,13 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() => setAccion("Recursos")}
+                agregarDocumento={() =>
+                  mostrarMensajeSistema(
+                    "Vinculación múltiple pendiente",
+                    "Este botón abrirá una ventana sobrepuesta para seleccionar archivos de Biblioteca y vincularlos a este registro. Por ahora, la función queda protegida para no perder la pantalla master.",
+                    "aviso"
+                  )
+                }
               />
             </>
           )}
@@ -734,7 +741,7 @@ function guardarRecurso() {
 
           {seleccionado && accion === "Editar" && modulo !== "Recursos" && (
             <>
-              <Formulario modulo={modulo} datos={seleccionado} onGuardar={guardarRegistroModulo} />
+              <Formulario modulo={modulo} datos={seleccionado} onGuardar={guardarRegistroModulo} abrirMediosContacto={(registro: any) => setModalMediosContacto({ modulo, registro })} />
               <ArchivosRelacionados
                 recursos={recursosVinculadosAlRegistro()}
                 abrir={(r: any) => setVisorRecurso(r)}
@@ -745,14 +752,20 @@ function guardarRecurso() {
                   setRecursoForm((prev: any) => ({ ...prev, ...r, archivos: r.archivos || [] }));
                   setAccion("Nuevo");
                 }}
-                agregarDocumento={() => setAccion("Recursos")}
+                agregarDocumento={() =>
+                  mostrarMensajeSistema(
+                    "Vinculación múltiple pendiente",
+                    "Este botón abrirá una ventana sobrepuesta para seleccionar archivos de Biblioteca y vincularlos a este registro. Por ahora, la función queda protegida para no perder la pantalla master.",
+                    "aviso"
+                  )
+                }
               />
             </>
           )}
 
                             {seleccionado && accion === "Excluir" && modulo !== "Recursos" && (
         <>
-          <Formulario modulo={modulo} datos={seleccionado} lectura />
+          <Formulario modulo={modulo} datos={seleccionado} lectura abrirMediosContacto={(registro: any) => setModalMediosContacto({ modulo, registro })} />
           <div style={{ textAlign: "right", marginTop: 10 }}>
             <button style={dangerButton} onClick={() => borrarSeleccionado()}>
               Eliminar / quitar documento
@@ -829,6 +842,13 @@ function guardarRecurso() {
 
       {mensajeSistema && (
         <MensajeSistema mensaje={mensajeSistema} cerrar={() => setMensajeSistema(null)} />
+      )}
+
+      {modalMediosContacto && (
+        <ModalMediosContacto
+          datos={modalMediosContacto}
+          cerrar={() => setModalMediosContacto(null)}
+        />
       )}
 
       {confirmarBorrado && (
@@ -1393,7 +1413,25 @@ function VisorRecurso({ recurso, cerrar }: any) {
 }
 
 
-function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Modulo; datos: any | null; lectura?: boolean; onGuardar?: (registro: any) => void }) {
+
+const provinciasCR = ["Heredia", "San José", "Alajuela", "Cartago", "Guanacaste", "Puntarenas", "Limón"];
+const cantonesDemo: Record<string, string[]> = {
+  Heredia: ["Belén", "Heredia", "Flores", "San Pablo"],
+  "San José": ["San José", "Escazú", "Desamparados"],
+  Alajuela: ["Alajuela", "San Ramón", "Grecia"],
+  Cartago: ["Cartago", "La Unión", "Paraíso"],
+  Guanacaste: ["Liberia", "Nicoya", "Santa Cruz"],
+  Puntarenas: ["Puntarenas", "Esparza", "Garabito"],
+  Limón: ["Limón", "Pococí", "Siquirres"],
+};
+const distritosDemo: Record<string, string[]> = {
+  Belén: ["San Antonio", "La Ribera", "La Asunción"],
+  Heredia: ["Heredia", "Mercedes", "San Francisco", "Ulloa", "Varablanca"],
+  Flores: ["San Joaquín", "Barrantes", "Llorente"],
+  "San Pablo": ["San Pablo", "Rincón de Sabanilla"],
+};
+
+function Formulario({ modulo, datos, lectura = false, onGuardar, abrirMediosContacto }: { modulo: Modulo; datos: any | null; lectura?: boolean; onGuardar?: (registro: any) => void; abrirMediosContacto?: (registro: any) => void }) {
   const [form, setForm] = useState<any>({
     id: datos?.id,
     cedula: datos?.cedula || "",
@@ -1403,8 +1441,6 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
     provincia: datos?.provincia || "Heredia",
     canton: datos?.canton || "Belén",
     distrito: datos?.distrito || "San Antonio",
-    telefono: datos?.telefono || "",
-    correo: datos?.correo || "",
     tipo: datos?.tipo || "",
     categoria: datos?.categoria || "",
     fecha: datos?.fecha || "",
@@ -1422,8 +1458,6 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
       provincia: datos?.provincia || "Heredia",
       canton: datos?.canton || "Belén",
       distrito: datos?.distrito || "San Antonio",
-      telefono: datos?.telefono || "",
-      correo: datos?.correo || "",
       tipo: datos?.tipo || "",
       categoria: datos?.categoria || "",
       fecha: datos?.fecha || "",
@@ -1433,6 +1467,17 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
   }, [datos?.id, modulo]);
 
   const set = (campo: string, valor: any) => setForm((prev: any) => ({ ...prev, [campo]: valor }));
+
+  const cambiarProvincia = (provincia: string) => {
+    const canton = (cantonesDemo[provincia] || [""])[0];
+    const distrito = (distritosDemo[canton] || [canton || ""])[0];
+    setForm((prev: any) => ({ ...prev, provincia, canton, distrito }));
+  };
+
+  const cambiarCanton = (canton: string) => {
+    const distrito = (distritosDemo[canton] || [canton || ""])[0];
+    setForm((prev: any) => ({ ...prev, canton, distrito }));
+  };
 
   const guardar = () => {
     const base =
@@ -1446,8 +1491,6 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
             provincia: form.provincia,
             canton: form.canton,
             distrito: form.distrito,
-            telefono: form.telefono,
-            correo: form.correo,
             descripcion: form.descripcion,
           }
         : modulo === "Entidades"
@@ -1459,8 +1502,6 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
             provincia: form.provincia,
             canton: form.canton,
             distrito: form.distrito,
-            telefono: form.telefono,
-            correo: form.correo,
             descripcion: form.descripcion,
           }
         : {
@@ -1475,6 +1516,9 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
     onGuardar?.(base);
   };
 
+  const cantones = cantonesDemo[form.provincia] || [];
+  const distritos = distritosDemo[form.canton] || [form.canton];
+
   return (
     <div style={{ marginTop: 12 }}>
       <div style={grid}>
@@ -1484,56 +1528,32 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
             <input readOnly={lectura} placeholder="Nombre" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Primer apellido" value={form.apellido1} onChange={(e) => set("apellido1", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Segundo apellido" value={form.apellido2} onChange={(e) => set("apellido2", e.target.value)} style={field} />
-            <select disabled={lectura} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} style={field}>
-              <option>Heredia</option>
-              <option>San José</option>
-              <option>Alajuela</option>
-              <option>Cartago</option>
-              <option>Guanacaste</option>
-              <option>Puntarenas</option>
-              <option>Limón</option>
+            <select disabled={lectura} value={form.provincia} onChange={(e) => cambiarProvincia(e.target.value)} style={field}>
+              {provinciasCR.map((p) => <option key={p}>{p}</option>)}
             </select>
-            <select disabled={lectura} value={form.canton} onChange={(e) => set("canton", e.target.value)} style={field}>
-              <option>Belén</option>
-              <option>Heredia</option>
-              <option>Flores</option>
-              <option>San Pablo</option>
+            <select disabled={lectura} value={form.canton} onChange={(e) => cambiarCanton(e.target.value)} style={field}>
+              {cantones.map((c) => <option key={c}>{c}</option>)}
             </select>
             <select disabled={lectura} value={form.distrito} onChange={(e) => set("distrito", e.target.value)} style={field}>
-              <option>San Antonio</option>
-              <option>La Ribera</option>
-              <option>La Asunción</option>
+              {distritos.map((d) => <option key={d}>{d}</option>)}
             </select>
-            <input readOnly={lectura} placeholder="Teléfono principal" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} style={field} />
-            <input readOnly={lectura} placeholder="Correo principal" value={form.correo} onChange={(e) => set("correo", e.target.value)} style={field} />
+            <MediosContactoBurbuja datos={datos || form} modulo={modulo} abrir={abrirMediosContacto} />
           </>
         ) : modulo === "Entidades" ? (
           <>
             <input readOnly={lectura} placeholder="Nombre de entidad" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Tipo de entidad" value={form.tipo} onChange={(e) => set("tipo", e.target.value)} style={field} />
             <input readOnly={lectura} placeholder="Categoría" value={form.categoria} onChange={(e) => set("categoria", e.target.value)} style={field} />
-            <select disabled={lectura} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} style={field}>
-              <option>Heredia</option>
-              <option>San José</option>
-              <option>Alajuela</option>
-              <option>Cartago</option>
-              <option>Guanacaste</option>
-              <option>Puntarenas</option>
-              <option>Limón</option>
+            <select disabled={lectura} value={form.provincia} onChange={(e) => cambiarProvincia(e.target.value)} style={field}>
+              {provinciasCR.map((p) => <option key={p}>{p}</option>)}
             </select>
-            <select disabled={lectura} value={form.canton} onChange={(e) => set("canton", e.target.value)} style={field}>
-              <option>Belén</option>
-              <option>Heredia</option>
-              <option>Flores</option>
-              <option>San Pablo</option>
+            <select disabled={lectura} value={form.canton} onChange={(e) => cambiarCanton(e.target.value)} style={field}>
+              {cantones.map((c) => <option key={c}>{c}</option>)}
             </select>
             <select disabled={lectura} value={form.distrito} onChange={(e) => set("distrito", e.target.value)} style={field}>
-              <option>San Antonio</option>
-              <option>La Ribera</option>
-              <option>La Asunción</option>
+              {distritos.map((d) => <option key={d}>{d}</option>)}
             </select>
-            <input readOnly={lectura} placeholder="Teléfono principal" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} style={field} />
-            <input readOnly={lectura} placeholder="Correo principal" value={form.correo} onChange={(e) => set("correo", e.target.value)} style={field} />
+            <MediosContactoBurbuja datos={datos || form} modulo={modulo} abrir={abrirMediosContacto} />
           </>
         ) : (
           <>
@@ -1553,10 +1573,6 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
         style={{ ...field, width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 10 }}
       />
 
-      {(modulo === "Personas" || modulo === "Entidades") && (
-        <MediosContacto lectura={lectura} telefono={form.telefono} correo={form.correo} />
-      )}
-
       {!lectura && (
         <div style={{ textAlign: "right", marginTop: 10 }}>
           <button style={primary} onClick={guardar}>Guardar</button>
@@ -1566,51 +1582,115 @@ function Formulario({ modulo, datos, lectura = false, onGuardar }: { modulo: Mod
   );
 }
 
-function MediosContacto({ lectura, telefono, correo }: any) {
-  const [medios, setMedios] = useState<any[]>([
-    telefono ? { tipo: "Teléfono", valor: telefono, principal: true, observacion: "Principal" } : null,
-    correo ? { tipo: "Correo", valor: correo, principal: true, observacion: "Principal" } : null,
-  ].filter(Boolean));
+function MediosContactoBurbuja({ datos, modulo, abrir }: any) {
+  return (
+    <button
+      type="button"
+      style={contactBubble}
+      onClick={() => abrir?.(datos)}
+      title="Ver medios de contacto"
+    >
+      📞 Medios de contacto <span style={contactBubbleCount}>👁</span>
+    </button>
+  );
+}
 
-  const agregarMedio = () => {
-    setMedios([...medios, { tipo: "Teléfono", valor: "", principal: false, observacion: "" }]);
-  };
+const catalogoMediosContacto = [
+  "Teléfono fijo",
+  "Celular",
+  "WhatsApp",
+  "Correo",
+  "Facebook",
+  "Instagram",
+  "YouTube",
+  "LinkedIn",
+  "Sitio web",
+  "Otro",
+];
+
+function ModalMediosContacto({ datos, cerrar }: any) {
+  const [filas, setFilas] = useState<any[]>(
+    catalogoMediosContacto.map((tipo) => ({ tipo, valor: "", principal: false }))
+  );
 
   const actualizar = (index: number, campo: string, valor: any) => {
-    setMedios(medios.map((m, i) => i === index ? { ...m, [campo]: valor } : m));
+    if (campo === "principal" && valor === true) {
+      const tipo = filas[index].tipo;
+      setFilas(filas.map((f, i) => ({
+        ...f,
+        principal: f.tipo === tipo ? i === index : f.principal
+      })));
+      return;
+    }
+
+    setFilas(filas.map((f, i) => i === index ? { ...f, [campo]: valor } : f));
+  };
+
+  const agregarOtro = (tipo: string) => {
+    const pos = filas.map((f) => f.tipo).lastIndexOf(tipo);
+    const nueva = { tipo, valor: "", principal: false };
+    setFilas([...filas.slice(0, pos + 1), nueva, ...filas.slice(pos + 1)]);
+  };
+
+  const eliminarFila = (index: number) => {
+    setFilas(filas.filter((_, i) => i !== index));
+  };
+
+  const guardar = () => {
+    cerrar();
   };
 
   return (
-    <div style={contactBox}>
-      <div style={relatedFilesHeader}>
-        <strong>Medios de contacto</strong>
-        {!lectura && <button style={smallPrimary} onClick={agregarMedio}>+ Agregar medio</button>}
-      </div>
-
-      {medios.length === 0 && (
-        <div style={emptyRecent}>No hay medios de contacto adicionales.</div>
-      )}
-
-      {medios.map((m, i) => (
-        <div key={i} style={contactRow}>
-          <select disabled={lectura} value={m.tipo} onChange={(e) => actualizar(i, "tipo", e.target.value)} style={field}>
-            <option>Teléfono</option>
-            <option>Celular</option>
-            <option>WhatsApp</option>
-            <option>Correo</option>
-            <option>Facebook</option>
-            <option>Instagram</option>
-            <option>Sitio web</option>
-            <option>Otro</option>
-          </select>
-          <input readOnly={lectura} placeholder="Dato de contacto" value={m.valor} onChange={(e) => actualizar(i, "valor", e.target.value)} style={field} />
-          <select disabled={lectura} value={m.principal ? "Sí" : "No"} onChange={(e) => actualizar(i, "principal", e.target.value === "Sí")} style={field}>
-            <option>Sí</option>
-            <option>No</option>
-          </select>
-          <input readOnly={lectura} placeholder="Observación" value={m.observacion} onChange={(e) => actualizar(i, "observacion", e.target.value)} style={field} />
+    <div style={dialogOverlay} onClick={cerrar}>
+      <div style={contactModalBox} onClick={(e) => e.stopPropagation()}>
+        <div style={visorHeader}>
+          <div>
+            <strong>Medios de contacto</strong>
+            <div style={visorMeta}>{tituloRegistro(datos, "Personas") || datos?.nombre || "Registro"}</div>
+          </div>
+          <button style={visorCerrar} onClick={cerrar}>×</button>
         </div>
-      ))}
+
+        <div style={contactTableHeader}>
+          <span>Medio</span>
+          <span>Dato</span>
+          <span>Principal</span>
+          <span></span>
+        </div>
+
+        <div style={contactTable}>
+          {filas.map((f, i) => (
+            <div key={`${f.tipo}-${i}`} style={contactTableRow}>
+              <div style={contactType}>{f.tipo}</div>
+              <input
+                value={f.valor}
+                onChange={(e) => actualizar(i, "valor", e.target.value)}
+                placeholder={`Digite ${f.tipo.toLowerCase()}`}
+                style={field}
+              />
+              <label style={starPrincipal} title="Principal de este tipo">
+                <input
+                  type="checkbox"
+                  checked={f.principal}
+                  onChange={(e) => actualizar(i, "principal", e.target.checked)}
+                />
+                ⭐
+              </label>
+              <div style={contactRowActions}>
+                <button style={miniCircle} onClick={() => agregarOtro(f.tipo)}>+</button>
+                {filas.filter((x) => x.tipo === f.tipo).length > 1 && (
+                  <button style={miniCircleDanger} onClick={() => eliminarFila(i)}>−</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: "right", marginTop: 12 }}>
+          <button style={secondaryButton} onClick={cerrar}>Cancelar</button>{" "}
+          <button style={primary} onClick={guardar}>Guardar medios</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1813,6 +1893,19 @@ const smallPrimary = { padding: "8px 13px", borderRadius: 999, border: "none", b
 
 const contactBox = { marginTop: 14, padding: 12, borderRadius: 16, border: "1px solid #e5e7eb", background: "#f8fafc" };
 const contactRow = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 8, marginTop: 8 };
+
+
+const contactBubble = { minHeight: 48, height: 48, borderRadius: 12, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#1e3a8a", fontWeight: 800, cursor: "pointer", padding: "0 14px", textAlign: "left" as const, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 };
+const contactBubbleCount = { marginLeft: 8, color: "#475569" };
+const contactModalBox = { width: "min(760px, 94vw)", maxHeight: "88vh", overflow: "auto" as const, background: "white", borderRadius: 22, padding: 16, boxShadow: "0 24px 90px rgba(15,23,42,.35)", border: "1px solid #e5e7eb" };
+const contactTableHeader = { display: "grid", gridTemplateColumns: "150px 1fr 90px 82px", gap: 8, fontSize: 12, color: "#64748b", fontWeight: 800, padding: "6px 4px" };
+const contactTable = { display: "grid", gap: 8 };
+const contactTableRow = { display: "grid", gridTemplateColumns: "150px 1fr 90px 82px", gap: 8, alignItems: "center" };
+const contactType = { fontWeight: 800, color: "#334155", fontSize: 13 };
+const starPrincipal = { display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 18 };
+const contactRowActions = { display: "flex", gap: 5, justifyContent: "flex-end" };
+const miniCircle = { width: 30, height: 30, borderRadius: 999, border: "none", background: "#dbeafe", color: "#1e3a8a", fontWeight: 900, cursor: "pointer" };
+const miniCircleDanger = { width: 30, height: 30, borderRadius: 999, border: "none", background: "#fee2e2", color: "#991b1b", fontWeight: 900, cursor: "pointer" };
 
 function chip(active: boolean) {
   return { padding: "9px 14px", borderRadius: 999, border: "1px solid #d1d5db", background: active ? "#1e3a8a" : "white", color: active ? "white" : "#475569", cursor: "pointer", whiteSpace: "nowrap" as const };
