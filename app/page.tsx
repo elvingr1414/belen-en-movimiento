@@ -396,6 +396,22 @@ export default function Home() {
         ? { personaId: seleccionado.id, entidadId: vinculoSeleccionado.id, puesto, directiva, fecha }
         : { personaId: vinculoSeleccionado.id, entidadId: seleccionado.id, puesto, directiva, fecha };
 
+    const puestoNormalizado = puesto.trim().toLowerCase();
+    const existeVinculo = vinculos.some((v) =>
+      v.personaId === nuevo.personaId &&
+      v.entidadId === nuevo.entidadId &&
+      (v.puesto || "").trim().toLowerCase() === puestoNormalizado
+    );
+
+    if (existeVinculo) {
+      mostrarMensajeSistema(
+        "Vínculo duplicado",
+        "Esta persona ya está vinculada a la misma entidad con ese cargo. No se puede guardar dos veces.",
+        "aviso"
+      );
+      return;
+    }
+
     setVinculos([...vinculos, nuevo]);
     limpiarVinculo();
   }
