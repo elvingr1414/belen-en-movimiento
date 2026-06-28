@@ -607,7 +607,8 @@ function guardarRecurso() {
 
   function vinculosActuales() {
     if (!seleccionado) return [];
-if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
+    if (modulo === "Personas") return vinculos.filter((v) => v.personaId === seleccionado.id);
+    if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === seleccionado.id);
     return [];
   }
 
@@ -729,6 +730,20 @@ if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === selecc
                   </button>
 
                   
+
+                  {(modulo === "Personas" || modulo === "Entidades") && (
+                    <button
+                      title="Vincular"
+                      aria-label="Vincular"
+                      onClick={() => {
+                        limpiarVinculo();
+                        setAccion("Vincular");
+                      }}
+                      style={iconButton(accion === "Vincular")}
+                    >
+                      🔗
+                    </button>
+                  )}
 
                   {modulo !== "Recursos" && (
                     <button title="Agregar documento" onClick={() => setAccion("Recursos")} style={iconButton(accion === "Recursos")}>
@@ -864,6 +879,27 @@ if (modulo === "Entidades") return vinculos.filter((v) => v.entidadId === selecc
               listaDestinoRecurso={listaDestinoRecurso}
               guardarVinculoRecurso={guardarVinculoRecurso}
               vinculos={vinculosDelRecurso()}
+            />
+          )}
+
+          {seleccionado && accion === "Vincular" && (modulo === "Personas" || modulo === "Entidades") && (
+            <VincularPersonaEntidad
+              modulo={modulo}
+              vinculosActuales={vinculosActuales()}
+              busquedaVinculo={busquedaVinculo}
+              setBusquedaVinculo={setBusquedaVinculo}
+              mostrarListaVinculo={mostrarListaVinculo}
+              setMostrarListaVinculo={setMostrarListaVinculo}
+              vinculoSeleccionado={vinculoSeleccionado}
+              setVinculoSeleccionado={setVinculoSeleccionado}
+              listaVinculo={listaVinculo}
+              puesto={puesto}
+              setPuesto={setPuesto}
+              directiva={directiva}
+              setDirectiva={setDirectiva}
+              fecha={fecha}
+              setFecha={setFecha}
+              guardarVinculo={guardarVinculo}
             />
           )}
 
